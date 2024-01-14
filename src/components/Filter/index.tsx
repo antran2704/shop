@@ -120,6 +120,7 @@ const FilterItem: FC<Props> = (props: Props) => {
                   name="gte"
                   type="number"
                   value={price.gte}
+                  required={price.lte.length > 0 ? true : false}
                   onChange={onChangePrice}
                   placeholder="0"
                   className="w-[100px] h-10 text-base p-2 border rounded"
@@ -130,6 +131,7 @@ const FilterItem: FC<Props> = (props: Props) => {
                 <input
                   name="lte"
                   type="number"
+                  required={price.gte.length > 0 ? true : false}
                   onChange={onChangePrice}
                   value={price.lte}
                   placeholder="110.00"

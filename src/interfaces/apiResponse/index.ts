@@ -28,7 +28,6 @@ export interface ICategory {
   createdAt: string;
   updatedAt: string;
   slug: string;
-  subCategories: ISubCategories[];
   filters: IFilterCategory[];
 }
 

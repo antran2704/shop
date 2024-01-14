@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { FC, useState, ChangeEvent, FormEvent } from "react";
+import { FC, useState, ChangeEvent, FormEvent, useEffect } from "react";
 
 import { IOrderProduct } from "~/interfaces/apiResponse";
 
@@ -36,7 +36,7 @@ const CheckOut: FC = () => {
     useState<IInforCustomer>(initInforCustomer);
   const [isSaveInfor, setSaveInfor] = useState<boolean>(false);
 
-  console.log(isSaveInfor);
+  console.log(isSaveInfor)
 
   const handleChangeInforCus = (e: ChangeEvent<HTMLInputElement>): void => {
     const name = e.target.name;
@@ -56,8 +56,15 @@ const CheckOut: FC = () => {
     if(isSaveInfor) {
       localStorage.setItem("inforCus", JSON.stringify(inforCusomer));
     }
-    console.log(inforCusomer);
   };
+
+  useEffect(() => {
+    const inforCus: IInforCustomer = JSON.parse(localStorage.getItem("inforCus") || "{}");
+    if(inforCus) {
+      setInforCustomer(inforCus);
+      setSaveInfor(true);
+    }
+  }, [])
 
   return (
     <div>
@@ -80,6 +87,7 @@ const CheckOut: FC = () => {
                 <input
                   type="email"
                   name="email"
+                  value={inforCusomer.email}
                   placeholder="Email..."
                   className="lg:w-8/12 w-full h-12 px-4 border border-[#e5e5e5] rounded-md"
                   required
@@ -88,6 +96,7 @@ const CheckOut: FC = () => {
                 <input
                   type="text"
                   name="phoneNumber"
+                  value={inforCusomer.phoneNumber}
                   placeholder="Phone number..."
                   className="lg:w-4/12 w-full h-12 px-4 border border-[#e5e5e5] rounded-md"
                   required
@@ -98,6 +107,7 @@ const CheckOut: FC = () => {
                 <input
                   type="text"
                   name="firstName"
+                  value={inforCusomer.firstName}
                   placeholder="First name..."
                   className="lg:w-6/12 w-full h-12 px-4 border border-[#e5e5e5] rounded-md"
                   required
@@ -107,6 +117,7 @@ const CheckOut: FC = () => {
                   type="text"
                   name="lastName"
                   placeholder="Last name..."
+                  value={inforCusomer.lastName}
                   className="lg:w-6/12 w-full h-12 px-4 border border-[#e5e5e5] rounded-md"
                   required
                   onChange={(e) => handleChangeInforCus(e)}
@@ -116,6 +127,7 @@ const CheckOut: FC = () => {
                 <input
                   type="text"
                   name="address"
+                  value={inforCusomer.address}
                   placeholder="Address..."
                   className="w-full h-12 px-4 border border-[#e5e5e5] rounded-md"
                   required
@@ -124,7 +136,7 @@ const CheckOut: FC = () => {
               </div>
               <div className="flex lg:flex-nowrap flex-wrap w-full items-center justify-between gap-3">
                 <select
-                  defaultValue="District..."
+                  defaultValue={inforCusomer.district}
                   name="district"
                   className="lg:w-full w-full h-12 px-4 border border-[#e5e5e5] rounded-md"
                   onChange={(e) => handleSelectInforCus(e)}
@@ -147,6 +159,7 @@ const CheckOut: FC = () => {
               <div className="flex items-center w-full mt-3 cursor-pointer gap-2">
                 <input
                   onChange={(e) => setSaveInfor(e.target.checked)}
+                  checked={isSaveInfor}
                   type="checkbox"
                   id="checkSaveInfor"
                 />

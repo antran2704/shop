@@ -22,7 +22,7 @@ const ProductItem: FC<Props> = (props: Props) => {
       <p className="md:text-base text-sm font-normal text-[#1e1e1e] text-start mt-3 truncate">
         {productData.name}
       </p>
-      <div className="flex items-center my-1">
+      {/* <div className="flex items-center my-1">
         {[...new Array(Math.floor(productData.stars))].map(
           (item, index: number) => (
             <AiFillStar key={index} className="text-sm text-[#ffc30e]" />
@@ -33,7 +33,7 @@ const ProductItem: FC<Props> = (props: Props) => {
             <AiFillStar key={index} className="text-sm text-[#dadada]" />
           )
         )}
-      </div>
+      </div> */}
       <div className="flex items-center gap-2">
         {productData.promotionPrice && (
           <Fragment>

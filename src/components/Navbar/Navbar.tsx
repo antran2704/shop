@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState, useEffect, FC } from "react";
+import React, { useState, useEffect, FC, Fragment } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   AiOutlineSearch,
@@ -12,13 +12,12 @@ import {
 import { BsArrowRightShort, BsArrowLeftShort } from "react-icons/bs";
 import { HiMenu } from "react-icons/hi";
 
-import { initItemDesktop, initItemMobile } from "./index";
+import { initItemDesktop } from "./index";
 
 import { IOrderProduct } from "~/interfaces/apiResponse";
-import { IMegaItem, INavItem } from "./interface";
+import { INavItem } from "./interface";
 
 import useClientY from "~/hooks/useClientY";
-
 
 import { RootState } from "~/store";
 import { GetListCart, handleDeleteProductInCart } from "~/store/actions";
@@ -33,38 +32,57 @@ const Navbar: FC = () => {
 
   const router = useRouter();
   const top = useClientY();
-
-  // const [totalCart, setTotalCart] = useState<number>(0);
   const [showNavbar, setShow] = useState<boolean>(false);
   const [showModalCart, setShowModalCart] = useState<boolean>(false);
-  const [currentNav, setCurrentNav] = useState([initItemMobile]);
+  const [showSearch, setShowSearch] = useState<boolean>(false);
+  const [currentNav, setCurrentNav] = useState([initItemDesktop]);
+  const [typeShow, setTypeShow] = useState<"next" | "prev" | null>(null);
 
   const handleShowModal = (): void => {
     if (showNavbar) {
-      setCurrentNav([initItemMobile]);
+      setCurrentNav([initItemDesktop]);
     }
     setShow(!showNavbar);
   };
 
   const handleAddItem = (items: INavItem[]) => {
     setCurrentNav([...currentNav, items]);
+    setTypeShow("next");
   };
 
   const handleBack = () => {
     const newCurrentMenu = currentNav.splice(0, currentNav.length - 1);
     setCurrentNav(newCurrentMenu);
+    setTypeShow("prev");
   };
 
   useEffect(() => {
+    let timmer: ReturnType<typeof setTimeout>;
     setShowModalCart(false);
-  }, [router.pathname]);
+
+    if (typeShow) {
+      timmer = setTimeout(() => {
+        setTypeShow(null);
+      }, 200);
+    }
+
+    return () => {
+      if (timmer) {
+        clearTimeout(timmer);
+      }
+    };
+  }, [router.pathname, typeShow]);
 
   return (
     <header>
-      <nav className="flex items-center justify-between px-5 py-3 bg-white">
+      <nav
+        className={`${
+          top > 100 ? `fixed left-0 right-0 ${styles.navbarScroll}` : "relative"
+        }  flex items-center justify-between px-5 py-3 bg-white shadow-md z-30`}
+      >
         <div className="flex items-center gap-3">
           <HiMenu
-            className="lg:hidden block text-3xl cursor-pointer"
+            className="xl:hidden block text-3xl cursor-pointer"
             onClick={handleShowModal}
           />
           <Link href="/" className="lg:w-[200px] md:w-[160px] w-[100px]">
@@ -73,81 +91,158 @@ const Navbar: FC = () => {
         </div>
 
         {/* navbar content on PC */}
-        <ul className="lg:flex hidden items-center gap-6">
+        <ul className="xl:flex hidden items-center gap-6">
           {initItemDesktop.map((item: INavItem, index: number) => (
-            <li key={index} className={`${styles.navbarItem} relative`}>
-              {item.path.length > 1 ? (
+            <li key={index} className={`${styles.navbarItem}`}>
+              {item.path ? (
                 <Link
                   href={item.path}
                   className={`text-lg font-medium px-5 py-2 text-[#1e1e1e] ${
                     router.asPath.includes(item.path) ? "text-primary" : ""
-                  } hover:text-primary transition-all ease-linear duration-100`}
+                  } hover:text-primary whitespace-nowrap transition-all ease-linear duration-100`}
                 >
                   {item.name}
                 </Link>
               ) : (
-                <Link
-                  href={item.path}
+                <p
                   className={`text-lg font-medium px-5 py-2 text-[#1e1e1e] ${
                     router.asPath === item.path ? "text-primary" : ""
                   } hover:text-primary transition-all ease-linear duration-100`}
                 >
                   {item.name}
-                </Link>
+                </p>
               )}
 
-              {item?.megaMenu && (
+              {item?.children && (
                 <ul
-                  className={`${styles.navbarMega} absolute top-10 flex items-start bg-white shadow-lg gap-5 z-10`}
+                  className={`${styles.navbarMega} absolute left-0 right-0 flex items-start justify-center bg-white shadow-lg px-5 pb-10 pt-5 gap-10 z-10`}
                 >
-                  {item.megaMenu.map((item: IMegaItem, index: number) => (
-                    <div key={index} className="px-6 py-4">
-                      <Link
-                        href={"/"}
-                        className="block w-full text-lg font-normal text-[#1e1e1e] hover:text-primary whitespace-nowrap mb-2"
-                      >
-                        {item.title}
-                      </Link>
-                      <ul className="flex flex-col items-start gap-2">
-                        {item.items.map((item: INavItem, index: number) => (
-                          <li key={index} className="w-full">
-                            <Link
-                              href={item.path}
-                              className={`w-full text-base font-normal text-[#1e1e1e] whitespace-nowrap ${
-                                router.asPath === item.path
-                                  ? "text-primary"
-                                  : ""
-                              }
-                               hover:text-primary transition-all ease-linear duration-100`}
-                            >
+                  {(!item.images || item.images?.length == 0) && (
+                    <div className="w-full grid grid-cols-4 items-start justify-center gap-10">
+                      {item.children &&
+                        item.children.length > 0 &&
+                        item.children.map((item: INavItem, index: number) => (
+                          <div key={index}>
+                            <h3 className="block w-full text-lg font-normal text-[#1e1e1e] whitespace-nowrap pb-2 mb-3 border-b">
                               {item.name}
-                            </Link>
-                          </li>
+                            </h3>
+                            <ul className="flex flex-col items-start gap-2">
+                              {item.children?.map(
+                                (item: INavItem, index: number) => (
+                                  <li key={index} className="w-full">
+                                    {item.path && (
+                                      <Link
+                                        href={item.path}
+                                        className={`block w-full text-base font-normal text-[#1e1e1e] whitespace-nowrap ${
+                                          router.asPath === item.path
+                                            ? "text-primary"
+                                            : ""
+                                        }
+                                 hover:text-primary transition-all ease-linear duration-100`}
+                                      >
+                                        {item.name}
+                                      </Link>
+                                    )}
+
+                                    {!item.path && (
+                                      <p
+                                        className={`block w-full text-base font-normal text-[#1e1e1e] whitespace-nowrap ${
+                                          router.asPath === item.path
+                                            ? "text-primary"
+                                            : ""
+                                        }
+                                 hover:text-primary transition-all ease-linear duration-100`}
+                                      >
+                                        {item.name}
+                                      </p>
+                                    )}
+                                  </li>
+                                )
+                              )}
+                            </ul>
+                          </div>
                         ))}
-                      </ul>
                     </div>
-                  ))}
-                  {/* <img
-                  src="https://www.livingspaces.com/globalassets/images/nav/02_d_bedroom_0624.jpg"
-                  alt=""
-                  className="h-full "
-                /> */}
+                  )}
+
+                  {item.images && item.images?.length > 0 && (
+                    <Fragment>
+                      <div className="w-1/2 grid grid-cols-2 items-start gap-10">
+                        {item.images.map((image: string, index: number) => (
+                          <img
+                            key={index}
+                            src={image}
+                            alt="image"
+                            className="w-full h-full max-h-[400px] object-cover rounded-lg overflow-hidden"
+                          />
+                        ))}
+                      </div>
+
+                      <div className="w-1/2 grid grid-cols-2 items-start gap-10">
+                        {item.children &&
+                          item.children.length > 0 &&
+                          item.children.map((item: INavItem, index: number) => (
+                            <div key={index}>
+                              <h3 className="block w-full text-lg font-normal text-[#1e1e1e] whitespace-nowrap pb-2 mb-3 border-b">
+                                {item.name}
+                              </h3>
+                              <ul className="flex flex-col items-start gap-2">
+                                {item.children?.map(
+                                  (item: INavItem, index: number) => (
+                                    <li key={index} className="w-full">
+                                      {item.path && (
+                                        <Link
+                                          href={item.path}
+                                          className={`block w-full text-base font-normal text-[#1e1e1e] whitespace-nowrap ${
+                                            router.asPath === item.path
+                                              ? "text-primary"
+                                              : ""
+                                          }
+                                 hover:text-primary transition-all ease-linear duration-100`}
+                                        >
+                                          {item.name}
+                                        </Link>
+                                      )}
+
+                                      {!item.path && (
+                                        <p
+                                          className={`block w-full text-base font-normal text-[#1e1e1e] whitespace-nowrap ${
+                                            router.asPath === item.path
+                                              ? "text-primary"
+                                              : ""
+                                          }
+                                 hover:text-primary transition-all ease-linear duration-100`}
+                                        >
+                                          {item.name}
+                                        </p>
+                                      )}
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          ))}
+                      </div>
+                    </Fragment>
+                  )}
                 </ul>
               )}
             </li>
           ))}
         </ul>
 
-        {/* navbar content on Tablet & Mobile */}
-        <ul
+        {/* navbar Tablet & Mobile */}
+        <div
           className={`${styles.navbarMobile} ${
+            typeShow ? styles[typeShow] : ""
+          } ${
             showNavbar ? styles.show : ""
-          } lg:hidden block fixed top-0 bottom-0 left-0  px-6 py-4 md:w-1/2 w-full bg-white shadow-lg z-40`}
+          } xl:hidden block fixed top-0 bottom-0 left-0 px-6 py-4 md:w-1/2 w-full bg-white shadow-lg overflow-hidden z-40`}
         >
           <div className="w-full mb-3">
             {currentNav.length > 1 ? (
               <BsArrowLeftShort
-                className="text-2xl cursor-pointer"
+                className="text-3xl cursor-pointer"
                 onClick={handleBack}
               />
             ) : (
@@ -157,41 +252,56 @@ const Navbar: FC = () => {
               />
             )}
           </div>
-          {currentNav[currentNav.length - 1].map(
-            (item: INavItem, index: number) => (
-              <li
-                key={index}
-                className="flex items-center justify-between w-full"
-              >
-                <Link
-                  href={item.path}
-                  onClick={handleShowModal}
-                  className={`block w-full text-lg font-medium py-2 text-[#1e1e1e] ${
-                    router.asPath === item.path ? "text-primary" : ""
-                  } hover:text-primary transition-all ease-linear duration-100`}
-                >
-                  {item.name}
-                </Link>
-                {item?.children && (
-                  <BsArrowRightShort
-                    className="text-3xl cursor-pointer"
-                    onClick={() => handleAddItem(item.children!)}
-                  />
-                )}
-              </li>
-            )
-          )}
-        </ul>
+          <ul>
+            {currentNav[currentNav.length - 1].map(
+              (item: INavItem, index: number) => (
+                <li key={index} className={`${styles.navbarItem} w-full`}>
+                  {!item.children && (
+                    <Link
+                      href={item.path || "/"}
+                      onClick={handleShowModal}
+                      className={`block w-full text-lg font-medium py-2 text-[#1e1e1e] ${
+                        router.asPath === item.path ? "text-primary" : ""
+                      } hover:text-primary transition-all ease-linear duration-100`}
+                    >
+                      {item.name}
+                    </Link>
+                  )}
+
+                  {item.children && (
+                    <p
+                      onClick={() => handleAddItem(item.children as INavItem[])}
+                      className={`flex items-center justify-between text-lg font-medium py-2 text-[#1e1e1e] ${
+                        router.asPath === item.path ? "text-primary" : ""
+                      } hover:text-primary transition-all ease-linear duration-100  cursor-pointer`}
+                    >
+                      {item.name}
+
+                      <BsArrowRightShort className="text-3xl" />
+                    </p>
+                  )}
+                </li>
+              )
+            )}
+          </ul>
+        </div>
 
         <div className="flex items-center md:gap-4 gap-3">
-          <div className="relative cursor-pointer">
-            <AiOutlineSearch className="lg:text-3xl md:text-2xl text-xl" />
-          </div>
-          <div className="relative cursor-pointer">
-            <AiOutlineHeart className="relative lg:text-3xl md:text-2xl text-xl z-0" />
-            <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
-              0
-            </span>
+          <div
+            className={`relative flex items-center justify-end w-[240px] px-1 py-1 ${
+              showSearch ? "border-dark" : "border-transparent"
+            } border rounded-md transition-all ease-linear duration-100`}
+          >
+            <input
+              type="text"
+              className={`${
+                showSearch ? "w-[200px] px-2" : "w-0 px-0"
+              } outline-none transition-all ease-linear duration-100`}
+            />
+            <AiOutlineSearch
+              onClick={() => setShowSearch(!showSearch)}
+              className="lg:text-3xl md:text-2xl text-xl cursor-pointer"
+            />
           </div>
           <div
             className="relative cursor-pointer"
@@ -203,114 +313,16 @@ const Navbar: FC = () => {
             </span>
           </div>
         </div>
+
+        {/* layout close modal */}
+        <div
+          className={`${styles.navbarLayoutClose} ${
+            showNavbar ? styles.show : ""
+          } xl:hidden block fixed top-0 bottom-0 left-0 right-0 z-30`}
+          style={{ backgroundColor: "rgba(1,1,1, 0.6)" }}
+          onClick={handleShowModal}
+        ></div>
       </nav>
-
-      {/* navbar on scroll */}
-      <nav
-        className={`${styles.navbarScroll} ${
-          top > 100 ? styles.show : ""
-        } fixed w-full flex items-center justify-between px-5 py-3 bg-white shadow-md z-20`}
-      >
-        <div className="flex items-center gap-3">
-          <HiMenu
-            className="lg:hidden block text-3xl cursor-pointer"
-            onClick={handleShowModal}
-          />
-          <Link href="/" className="lg:w-[200px] md:w-[160px] w-[100px]">
-            <img src="/images/logo.webp" alt="logo image" className="w-100" />
-          </Link>
-        </div>
-
-        {/* navbar content on PC */}
-        <ul className="lg:flex hidden items-center gap-6">
-          {initItemDesktop.map((item: INavItem, index: number) => (
-            <li key={index} className={`${styles.navbarItem} relative`}>
-              {item.path.length > 1 ? (
-                <Link
-                  href={item.path}
-                  className={`text-lg font-medium px-5 py-2 text-[#1e1e1e] ${
-                    router.asPath.includes(item.path) ? "text-primary" : ""
-                  } hover:text-primary transition-all ease-linear duration-100`}
-                >
-                  {item.name}
-                </Link>
-              ) : (
-                <Link
-                  href={item.path}
-                  className={`text-lg font-medium px-5 py-2 text-[#1e1e1e] ${
-                    router.asPath === item.path ? "text-primary" : ""
-                  } hover:text-primary transition-all ease-linear duration-100`}
-                >
-                  {item.name}
-                </Link>
-              )}
-              {item?.megaMenu && (
-                <ul
-                  className={`${styles.navbarMega} absolute top-10 flex items-start bg-white shadow-lg gap-5 z-10`}
-                >
-                  {item.megaMenu.map((item: IMegaItem, index: number) => (
-                    <div key={index} className="px-6 py-4">
-                      <Link
-                        href={"/"}
-                        className="block w-full text-lg font-normal text-[#1e1e1e] hover:text-primary whitespace-nowrap mb-2"
-                      >
-                        {item.title}
-                      </Link>
-                      <ul className="flex flex-col items-start gap-2">
-                        {item.items.map((item: INavItem, index: number) => (
-                          <li key={index} className="w-full">
-                            <Link
-                              href={item.path}
-                              className="w-full text-base font-normal text-[#1e1e1e] whitespace-nowrap hover:text-primary transition-all ease-linear duration-100"
-                            >
-                              {item.name}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                  {/* <img
-                  src="https://www.livingspaces.com/globalassets/images/nav/02_d_bedroom_0624.jpg"
-                  alt=""
-                  className="h-full "
-                /> */}
-                </ul>
-              )}
-            </li>
-          ))}
-        </ul>
-
-        <div className="flex items-center md:gap-4 gap-3">
-          <div className="relative cursor-pointer">
-            <AiOutlineSearch className="lg:text-3xl md:text-2xl text-xl" />
-          </div>
-          <div className="relative cursor-pointer">
-            <AiOutlineHeart className="relative lg:text-3xl md:text-2xl text-xl z-0" />
-            <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
-              0
-            </span>
-          </div>
-          <div
-            className="relative cursor-pointer"
-            onClick={() => setShowModalCart(true)}
-          >
-            <AiOutlineShoppingCart className="relative lg:text-3xl md:text-2xl text-xl z-0" />
-            <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
-              {totalCart < 100 ? totalCart : "99"}
-            </span>
-          </div>
-        </div>
-      </nav>
-
-      {/* layout close modal */}
-      <div
-        className={`${styles.navbarLayoutClose} ${
-          showNavbar ? styles.show : ""
-        } lg:hidden block fixed top-0 bottom-0 left-0 right-0 z-30`}
-        style={{ backgroundColor: "rgba(1,1,1, 0.6)" }}
-        onClick={handleShowModal}
-      ></div>
 
       {/* modal cart */}
       <div
@@ -362,10 +374,14 @@ const Navbar: FC = () => {
                   </Link>
                   <div className="flex items-center gap-2">
                     {item.size && (
-                      <span className="sm:text-sm text-xs">Size: {item.size}</span>
+                      <span className="sm:text-sm text-xs">
+                        Size: {item.size}
+                      </span>
                     )}
                     {item.color && (
-                      <span className="sm:text-sm text-xs">Color: {item.color}</span>
+                      <span className="sm:text-sm text-xs">
+                        Color: {item.color}
+                      </span>
                     )}
                   </div>
                   <p className="sm:text-base text-sm mt-2">

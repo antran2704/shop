@@ -7,6 +7,40 @@
     transform: translateX(0%);
     opacity: 1;
   }
+
+  &.next {
+    .navbarItem {
+      animation: showNext linear 0.2s forwards;
+    }
+  }
+
+  &.prev {
+    .navbarItem {
+      animation: showPrev linear 0.2s forwards;
+    }
+  }
+
+  @keyframes showNext {
+    from {
+      transform: translateX(100px);
+      opacity: 0;
+    }
+    to {
+      transform: translate(0px);
+      opacity: 1;
+    }
+  }
+
+  @keyframes showPrev {
+    from {
+      transform: translateX(-100px);
+      opacity: 0;
+    }
+    to {
+      transform: translate(0px);
+      opacity: 1;
+    }
+  }
 }
 
 .navbarLayoutClose {
@@ -21,12 +55,13 @@
 }
 
 .navbarItem:hover .navbarMega {
-  top: 32px;
+  top: 100%;
   opacity: 1;
   pointer-events: inherit;
 }
 
 .navbarMega {
+  top: 120%;
   opacity: 0;
   pointer-events: none;
   transition: all linear 0.2s;
@@ -37,17 +72,22 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: -10px;
-  height: 30px;
+  top: -30px;
+  height: 40px;
   background-color: transparent;
 }
 
 .navbarScroll {
-  top: -100px;
-  transition: all linear 0.3s;
+  animation: scrollMenu linear 0.3s forwards;
 
-  &.show {
-    top: 0;
+  @keyframes scrollMenu{
+    from {
+      opacity: 0;
+      top: -100px;
+    } to {
+      opacity: 1;
+      top: 0px;
+    }
   }
 }
 

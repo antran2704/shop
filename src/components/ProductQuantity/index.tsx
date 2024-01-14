@@ -1,4 +1,5 @@
 import { FC, ChangeEvent, Dispatch, SetStateAction } from "react";
+import handleCheckValidCount from "~/helpers/checkValidCount";
 
 interface Props {
     totalProduct: number;
@@ -13,6 +14,17 @@ const ProductQuantity: FC<Props> = (props: Props) => {
       setTotalProduct(totalProduct - 1);
     }
   };
+
+  const handleChangeCount = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const isValidCount = handleCheckValidCount(value);
+
+    if (!isValidCount) {
+        return;
+    }
+    setTotalProduct(Number(value));
+  }
+
   return (
     <div className="flex items-center w-full h-14">
       <button
@@ -23,9 +35,7 @@ const ProductQuantity: FC<Props> = (props: Props) => {
       </button>
       <input
         type="text"
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          setTotalProduct(Number(e.target.value))
-        }
+        onChange={handleChangeCount}
         value={totalProduct}
         className="flex items-center justify-center text-base text-center font-medium w-4/12 h-full border border-borderColor"
       />

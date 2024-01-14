@@ -6,7 +6,7 @@ import Footer from "~/components/Footer";
 import { GetListCart } from "~/store/actions";
 
 const Navbar = dynamic(() => import("~/components/Navbar/Navbar"), {
-  ssr: false,
+  ssr: true,
 });
 
 interface Props {

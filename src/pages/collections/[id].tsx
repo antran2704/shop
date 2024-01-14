@@ -8,13 +8,7 @@ import { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
-import {
-  ICategory,
-  IFilterCategory,
-  IProduct,
-  IPagination,
-  IListProduct,
-} from "~/interfaces/apiResponse";
+import { IProduct, IPagination } from "~/interfaces/apiResponse";
 
 import Header from "~/components/Header";
 import FilterItem from "~/components/Filter";
@@ -34,129 +28,161 @@ const CollectionItem: FC<Props> = (props: Props) => {
   const router = useRouter();
 
   const { query } = props;
-  const slug = query.slug;
+  const { id } = query;
   const currentPage = query.page ? Number(query.page) : 1;
 
   const btnSubmitFilterRef = useRef<HTMLButtonElement>(null);
-  const [breadcrumb, setBreadcrumb] = useState<string>("");
-  const [categoryData, setCategoryData] = useState<ICategory>();
-  const [listProducts, setListProducts] = useState<IProduct[]>([]);
+  const [categoryData, setCategoryData] = useState<any>();
+  const [products, setProducts] = useState<any>([]);
   const [pagination, setPagination] = useState<IPagination>(initPagination);
 
-  const handeChangePage = async (page: number) => {
-    const currentUrl = router.asPath;
-    const index = router.asPath.indexOf("?");
-    router.query.page = page.toString();
-    if (index !== -1) {
-      if (currentUrl.includes(`page=${currentPage}`)) {
-        const newUrl = currentUrl.replace(
-          `page=${currentPage}`,
-          `page=${page}`
-        );
-        router.push(
-          `/collections/${categoryData?.slug}?${newUrl.slice(index + 1)}`
-        );
-      } else {
-        router.push(
-          `/collections/${categoryData?.slug}?${router.asPath.slice(
-            index + 1
-          )}&page=${page}`
-        );
+  const handleGetCategory = async () => {
+    try {
+      const response = await axios
+        .get(`${process.env.NEXT_PUBLIC_ENDPOINT_API}/categories/id/${id}`)
+        .then((res) => res.data);
+
+      if (response.status === 200) {
+        setCategoryData(response.payload);
       }
-    } else {
-      router.push(`/collections/${categoryData?.slug}?page=${page}`);
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  useEffect(() => {
-    const arrs = slug[slug.length - 1].split("-");
-    let newString = "";
-    const newArrs = arrs.map((item: string) => {
-      return item.split("").map((chart, index) => {
-        if (index === 0) {
-          return item[0].toUpperCase();
-        } else {
-          return chart;
-        }
-      });
-    });
+  const handleGetProducts = async () => {
+    try {
+      const response = await axios
+        .get(`${process.env.NEXT_PUBLIC_ENDPOINT_API}/products/category/${id}`)
+        .then((res) => res.data);
 
-    newArrs.map((items: string[]) => {
-      items.map((item: string, index: number) => {
-        if (index === items.length - 1) {
-          newString += `${item} `;
-        } else {
-          newString += item;
-        }
-      });
-    });
-    setBreadcrumb(newString);
-  }, [slug]);
+      if (response.status === 200) {
+        setProducts(response.payload);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // const handeChangePage = async (page: number) => {
+  //   const currentUrl = router.asPath;
+  //   const index = router.asPath.indexOf("?");
+  //   router.query.page = page.toString();
+  //   if (index !== -1) {
+  //     if (currentUrl.includes(`page=${currentPage}`)) {
+  //       const newUrl = currentUrl.replace(
+  //         `page=${currentPage}`,
+  //         `page=${page}`
+  //       );
+  //       router.push(
+  //         `/collections/${categoryData?.slug}?${newUrl.slice(index + 1)}`
+  //       );
+  //     } else {
+  //       router.push(
+  //         `/collections/${categoryData?.slug}?${router.asPath.slice(
+  //           index + 1
+  //         )}&page=${page}`
+  //       );
+  //     }
+  //   } else {
+  //     router.push(`/collections/${categoryData?.slug}?page=${page}`);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   const arrs = id[id.length - 1].split("-");
+  //   let newString = "";
+  //   const newArrs = arrs.map((item: string) => {
+  //     return item.split("").map((chart, index) => {
+  //       if (index === 0) {
+  //         return item[0].toUpperCase();
+  //       } else {
+  //         return chart;
+  //       }
+  //     });
+  //   });
+
+  //   newArrs.map((items: string[]) => {
+  //     items.map((item: string, index: number) => {
+  //       if (index === items.length - 1) {
+  //         newString += `${item} `;
+  //       } else {
+  //         newString += item;
+  //       }
+  //     });
+  //   });
+  //   setBreadcrumb(newString);
+  // }, [id]);
 
   // handle get data of current category
-  useEffect(() => {
-    const getCategory = async () => {
-      try {
-        const data: ICategory = await axios
-          .get(`${process.env.NEXT_PUBLIC_ENDPOINT_API}/category/${slug}`)
-          .then((res) => res.data.payload);
+  // useEffect(() => {
+  //   const getCategory = async () => {
+  //     try {
+  //       const data: ICategory = await axios
+  //         .get(`${process.env.NEXT_PUBLIC_ENDPOINT_API}/category/${}`)
+  //         .then((res) => res.data.payload);
 
-        setCategoryData(data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  //       setCategoryData(data);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
 
-    getCategory();
-  }, []);
+  //   getCategory();
+  // }, []);
 
   // handle get items of current category
+  // useEffect(() => {
+  //   const getCategoryAndProducts = async () => {
+  //     const index = router.asPath.indexOf("?");
+  //     let listProducts: IListProduct;
+
+  //     try {
+  //       if (index !== -1) {
+  //         listProducts = await axios
+  //           .get(
+  //             `${
+  //               process.env.NEXT_PUBLIC_ENDPOINT_API
+  //             }/product/getAllProductsInCategory/${
+  //               categoryData?._id
+  //             }?${router.asPath.slice(index + 1)}&page=${currentPage}`
+  //           )
+  //           .then((res) => res.data);
+  //       } else {
+  //         listProducts = await axios
+  //           .get(
+  //             `${process.env.NEXT_PUBLIC_ENDPOINT_API}/product/getAllProductsInCategory/${categoryData?._id}?page=${currentPage}`
+  //           )
+  //           .then((res) => res.data);
+  //       }
+  //       console.log(listProducts);
+  //       setListProducts(listProducts.payload);
+  //       setPagination(listProducts.pagination);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+
+  //   if (categoryData?._id) {
+  //     getCategoryAndProducts();
+  //   }
+  // }, [currentPage, categoryData]);
+
   useEffect(() => {
-    const getCategoryAndProducts = async () => {
-      const index = router.asPath.indexOf("?");
-      let listProducts: IListProduct;
-
-      try {
-        if (index !== -1) {
-          listProducts = await axios
-            .get(
-              `${
-                process.env.NEXT_PUBLIC_ENDPOINT_API
-              }/product/getAllProductsInCategory/${
-                categoryData?._id
-              }?${router.asPath.slice(index + 1)}&page=${currentPage}`
-            )
-            .then((res) => res.data);
-        } else {
-          listProducts = await axios
-            .get(
-              `${process.env.NEXT_PUBLIC_ENDPOINT_API}/product/getAllProductsInCategory/${categoryData?._id}?page=${currentPage}`
-            )
-            .then((res) => res.data);
-        }
-        console.log(listProducts);
-        setListProducts(listProducts.payload);
-        setPagination(listProducts.pagination);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    if (categoryData?._id) {
-      getCategoryAndProducts();
-    }
-  }, [currentPage, categoryData]);
+    handleGetCategory();
+    handleGetProducts();
+  }, []);
   return (
     <div>
       <Header
-        title={breadcrumb}
+        title={categoryData?.title || ""}
         listBackLinks={[{ title: "Home", link: "/" }]}
       />
       <div className="container__cus">
         <div className="flex lg:flex-nowrap flex-wrap items-start justify-between my-10 gap-10">
           <div className="lg:w-3/12 w-full">
             <form>
-              {categoryData?.filters.map(
+              {/* {categoryData?.filters.map(
                 (item: IFilterCategory, index: number) => (
                   <FilterItem
                     key={index}
@@ -167,7 +193,7 @@ const CollectionItem: FC<Props> = (props: Props) => {
                     query={query}
                   />
                 )
-              )}
+              )} */}
 
               <FilterItem
                 titleFilter="Price"
@@ -202,7 +228,7 @@ const CollectionItem: FC<Props> = (props: Props) => {
                 <span>result</span>
               </p>
             )}
-            {listProducts.length === 0 && (
+            {products.length === 0 && (
               <Fragment>
                 <h3 className="text-2xl text-center">
                   No item in category <strong>{categoryData?.title}</strong>
@@ -215,9 +241,9 @@ const CollectionItem: FC<Props> = (props: Props) => {
                 </Link>
               </Fragment>
             )}
-            <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 mt-5 gap-4">
-              {listProducts.length > 0 &&
-                listProducts.map((product: IProduct, index: number) => (
+            <div className="grid md:grid-cols-3 grid-cols-2 mt-5 gap-4">
+              {products.length > 0 &&
+                products.map((product: IProduct, index: number) => (
                   <ProductItem key={index} productData={product} />
                 ))}
             </div>
@@ -227,7 +253,7 @@ const CollectionItem: FC<Props> = (props: Props) => {
               <Pagination
                 current={currentPage}
                 className="pagination"
-                onChange={(page) => handeChangePage(page)}
+                // onChange={(page) => handeChangePage(page)}
                 total={pagination.totalItems}
                 pageSize={pagination.pageSize}
               />
