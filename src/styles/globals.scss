@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --primary-color: #f8796c;
+}
+
 // scroll
 @mixin scroll() {
   &::-webkit-scrollbar {
@@ -40,7 +44,8 @@ body {
 
 .container__cus {
   max-width: 1230px;
-  padding: 0 20px;
+  padding-left: 20px;
+  padding-right: 20px;
   margin: 0 auto;
 }
 
@@ -54,7 +59,7 @@ body {
 }
 
 input[type="checkbox"]:checked {
-  background-color: #f8796c;
+  background-color: var(--primary-color);
 }
 
 input[type="checkbox"] {
@@ -87,9 +92,49 @@ input[type="checkbox"]:checked:after {
   display: block;
 }
 
-.swiper-button-disabled {
-  opacity: 0.7;
-  pointer-events: none;
+.swiper {
+  overflow: visible;
+
+  .swiper-button-prev,
+  .swiper-button-next {
+    width: 40px;
+    height: 40px;
+    color: white;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    transition: all linear 0.2s;
+
+    &::after {
+      font-size: 24px;
+    }
+  }
+
+  .swiper-button-prev {
+    left: -30px;
+    opacity: 0;
+  }
+
+  .swiper-button-next {
+    right: -30px;
+    opacity: 0;
+  }
+
+  &:hover {
+    .swiper-button-prev {
+      left: -14px;
+      opacity: 1;
+    }
+
+    .swiper-button-next {
+      right: -14px;
+      opacity: 1;
+    }
+
+    .swiper-button-disabled {
+      opacity: 0.7;
+      pointer-events: inherit;
+    }
+  }
 }
 
 // banner
@@ -115,7 +160,7 @@ input[type="checkbox"]:checked:after {
     height: 12px;
 
     &.swiper-pagination-bullet-active {
-      background-color: #1e1e1e;
+      background-color: var(--primary-color);
     }
   }
 
@@ -224,13 +269,13 @@ input[type="checkbox"]:checked:after {
     transition: all linear 0.2s;
 
     &:hover {
-      background-color: #f8796c;
+      background-color: var(--primary-color);
       color: white;
     }
   }
 
   .rc-pagination-item-active a {
-    background-color: #f8796c;
+    background-color: var(--primary-color);
     color: white;
     cursor: not-allowed;
   }

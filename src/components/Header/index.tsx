@@ -20,7 +20,7 @@ const Header: FC<Props> = (props: Props) => {
         backgroundImage: "url(/images/breadcrumb_1.webp)",
       }}
     >
-      <div className="container__cus w-full">
+      <div className="container__cus w-full px-5">
         <h1 className="sm:block hidden lg:text-4xl md:text-2xl text-xl font-medium mb-2">{title}</h1>
         <div className="flex flex-wrap items-center text-lg gap-2">
           {listBackLinks.map((item: IBackLink, index: number) => (

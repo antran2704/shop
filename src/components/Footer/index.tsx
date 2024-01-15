@@ -19,7 +19,10 @@ function Footer() {
         </div>
         <div className="flex items-start md:text-lg text-base">
           <span className="font-medium md:w-auto w-[60px]">Email: </span>
-          <a href="mailto:phamtrangiaan27@gmail.com" className="pl-2 hover:underline">
+          <a
+            href="mailto:phamtrangiaan27@gmail.com"
+            className="pl-2 hover:underline"
+          >
             phamtrangiaan27@gmail.com
           </a>
         </div>

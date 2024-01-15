@@ -8,7 +8,7 @@ const Contact: FC = () => {
   return (
     <div>
       <Header title={"About Us"} listBackLinks={[{title: "Home", link: "/"}]} />
-      <section className="container__cus">
+      <section className="container__cus px-5">
         <div className="flex lg:flex-nowrap flex-wrap items-center justify-between py-10 gap-10">
           <div className="lg:w-6/12 w-full">
             <h3 className="text-2xl font-medium">Provide the best</h3>
@@ -41,7 +41,7 @@ const Contact: FC = () => {
         </div>
       </section>
       {/* Team Member */}
-      <section className="container__cus">
+      <section className="container__cus px-5">
         <div className="py-10">
           <h2 className="md:w-1/2 w-full text-4xl font-bold text-center mx-auto">
             Team Member
@@ -92,7 +92,7 @@ const Contact: FC = () => {
       </section>
 
       {/* Client Feedback */}
-      <section className="client__feedback container__cus">
+      <section className="client__feedback container__cus px-5 overflow-hidden">
         <div className="py-10">
           <h2 className="md:w-1/2 w-full text-4xl font-bold text-center mx-auto">
             Client Feedback

@@ -1,20 +1,21 @@
 import Link from "next/link";
-import { FC, useEffect, useState } from "react";
+import { FC, Fragment, useEffect, useState } from "react";
 import axios from "axios";
 import { MdKeyboardArrowRight, MdKeyboardArrowLeft } from "react-icons/md";
 import { Navigation, Pagination, EffectFade, Autoplay } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 // Interface
-import { ICategory, ICategoryPayload } from "~/interfaces/apiResponse";
+import ProductItem from "~/components/Product/Item";
+import { IDataCategory, IProductHome } from "~/interfaces";
 
 const Home: FC = () => {
-  const [categories, setCategories] = useState<any>([]);
-  const [products, setProducts] = useState<any>([]);
+  const [categories, setCategories] = useState<IDataCategory[]>([]);
+  const [products, setProducts] = useState<IProductHome[]>([]);
 
   const getCategories = async () => {
     try {
-      const data: ICategoryPayload = await axios
+      const data = await axios
         .get(`${process.env.NEXT_PUBLIC_ENDPOINT_API}/categories`)
         .then((res) => res.data);
 
@@ -116,28 +117,18 @@ const Home: FC = () => {
       </section>
 
       {/* Category */}
-      <section className="category my-10">
-        <div className="container__cus">
+      <section className="py-10">
+        <div className="container__cus p-5">
           <div className="flex items-center justify-between mb-6">
-            <p className="text-xl font-normal text-[#1e1e1e]">Categories</p>
-            <div className="flex items-center gap-2">
-              <button className="category__btn-prev flex items-center justify-center w-8 h-8 bg-[#f0f0f0] hover:bg-primary rounded-full transition-all duration-100">
-                <MdKeyboardArrowLeft className="text-3xl text-[#9ea18e] hover:text-white" />
-              </button>
-              <button className="category__btn-next flex items-center justify-center w-8 h-8 bg-[#f0f0f0] hover:bg-primary rounded-full transition-all duration-100">
-                <MdKeyboardArrowRight className="text-3xl text-[#9ea18e] hover:text-white" />
-              </button>
-            </div>
+            <h3 className="text-xl font-medium text-[#1e1e1e]">Categories</h3>
           </div>
-          <div className="lg:p-8 md:p-6 p-4 rounded-md border border-[#e5e5e5] ">
+          <div className="p-5 border-2 rounded-md">
             <Swiper
               modules={[Navigation]}
+              cssMode={true}
               slidesPerView={2}
               spaceBetween={20}
-              navigation={{
-                nextEl: ".category__btn-next",
-                prevEl: ".category__btn-prev",
-              }}
+              navigation={true}
               breakpoints={{
                 478: {
                   slidesPerView: 3,
@@ -146,28 +137,26 @@ const Home: FC = () => {
                   slidesPerView: 4,
                 },
                 990: {
-                  slidesPerView: 8,
+                  slidesPerView: 6,
                 },
               }}
             >
-              {categories.map((category: ICategory, index: number) => (
-                <SwiperSlide key={index}>
+              {categories.map((category: IDataCategory) => (
+                <SwiperSlide key={category._id}>
                   <Link
                     href={`/collections/${category._id}`}
-                    className="flex flex-col items-center justify-center"
+                    className="flex flex-col items-center justify-center text-[#1e1e1e] hover:text-primary"
                   >
                     <img
-                      src={category.thumbnail}
+                      src={category.thumbnail || ""}
                       alt="image category"
-                      className="w-[80px] h-[80px] rounded-full"
+                      className="w-full h-[160px] rounded-md"
                     />
+
+                    <p className="block w-full text-sm font-medium text-center mt-3">
+                      {category.title}
+                    </p>
                   </Link>
-                  <a
-                    href="#"
-                    className="block w-full text-sm font-medium text-[#1e1e1e] hover:text-primary text-center mt-3 hover:underline"
-                  >
-                    {category.title}
-                  </a>
                 </SwiperSlide>
               ))}
             </Swiper>
@@ -175,71 +164,22 @@ const Home: FC = () => {
         </div>
       </section>
 
-      <section className="category my-10">
-        <div className="container__cus">
+      <section className="py-10">
+        <div className="container__cus bg-white p-5 rounded-lg">
           <div className="flex items-center justify-between mb-6">
-            <p className="text-xl font-normal text-[#1e1e1e]">Products</p>
-            <div className="flex items-center gap-2">
-              <button className="category__btn-prev flex items-center justify-center w-8 h-8 bg-[#f0f0f0] hover:bg-primary rounded-full transition-all duration-100">
-                <MdKeyboardArrowLeft className="text-3xl text-[#9ea18e] hover:text-white" />
-              </button>
-              <button className="category__btn-next flex items-center justify-center w-8 h-8 bg-[#f0f0f0] hover:bg-primary rounded-full transition-all duration-100">
-                <MdKeyboardArrowRight className="text-3xl text-[#9ea18e] hover:text-white" />
-              </button>
-            </div>
+            <p className="text-xl font-medium text-[#1e1e1e]">Products</p>
           </div>
-          <div className="lg:p-8 md:p-6 p-4 rounded-md border border-[#e5e5e5] ">
-            <Swiper
-              modules={[Navigation]}
-              slidesPerView={2}
-              spaceBetween={20}
-              navigation={{
-                nextEl: ".category__btn-next",
-                prevEl: ".category__btn-prev",
-              }}
-              breakpoints={{
-                478: {
-                  slidesPerView: 3,
-                },
-                650: {
-                  slidesPerView: 4,
-                },
-                990: {
-                  slidesPerView: 5,
-                },
-              }}
-            >
-              {products.map((product: any, index: number) => (
-                <SwiperSlide key={index} className="w-2/12">
-                  <Link
-                    href={`/collections/product/${product._id}`}
-                    className="w-ful"
-                  >
-                    <img
-                      src={product.thumbnail}
-                      alt="image product"
-                      className="w-[200px] h-[200px] rounded-xl"
-                    />
-                  </Link>
-                  <p className="text-base font-normal text-[#1e1e1e] text-center mt-3 truncate">
-                    {product.title}
-                  </p>
-                  <a
-                    href="#"
-                    className="block w-full text-sm font-medium text-primary text-center hover:underline"
-                  >
-                    View more
-                  </a>
-                </SwiperSlide>
-              ))}
-            </Swiper>
+          <div className="grid lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 gap-5">
+            {products.map((product: IProductHome) => (
+              <ProductItem data={product} key={product._id} />
+            ))}
           </div>
         </div>
       </section>
 
       {/* Brands */}
-      <section className="my-10">
-        <div className="container__cus">
+      <section className="py-10">
+        <div>
           <Swiper
             modules={[Autoplay]}
             autoplay={{
@@ -264,46 +204,102 @@ const Home: FC = () => {
             }}
           >
             <SwiperSlide>
-              <img src="/images/brand-1.avif" alt="banner" />
+              <img
+                src="/images/brand-1.avif"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-2.avif" alt="banner" />
+              <img
+                src="/images/brand-2.avif"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-3.webp" alt="banner" />
+              <img
+                src="/images/brand-3.webp"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-4.webp" alt="banner" />
+              <img
+                src="/images/brand-4.webp"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-1.avif" alt="banner" />
+              <img
+                src="/images/brand-1.avif"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-2.avif" alt="banner" />
+              <img
+                src="/images/brand-2.avif"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-3.webp" alt="banner" />
+              <img
+                src="/images/brand-3.webp"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-4.webp" alt="banner" />
+              <img
+                src="/images/brand-4.webp"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-2.avif" alt="banner" />
+              <img
+                src="/images/brand-2.avif"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-3.webp" alt="banner" />
+              <img
+                src="/images/brand-3.webp"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-4.webp" alt="banner" />
+              <img
+                src="/images/brand-4.webp"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-2.avif" alt="banner" />
+              <img
+                src="/images/brand-2.avif"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-3.webp" alt="banner" />
+              <img
+                src="/images/brand-3.webp"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
             <SwiperSlide>
-              <img src="/images/brand-4.webp" alt="banner" />
+              <img
+                src="/images/brand-4.webp"
+                alt="banner"
+                className="mx-auto"
+              />
             </SwiperSlide>
           </Swiper>
         </div>

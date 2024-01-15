@@ -8,13 +8,9 @@ export const initItemDesktop: INavItem[] = [
   {
     name: "Design",
     path: "/design",
-  },
-  {
-    name: "Collections",
-    path: "/collections",
     images: [
       "https://theme.hstatic.net/1000197303/1001046599/14/mega-image_1-1.jpg?v=7844",
-      "https://theme.hstatic.net/1000197303/1001046599/14/mega-image_1-2.jpg?v=7844"
+      "https://theme.hstatic.net/1000197303/1001046599/14/mega-image_1-2.jpg?v=7844",
     ],
     children: [
       {
@@ -84,7 +80,7 @@ export const initItemDesktop: INavItem[] = [
   },
   {
     name: "About Us",
-    path: "/aboutUs",
+    path: "/about-us",
   },
   {
     name: "Contact",

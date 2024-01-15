@@ -3,11 +3,8 @@ import React, { FC, useEffect } from "react";
 import { useDispatch } from "react-redux";
 
 import Footer from "~/components/Footer";
+import Navbar from "~/components/Navbar";
 import { GetListCart } from "~/store/actions";
-
-const Navbar = dynamic(() => import("~/components/Navbar/Navbar"), {
-  ssr: true,
-});
 
 interface Props {
   children: JSX.Element;
@@ -20,10 +17,9 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
     dispatch(GetListCart());
   }, []);
   return (
-    <main>
+    <main className="bg-[#f5f5fa]">
       <Navbar />
       {children}
-      {/* Get Our Latets Update  */}
       <section
         className="flex items-center justify-center w-full h-[370px] bg-cover bg-center md:pl-24 px-5 mt-10"
         style={{

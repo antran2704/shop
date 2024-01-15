@@ -12,7 +12,7 @@ import { IProduct, IPagination } from "~/interfaces/apiResponse";
 
 import Header from "~/components/Header";
 import FilterItem from "~/components/Filter";
-import ProductItem from "~/components/ProductItem";
+import ProductItem from "~/components/Product";
 
 interface Props {
   query: any;
@@ -263,7 +263,7 @@ const CollectionItem: FC<Props> = (props: Props) => {
       </div>
       {/* Category */}
       <section className="category my-10">
-        <div className="container__cus">
+        <div className="container__cus overflow-hidden">
           <div className="flex items-center justify-between mb-6">
             <p className="text-xl font-normal text-[#1e1e1e]">
               Shop By Category
@@ -277,7 +277,7 @@ const CollectionItem: FC<Props> = (props: Props) => {
               </button>
             </div>
           </div>
-          <div className="lg:p-8 md:p-6 p-4 rounded-md border border-[#e5e5e5] ">
+          <div>
             <Swiper
               modules={[Navigation]}
               slidesPerView={2}
