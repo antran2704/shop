@@ -1,13 +1,17 @@
-import { FC } from "react";
+import { FC, ReactElement } from "react";
 import { Pagination, Autoplay } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 import Header from "~/components/Header";
+import DefaultLayout from "~/layouts/DefaultLayout";
 
-const Contact: FC = () => {
+const AboutUsPage = () => {
   return (
     <div>
-      <Header title={"About Us"} listBackLinks={[{title: "Home", link: "/"}]} />
+      <Header
+        title={"About Us"}
+        listBackLinks={[{ title: "Home", link: "/" }]}
+      />
       <section className="container__cus px-5">
         <div className="flex lg:flex-nowrap flex-wrap items-center justify-between py-10 gap-10">
           <div className="lg:w-6/12 w-full">
@@ -189,4 +193,8 @@ const Contact: FC = () => {
   );
 };
 
-export default Contact;
+export default AboutUsPage;
+
+AboutUsPage.getLayout = function getLayout(page: ReactElement) {
+  return <DefaultLayout>{page}</DefaultLayout>;
+};

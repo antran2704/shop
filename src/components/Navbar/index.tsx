@@ -20,6 +20,7 @@ import { RootState } from "~/store";
 import { GetListCart, handleDeleteProductInCart } from "~/store/actions";
 
 import styles from "./Navbar.module.scss";
+import Search from "../Search";
 
 const Navbar: FC = () => {
   const dispatch = useDispatch();
@@ -28,12 +29,9 @@ const Navbar: FC = () => {
   );
 
   const router = useRouter();
-  const searchRef = useRef<HTMLDivElement>(null);
-  const inpSearchRef = useRef<HTMLInputElement>(null);
-
   const [showNavbar, setShow] = useState<boolean>(false);
   const [showModalCart, setShowModalCart] = useState<boolean>(false);
-  const [showSearch, setShowSearch] = useState<boolean>(false);
+
   const [currentNav, setCurrentNav] = useState([initItemDesktop]);
   const [typeShow, setTypeShow] = useState<"next" | "prev" | null>(null);
 
@@ -87,40 +85,8 @@ const Navbar: FC = () => {
           </Link>
         </div>
 
-        <div
-          ref={searchRef}
-          className={`relative sm:flex hidden items-center justify-end lg:w-6/12 w-5/12 px-1 py-1 bg-white border  rounded-md transition-all ease-linear duration-100 z-30`}
-        >
-          <input
-            ref={inpSearchRef}
-            type="text"
-            onFocus={() => {
-              searchRef.current?.classList.add("border-dark");
-              setShowSearch(true);
-            }}
-            onBlur={() => searchRef.current?.classList.remove("border-dark")}
-            placeholder="Search Product"
-            className={`w-full px-2 outline-none transition-all ease-linear duration-100`}
-          />
-          <AiOutlineSearch className="lg:text-3xl md:text-2xl text-xl cursor-pointer" />
-
-          {showSearch && (
-            <div
-              className={`absolute ${
-                showSearch ? "block" : "hidden"
-              } min-h-[200px] top-[110%] left-0 right-0 bg-white py-5 border-2 rounded-md shadow-lg`}
-            >
-              <div className="flex flex-col items-center justify-center gap-2">
-                <img
-                  src="/no_result.svg"
-                  alt="No Result"
-                  className="w-[160px] h-[160px]"
-                />
-
-                <p className="text-base font-medium">No Result</p>
-              </div>
-            </div>
-          )}
+        <div className="lg:w-6/12 w-5/12">
+          <Search />
         </div>
 
         <div className="flex items-center justify-end w-3/12 md:gap-4 gap-3">
@@ -139,14 +105,6 @@ const Navbar: FC = () => {
         </div>
 
         {/* layout close modal */}
-        {showSearch && (
-          <div
-            className={`fixed top-0 bottom-0 left-0 right-0 z-20`}
-            style={{ backgroundColor: "rgba(1,1,1, 0.6)" }}
-            onClick={() => setShowSearch(false)}
-          ></div>
-        )}
-
         {showNavbar && (
           <div
             className={`xl:hidden block fixed top-0 bottom-0 left-0 right-0 z-30`}

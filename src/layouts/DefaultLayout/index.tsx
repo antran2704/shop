@@ -14,8 +14,10 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    console.log("defaul layout");
     dispatch(GetListCart());
   }, []);
+
   return (
     <main className="bg-[#f5f5fa]">
       <Navbar />

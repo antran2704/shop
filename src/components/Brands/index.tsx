@@ -1,0 +1,62 @@
+import { Autoplay } from "swiper";
+import { Swiper, SwiperSlide } from "swiper/react";
+
+const listBrand: string[] = [
+  "/images/brand-1.avif",
+  "/images/brand-2.avif",
+  "/images/brand-3.webp",
+  "/images/brand-4.webp",
+  "/images/brand-1.avif",
+  "/images/brand-2.avif",
+  "/images/brand-3.webp",
+  "/images/brand-4.webp",
+  "/images/brand-1.avif",
+  "/images/brand-2.avif",
+  "/images/brand-3.webp",
+  "/images/brand-4.webp",
+  "/images/brand-1.avif",
+  "/images/brand-2.avif",
+  "/images/brand-3.webp",
+  "/images/brand-4.webp",
+];
+
+const breakpointsSwiper = {
+  478: {
+    slidesPerView: 3,
+    spaceBetween: 14,
+  },
+  650: {
+    slidesPerView: 4,
+    spaceBetween: 18,
+  },
+  990: {
+    slidesPerView: 6,
+    spaceBetween: 20,
+  },
+};
+
+const Brands = () => {
+  return (
+    <div>
+      <Swiper
+        modules={[Autoplay]}
+        autoplay={{
+          delay: 4000,
+          disableOnInteraction: false,
+        }}
+        slidesPerView={2}
+        loop={true}
+        enabled={true}
+        breakpoints={breakpointsSwiper}
+      >
+        {listBrand.map((brand: string, index: number) => (
+          <SwiperSlide key={index}>
+            <img src={brand} alt="banner" className="mx-auto" />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
+  );
+};
+
+export default Brands;

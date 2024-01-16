@@ -1,15 +1,18 @@
 import Link from "next/link";
-import { FC, Fragment, useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import axios from "axios";
-import { MdKeyboardArrowRight, MdKeyboardArrowLeft } from "react-icons/md";
-import { Navigation, Pagination, EffectFade, Autoplay } from "swiper";
+import { Navigation, Pagination, EffectFade, Autoplay, Parallax } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 // Interface
 import ProductItem from "~/components/Product/Item";
-import { IDataCategory, IProductHome } from "~/interfaces";
+import { IDataCategory, IProductHome, NextPageWithLayout } from "~/interfaces";
+import Brands from "~/components/Brands";
+import DefaultLayout from "~/layouts/DefaultLayout";
 
-const Home: FC = () => {
+const Layout = DefaultLayout;
+
+const Home: NextPageWithLayout = () => {
   const [categories, setCategories] = useState<IDataCategory[]>([]);
   const [products, setProducts] = useState<IProductHome[]>([]);
 
@@ -117,10 +120,10 @@ const Home: FC = () => {
       </section>
 
       {/* Category */}
-      <section className="py-10">
+      <section className="py-5">
         <div className="container__cus p-5">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-medium text-[#1e1e1e]">Categories</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xl font-medium text-[#1e1e1e]">Danh mục</h3>
           </div>
           <div className="p-5 border-2 rounded-md">
             <Swiper
@@ -164,14 +167,83 @@ const Home: FC = () => {
         </div>
       </section>
 
-      <section className="py-10">
+      <section className="py-5">
         <div className="container__cus bg-white p-5 rounded-lg">
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-xl font-medium text-[#1e1e1e]">Products</p>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xl font-medium text-[#1e1e1e]">Sản phẩm Hot 🔥</h3>
+          </div>
+          <div>
+            <Swiper
+              modules={[Navigation]}
+              slidesPerView={2}
+              spaceBetween={20}
+              navigation={true}
+              breakpoints={{
+                478: {
+                  slidesPerView: 3,
+                },
+                650: {
+                  slidesPerView: 4,
+                },
+                990: {
+                  slidesPerView: 5,
+                },
+              }}
+            >
+              {products.map((product: IProductHome) => (
+                <SwiperSlide key={product._id}>
+                  <ProductItem data={product} key={product._id} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-5">
+        <div className="container__cus bg-white p-5 rounded-lg">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xl font-medium text-[#1e1e1e]">
+              Có thể bạn thích
+            </h3>
+          </div>
+          <div>
+            <Swiper
+              modules={[Navigation]}
+              cssMode={true}
+              slidesPerView={2}
+              spaceBetween={20}
+              navigation={true}
+              breakpoints={{
+                478: {
+                  slidesPerView: 3,
+                },
+                650: {
+                  slidesPerView: 4,
+                },
+                990: {
+                  slidesPerView: 5,
+                },
+              }}
+            >
+              {products.map((product: IProductHome) => (
+                <SwiperSlide key={product._id}>
+                  <ProductItem data={product} key={product._id} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-5">
+        <div className="container__cus bg-white p-5 rounded-lg">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xl font-medium text-[#1e1e1e]">Sản phẩm gợi ý</p>
           </div>
           <div className="grid lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 gap-5">
             {products.map((product: IProductHome) => (
-              <ProductItem data={product} key={product._id} />
+              <ProductItem hoverScale={true} data={product} key={product._id} />
             ))}
           </div>
         </div>
@@ -179,133 +251,14 @@ const Home: FC = () => {
 
       {/* Brands */}
       <section className="py-10">
-        <div>
-          <Swiper
-            modules={[Autoplay]}
-            autoplay={{
-              delay: 4000,
-            }}
-            slidesPerView={2}
-            loop={true}
-            enabled={true}
-            breakpoints={{
-              478: {
-                slidesPerView: 3,
-                spaceBetween: 14,
-              },
-              650: {
-                slidesPerView: 4,
-                spaceBetween: 18,
-              },
-              990: {
-                slidesPerView: 6,
-                spaceBetween: 20,
-              },
-            }}
-          >
-            <SwiperSlide>
-              <img
-                src="/images/brand-1.avif"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-2.avif"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-3.webp"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-4.webp"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-1.avif"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-2.avif"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-3.webp"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-4.webp"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-2.avif"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-3.webp"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-4.webp"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-2.avif"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-3.webp"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-            <SwiperSlide>
-              <img
-                src="/images/brand-4.webp"
-                alt="banner"
-                className="mx-auto"
-              />
-            </SwiperSlide>
-          </Swiper>
-        </div>
+        <Brands />
       </section>
     </div>
   );
 };
 
 export default Home;
+
+Home.getLayout = function getLayout(page: ReactElement) {
+  return <Layout>{page}</Layout>;
+};

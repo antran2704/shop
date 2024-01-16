@@ -1,10 +1,17 @@
-import { FC } from "react";
+import { ReactElement } from "react";
 import Header from "~/components/Header";
+import { NextPageWithLayout } from "~/interfaces";
+import DefaultLayout from "~/layouts/DefaultLayout";
 
-const Contact: FC = () => {
+const Layout = DefaultLayout;
+
+const Contact: NextPageWithLayout = () => {
   return (
     <div>
-      <Header title={"Contact"} listBackLinks={[{title: "Home", link: "/"}]}/> 
+      <Header
+        title={"Contact"}
+        listBackLinks={[{ title: "Home", link: "/" }]}
+      />
       <section className="my-16">
         <div className="container__cus flex lg:flex-nowrap flex-wrap items-start justify-between gap-5">
           <div
@@ -95,3 +102,7 @@ const Contact: FC = () => {
 };
 
 export default Contact;
+
+Contact.getLayout = function getLayout(page: ReactElement) {
+  return <Layout>{page}</Layout>;
+};

@@ -1,8 +1,6 @@
-import type { AppProps } from "next/app";
 import { Provider } from "react-redux";
-import store from "~/store/index.ts";
+import store from "~/store";
 
-import DefaultLayout from "~/layouts/DefaultLayout";
 import "swiper/scss";
 import "swiper/scss/navigation";
 import "swiper/scss/pagination";
@@ -13,13 +11,11 @@ import "lightgallery/css/lightgallery.css";
 import "lightgallery/css/lg-zoom.css";
 import "lightgallery/css/lg-thumbnail.css";
 import "~/styles/globals.scss";
+import { AppPropsWithLayout } from "~/interfaces";
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps }: AppPropsWithLayout) {
+  const getLayout = Component.getLayout ?? ((page) => page);
   return (
-    <Provider store={store}>
-      <DefaultLayout>
-        <Component {...pageProps} />
-      </DefaultLayout>
-    </Provider>
+    <Provider store={store}>{getLayout(<Component {...pageProps} />)}</Provider>
   );
 }
