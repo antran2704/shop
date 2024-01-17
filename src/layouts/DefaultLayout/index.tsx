@@ -1,6 +1,7 @@
-import dynamic from "next/dynamic";
 import React, { FC, useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import Footer from "~/components/Footer";
 import Navbar from "~/components/Navbar";
@@ -14,7 +15,6 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log("defaul layout");
     dispatch(GetListCart());
   }, []);
 
@@ -51,6 +51,11 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
         </div>
       </section>
       <Footer />
+      <ToastContainer
+        autoClose={5000}
+        pauseOnFocusLoss={false}
+        pauseOnHover={false}
+      />
     </main>
   );
 };

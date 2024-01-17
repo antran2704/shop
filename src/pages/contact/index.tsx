@@ -1,5 +1,7 @@
 import { ReactElement } from "react";
+
 import Header from "~/components/Header";
+import Seo from "~/components/Seo";
 import { NextPageWithLayout } from "~/interfaces";
 import DefaultLayout from "~/layouts/DefaultLayout";
 
@@ -8,9 +10,17 @@ const Layout = DefaultLayout;
 const Contact: NextPageWithLayout = () => {
   return (
     <div>
+      <Seo
+        title="Shop Antran | Contact"
+        description="Description Shop Antran Contact Page"
+      />
+
       <Header
         title={"Contact"}
-        listBackLinks={[{ title: "Home", link: "/" }]}
+        breadcrumbs={[
+          { label: "Home", url_path: "/" },
+          { label: "Contact", url_path: "/contact" },
+        ]}
       />
       <section className="my-16">
         <div className="container__cus flex lg:flex-nowrap flex-wrap items-start justify-between gap-5">

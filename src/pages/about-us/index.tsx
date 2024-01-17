@@ -1,16 +1,22 @@
-import { FC, ReactElement } from "react";
+import { ReactElement } from "react";
 import { Pagination, Autoplay } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 import Header from "~/components/Header";
+import Seo from "~/components/Seo";
 import DefaultLayout from "~/layouts/DefaultLayout";
 
 const AboutUsPage = () => {
   return (
     <div>
+      <Seo title="Shop Antran | Abou Us" description="Description Shop Antran About Us Page" />
+
       <Header
         title={"About Us"}
-        listBackLinks={[{ title: "Home", link: "/" }]}
+        breadcrumbs={[
+          { label: "Home", url_path: "/" },
+          { label: "About us", url_path: "/about-us" },
+        ]}
       />
       <section className="container__cus px-5">
         <div className="flex lg:flex-nowrap flex-wrap items-center justify-between py-10 gap-10">

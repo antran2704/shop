@@ -81,7 +81,7 @@ const Navbar: FC = () => {
             onClick={handleShowModal}
           />
           <Link href="/" className="lg:w-[200px] md:w-[160px] w-[100px]">
-            <img src="/images/logo.webp" alt="logo image" className="w-100" />
+            <img src="/logo.webp" alt="logo image" className="w-100" />
           </Link>
         </div>
 
@@ -177,7 +177,7 @@ const Navbar: FC = () => {
               <Link
                 href={item.path}
                 className={`text-base font-medium px-5 py-2 text-[#1e1e1e] ${
-                  router.pathname.includes(item.path) ? "text-primary" : ""
+                  router.pathname === item.path ? "text-primary" : ""
                 } hover:text-primary whitespace-nowrap transition-all ease-linear duration-100`}
               >
                 {item.name}

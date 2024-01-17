@@ -2,7 +2,7 @@ interface IOption {
   title: string;
 }
 
-interface IBreadcrumbCategory {
+interface IBreadcrumb {
   label: string;
   url_path: string;
 }
@@ -23,7 +23,7 @@ interface IDataCategory {
   meta_description?: string;
   public: boolean;
   thumbnail: string | null;
-  breadcrumbs?: IBreadcrumbCategory[];
+  breadcrumbs?: IBreadcrumb[];
   createdAt?: string;
 }
 
@@ -31,5 +31,5 @@ export type {
   IOption,
   IDataCategory,
   IParentCategory,
-  IBreadcrumbCategory,
+  IBreadcrumb,
 };

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ReactElement, useEffect, useState } from "react";
 import axios from "axios";
-import { Navigation, Pagination, EffectFade, Autoplay, Parallax } from "swiper";
+import { Navigation, Pagination, EffectFade, Autoplay } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 // Interface
@@ -9,45 +9,23 @@ import ProductItem from "~/components/Product/Item";
 import { IDataCategory, IProductHome, NextPageWithLayout } from "~/interfaces";
 import Brands from "~/components/Brands";
 import DefaultLayout from "~/layouts/DefaultLayout";
+import Seo from "~/components/Seo";
+import { useCategoriesAll } from "~/hooks/useCategories";
+import { useProducts } from "~/hooks/useProducts";
 
 const Layout = DefaultLayout;
 
 const Home: NextPageWithLayout = () => {
-  const [categories, setCategories] = useState<IDataCategory[]>([]);
-  const [products, setProducts] = useState<IProductHome[]>([]);
+  const { categories, loadingCategories } = useCategoriesAll();
+  const { products, loadingProducts } = useProducts(1);
 
-  const getCategories = async () => {
-    try {
-      const data = await axios
-        .get(`${process.env.NEXT_PUBLIC_ENDPOINT_API}/categories`)
-        .then((res) => res.data);
-
-      setCategories(data.payload);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const getProducts = async () => {
-    try {
-      const data: any = await axios
-        .get(`${process.env.NEXT_PUBLIC_ENDPOINT_API}/products`)
-        .then((res) => res.data);
-
-      if (data.status === 200) {
-        setProducts(data.payload);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    getCategories();
-    getProducts();
-  }, []);
   return (
     <div>
+      <Seo
+        title="Shop Antran | Home Page"
+        description="Description Shop Antran Home Page"
+      />
+
       {/* banner */}
       <section
         id="banner"
@@ -170,7 +148,9 @@ const Home: NextPageWithLayout = () => {
       <section className="py-5">
         <div className="container__cus bg-white p-5 rounded-lg">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xl font-medium text-[#1e1e1e]">Sản phẩm Hot 🔥</h3>
+            <h3 className="text-xl font-medium text-[#1e1e1e]">
+              Sản phẩm Hot 🔥
+            </h3>
           </div>
           <div>
             <Swiper

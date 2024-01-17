@@ -1,18 +1,13 @@
 import Link from "next/link";
-import { FC } from "react";
-
-interface IBackLink {
-  title: String;
-  link: String;
-}
+import { IBreadcrumb } from "~/interfaces";
 
 interface Props {
-  title: String;
-  listBackLinks: IBackLink[];
+  title: string;
+  breadcrumbs: IBreadcrumb[];
 }
 
-const Header: FC<Props> = (props: Props) => {
-  const { title, listBackLinks } = props;
+const Header = (props: Props) => {
+  const { title, breadcrumbs } = props;
   return (
     <header
       className="flex items-center lg:h-[200px] md:h-[140px] h-auto py-10 bg-cover bg-center"
@@ -21,16 +16,22 @@ const Header: FC<Props> = (props: Props) => {
       }}
     >
       <div className="container__cus w-full px-5">
-        <h1 className="sm:block hidden lg:text-4xl md:text-2xl text-xl font-medium mb-2">{title}</h1>
+        <h1 className="sm:block hidden lg:text-4xl md:text-2xl text-xl font-medium mb-2">
+          {title}
+        </h1>
         <div className="flex flex-wrap items-center text-lg gap-2">
-          {listBackLinks.map((item: IBackLink, index: number) => (
-            <div className="flex items-center gap-2" key={index}>
-              <Link href={`${item.link}`}>{item.title}</Link>
-              <span>|</span>
-            </div>
-          ))}
-
-          <span className="text-primary">{title}</span>
+          {breadcrumbs.map((item: IBreadcrumb, index: number) => {
+            if (breadcrumbs.length - 1 !== index) {
+              return (
+                <div className="flex items-center gap-2" key={index}>
+                  <Link href={`${item.url_path}`}>{item.label}</Link>
+                  <span>|</span>
+                </div>
+              );
+            } else {
+              return <span className="text-primary" key={index}>{item.label}</span>;
+            }
+          })}
         </div>
       </div>
     </header>
