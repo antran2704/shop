@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { FaFacebook, FaInstagram, FaYoutube } from "react-icons/fa";
+import { LOGO } from "~/configs/images";
 
 function Footer() {
   return (
     <footer className="bg-[#ece5dd]">
       <div className="container__cus py-10">
         <Link href="/" className="block w-[140px] pb-5">
-          <img src="/logo.webp" alt="logo image" className="w-full" />
+          <img
+            src={LOGO}
+            alt="Logo"
+            title="Logo"
+            className="w-100"
+            width="auto"
+            height="auto"
+            loading="lazy"
+          />
         </Link>
 
         <div className="flex lg:flex-nowrap flex-wrap items-start justify-between gap-5">
@@ -90,13 +99,13 @@ function Footer() {
               </li>
               <li className="flex items-center my-2 gap-2">
                 <Link href={"/"}>
-                    <FaFacebook className="text-2xl"/>
+                  <FaFacebook className="text-2xl" />
                 </Link>
                 <Link href={"/"}>
-                    <FaInstagram className="text-2xl"/>
+                  <FaInstagram className="text-2xl" />
                 </Link>
                 <Link href={"/"}>
-                    <FaYoutube className="text-2xl"/>
+                  <FaYoutube className="text-2xl" />
                 </Link>
               </li>
             </ul>

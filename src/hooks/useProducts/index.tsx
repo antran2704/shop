@@ -13,7 +13,7 @@ const useProducts = (page: number = 1, options?: Partial<SWRConfiguration>) => {
         return res.payload;
       }
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   };
 
@@ -21,15 +21,16 @@ const useProducts = (page: number = 1, options?: Partial<SWRConfiguration>) => {
     data: products,
     isLoading: loadingProducts,
     mutate,
+    error
   } = useSWR([PRODUCT_KEY.PRODUCTS_PAGE, page], fetcherProducts, {
     ...options,
     revalidateOnFocus: false,
     dedupingInterval: REFESH_TIME,
     keepPreviousData: true,
-    fallbackData: [],
+    fallbackData: []
   });
 
-  return { products, loadingProducts, mutate };
+  return { products, loadingProducts, error, mutate };
 };
 
 export { useProducts };

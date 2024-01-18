@@ -1,5 +1,6 @@
 import { Autoplay } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
+import ImageCus from "../Image";
 
 const listBrand: string[] = [
   "/images/brand-1.avif",
@@ -51,7 +52,12 @@ const Brands = () => {
       >
         {listBrand.map((brand: string, index: number) => (
           <SwiperSlide key={index}>
-            <img src={brand} alt="banner" className="mx-auto" />
+            <ImageCus
+              title="Brand"
+              src={brand}
+              alt="Brand"
+              className="mx-auto"
+            />
           </SwiperSlide>
         ))}
       </Swiper>

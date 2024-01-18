@@ -3,8 +3,6 @@ import { useRouter } from "next/router";
 import React, { useState, useEffect, FC, Fragment, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  AiOutlineSearch,
-  AiOutlineHeart,
   AiOutlineShoppingCart,
   AiOutlineClose,
   AiFillCloseCircle,
@@ -21,6 +19,8 @@ import { GetListCart, handleDeleteProductInCart } from "~/store/actions";
 
 import styles from "./Navbar.module.scss";
 import Search from "../Search";
+import { LOGO } from "~/configs/images";
+import ImageCus from "../Image";
 
 const Navbar: FC = () => {
   const dispatch = useDispatch();
@@ -81,7 +81,7 @@ const Navbar: FC = () => {
             onClick={handleShowModal}
           />
           <Link href="/" className="lg:w-[200px] md:w-[160px] w-[100px]">
-            <img src="/logo.webp" alt="logo image" className="w-100" />
+            <img src={LOGO} alt="Logo" title="Logo" className="w-100" width="auto" height="auto" loading="lazy" />
           </Link>
         </div>
 
@@ -248,10 +248,11 @@ const Navbar: FC = () => {
                   <Fragment>
                     <div className="w-1/2 grid grid-cols-2 items-start gap-10">
                       {item.images.map((image: string, index: number) => (
-                        <img
+                        <ImageCus
                           key={index}
                           src={image}
                           alt="image"
+                          title="image"
                           className="w-full h-full max-h-[400px] object-cover rounded-lg overflow-hidden"
                         />
                       ))}
@@ -338,10 +339,11 @@ const Navbar: FC = () => {
                 className="flex items-center pb-3 px-2 border-b border-borderColor gap-4"
               >
                 <div className="relative h-20">
-                  <img
+                  <ImageCus
                     src={item.avatarProduct}
                     className="sm:w-[80px] sm:h-[80px] w-[60px] h-[60px]"
                     alt="img"
+                    title="img"
                   />
                   <AiFillCloseCircle
                     onClick={() => {

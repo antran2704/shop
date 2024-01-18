@@ -1,17 +1,18 @@
 import Link from "next/link";
-import { ReactElement, useEffect, useState } from "react";
-import axios from "axios";
+import { ReactElement, useEffect } from "react";
 import { Navigation, Pagination, EffectFade, Autoplay } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 // Interface
-import ProductItem from "~/components/Product/Item";
+import { ProductItem } from "~/components/Product/Item";
 import { IDataCategory, IProductHome, NextPageWithLayout } from "~/interfaces";
 import Brands from "~/components/Brands";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import Seo from "~/components/Seo";
 import { useCategoriesAll } from "~/hooks/useCategories";
 import { useProducts } from "~/hooks/useProducts";
+import { CategoryItem, CategoryLoading } from "~/components/Category";
+import { ProductLoading } from "~/components/Product";
 
 const Layout = DefaultLayout;
 
@@ -122,31 +123,26 @@ const Home: NextPageWithLayout = () => {
                 },
               }}
             >
-              {categories.map((category: IDataCategory) => (
-                <SwiperSlide key={category._id}>
-                  <Link
-                    href={`/collections/${category._id}`}
-                    className="flex flex-col items-center justify-center text-[#1e1e1e] hover:text-primary"
-                  >
-                    <img
-                      src={category.thumbnail || ""}
-                      alt="image category"
-                      className="w-full h-[160px] rounded-md"
-                    />
+              {!loadingCategories &&
+                categories.map((category: IDataCategory) => (
+                  <SwiperSlide key={category._id}>
+                    <CategoryItem data={category} />
+                  </SwiperSlide>
+                ))}
 
-                    <p className="block w-full text-sm font-medium text-center mt-3">
-                      {category.title}
-                    </p>
-                  </Link>
-                </SwiperSlide>
-              ))}
+              {loadingCategories &&
+                [...new Array(6)].map((item, index: number) => (
+                  <SwiperSlide key={index}>
+                    <CategoryLoading />
+                  </SwiperSlide>
+                ))}
             </Swiper>
           </div>
         </div>
       </section>
 
       <section className="py-5">
-        <div className="container__cus bg-white p-5 rounded-lg">
+        <div className="container__cus bg-white p-5 rounded-lg overflow-hidden">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xl font-medium text-[#1e1e1e]">
               Sản phẩm Hot 🔥
@@ -170,11 +166,19 @@ const Home: NextPageWithLayout = () => {
                 },
               }}
             >
-              {products.map((product: IProductHome) => (
-                <SwiperSlide key={product._id}>
-                  <ProductItem data={product} key={product._id} />
-                </SwiperSlide>
-              ))}
+              {!loadingProducts &&
+                products.map((product: IProductHome) => (
+                  <SwiperSlide key={product._id}>
+                    <ProductItem data={product} key={product._id} />
+                  </SwiperSlide>
+                ))}
+
+              {loadingProducts &&
+                [...new Array(5)].map((item, index: number) => (
+                  <SwiperSlide key={index}>
+                    <ProductLoading />
+                  </SwiperSlide>
+                ))}
             </Swiper>
           </div>
         </div>
@@ -206,11 +210,19 @@ const Home: NextPageWithLayout = () => {
                 },
               }}
             >
-              {products.map((product: IProductHome) => (
-                <SwiperSlide key={product._id}>
-                  <ProductItem data={product} key={product._id} />
-                </SwiperSlide>
-              ))}
+              {!loadingProducts &&
+                products.map((product: IProductHome) => (
+                  <SwiperSlide key={product._id}>
+                    <ProductItem data={product} key={product._id} />
+                  </SwiperSlide>
+                ))}
+
+              {loadingProducts &&
+                [...new Array(5)].map((item, index: number) => (
+                  <SwiperSlide key={index}>
+                    <ProductLoading />
+                  </SwiperSlide>
+                ))}
             </Swiper>
           </div>
         </div>
@@ -222,9 +234,19 @@ const Home: NextPageWithLayout = () => {
             <p className="text-xl font-medium text-[#1e1e1e]">Sản phẩm gợi ý</p>
           </div>
           <div className="grid lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 gap-5">
-            {products.map((product: IProductHome) => (
-              <ProductItem hoverScale={true} data={product} key={product._id} />
-            ))}
+            {!loadingProducts &&
+              products.map((product: IProductHome) => (
+                <ProductItem
+                  hoverScale={true}
+                  data={product}
+                  key={product._id}
+                />
+              ))}
+
+            {loadingProducts &&
+              [...new Array(5)].map((item, index: number) => (
+                <ProductLoading key={index}/>
+              ))}
           </div>
         </div>
       </section>
