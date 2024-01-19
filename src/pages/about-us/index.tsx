@@ -21,7 +21,7 @@ const AboutUsPage = () => {
       <section className="container__cus px-5">
         <div className="flex lg:flex-nowrap flex-wrap items-center justify-between py-10 gap-10">
           <div className="lg:w-6/12 w-full">
-            <h3 className="text-2xl font-medium">Provide the best</h3>
+            <p className="text-2xl font-medium">Provide the best</p>
             <h2 className="text-3xl font-medium">Handmade Products.</h2>
             <p className="text-lg my-4">
               Contrary to popular belief, Lorem Ipsum is not simply random text.

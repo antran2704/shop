@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 const ProductLoading = () => {
   return (
     <div
@@ -16,4 +18,4 @@ const ProductLoading = () => {
   );
 };
 
-export { ProductLoading };
+export default memo(ProductLoading);

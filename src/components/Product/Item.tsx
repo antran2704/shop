@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Fragment } from "react";
+import { Fragment, memo } from "react";
 import { AiFillStar } from "react-icons/ai";
 import {
   CURRENCY_CHARACTER,
@@ -17,7 +17,6 @@ interface Props {
 
 const ProductItem = (props: Props) => {
   const { data, hoverScale = false } = props;
-
   return (
     <div
       className={`group relative w-full text-[#1e1e1e] ${
@@ -32,7 +31,7 @@ const ProductItem = (props: Props) => {
           src={data.thumbnail || ""}
           title={data.title}
           alt={data.title}
-          className="w-full lg:h-[220px] md:h-[180px] h-[160px]"
+          className="w-full lg:h-[220px] md:h-[180px] h-[160px] object-center"
         />
         <div className="px-2 py-2">
           <p className="group-hover:text-primary  h-[48px] text-base font-normal line-clamp-2">
@@ -79,4 +78,4 @@ const ProductItem = (props: Props) => {
   );
 };
 
-export {ProductItem};
+export default memo(ProductItem);

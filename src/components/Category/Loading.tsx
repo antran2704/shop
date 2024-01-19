@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 const CategoryLoading = () => {
   return (
     <div className="flex flex-col items-center justify-center text-[#1e1e1e] hover:text-primary">
@@ -8,4 +10,4 @@ const CategoryLoading = () => {
   );
 };
 
-export { CategoryLoading };
+export default memo(CategoryLoading);

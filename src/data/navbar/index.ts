@@ -1,6 +1,6 @@
-import { INavItem } from "./interface";
+import { INavItem } from "~/interfaces";
 
-export const initItemDesktop: INavItem[] = [
+export const initDataNavbar: INavItem[] = [
   {
     name: "Home",
     path: "/",

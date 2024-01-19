@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { IDataCategory } from "~/interfaces";
 import ImageCus from "../Image";
+import { memo } from "react";
 
 interface Props {
   data: IDataCategory;
@@ -28,4 +29,4 @@ const CategoryItem = (props: Props) => {
   );
 };
 
-export { CategoryItem };
+export default memo(CategoryItem);

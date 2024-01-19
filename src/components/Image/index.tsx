@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Fragment, memo } from "react";
 import { NO_IMAGE } from "~/configs/images";
 
 interface Props {
@@ -20,33 +20,40 @@ const ImageCus = (props: Props) => {
     image.src = src;
 
     image.onload = () => {
-      if (ImageRef.current) {
+      if (ImageRef.current && image.complete) {
         ImageRef.current.src = src;
       }
+
+      setLoading(false);
     };
+
     image.onerror = () => {
       if (ImageRef.current) {
         ImageRef.current.src = NO_IMAGE;
       }
+      setLoading(false);
     };
-
-    setLoading(false);
   }
-
+  
   useEffect(() => {
     loadImage(src as string);
   }, []);
 
   return (
-    <img
-      ref={ImageRef}
-      alt={alt}
-      title={title}
-      className={`${loading ? "skelaton" : ""} ${className}`}
-      width="auto" height="auto"
-      loading="lazy"
-    />
+    <Fragment>
+      {loading && <div className={`skelaton ${className}`}></div>}
+
+      <img
+        ref={ImageRef}
+        alt={alt}
+        title={title}
+        className={`${className} ${loading ? "hidden" : "block"}`}
+        width="auto"
+        height="auto"
+        loading="lazy"
+      />
+    </Fragment>
   );
 };
 
-export default ImageCus;
+export default memo(ImageCus);

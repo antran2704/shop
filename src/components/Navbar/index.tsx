@@ -1,26 +1,33 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState, useEffect, FC, Fragment, useRef } from "react";
+import React, { useState, useEffect, useCallback, FC, Fragment } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   AiOutlineShoppingCart,
   AiOutlineClose,
   AiFillCloseCircle,
+  AiOutlineSearch,
 } from "react-icons/ai";
 import { BsArrowRightShort, BsArrowLeftShort } from "react-icons/bs";
 import { HiMenu } from "react-icons/hi";
+import { IoMdCloseCircleOutline } from "react-icons/io";
 
-import { initItemDesktop } from "./data";
+import { initDataNavbar } from "~/data";
 
-import { INavItem } from "./interface";
+import { IProductHome, INavItem } from "~/interfaces";
 
 import { RootState } from "~/store";
 import { GetListCart, handleDeleteProductInCart } from "~/store/actions";
 
-import styles from "./Navbar.module.scss";
-import Search from "../Search";
+import { searchProductsMenu } from "~/api-client/search";
+
+import useDebounce from "~/hooks/useDebounce";
+
+import Search from "~/components/Search";
+import ImageCus from "~/components/Image";
 import { LOGO } from "~/configs/images";
-import ImageCus from "../Image";
+
+import styles from "./Navbar.module.scss";
 
 const Navbar: FC = () => {
   const dispatch = useDispatch();
@@ -30,14 +37,35 @@ const Navbar: FC = () => {
 
   const router = useRouter();
   const [showNavbar, setShow] = useState<boolean>(false);
+  const [showNavbarMobile, setShowNavarMobile] = useState<boolean>(false);
   const [showModalCart, setShowModalCart] = useState<boolean>(false);
+  const [noResult, setNoResult] = useState<boolean>(false);
 
-  const [currentNav, setCurrentNav] = useState([initItemDesktop]);
+  const [currentNav, setCurrentNav] = useState([initDataNavbar]);
   const [typeShow, setTypeShow] = useState<"next" | "prev" | null>(null);
+
+  const [listSearch, setListSearch] = useState<IProductHome[]>([]);
+  const [searchText, setSearch] = useState<string | null>(null);
+  const debouce = useDebounce(searchText, 1000);
+
+  const onClearSearchText = useCallback(() => {
+    setSearch(null);
+  }, [searchText]);
+
+  const onChangeValue = useCallback(
+    (value: string) => {
+      if (noResult) {
+        setNoResult(false);
+      }
+
+      setSearch(value);
+    },
+    [searchText, noResult]
+  );
 
   const handleShowModal = (): void => {
     if (showNavbar) {
-      setCurrentNav([initItemDesktop]);
+      setCurrentNav([initDataNavbar]);
     }
     setShow(!showNavbar);
   };
@@ -51,6 +79,22 @@ const Navbar: FC = () => {
     const newCurrentMenu = currentNav.splice(0, currentNav.length - 1);
     setCurrentNav(newCurrentMenu);
     setTypeShow("prev");
+  };
+
+  const handelSearch = async () => {
+    try {
+      const response = await searchProductsMenu(searchText as string, 8);
+
+      if (response.status === 200) {
+        if (response.payload.length === 0) {
+          setNoResult(true);
+        }
+
+        setListSearch(response.payload);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -70,6 +114,12 @@ const Navbar: FC = () => {
     };
   }, [router.pathname, typeShow]);
 
+  useEffect(() => {
+    if (searchText) {
+      handelSearch();
+    }
+  }, [debouce]);
+
   return (
     <header className="sticky top-0 left-0 right-0 z-30">
       <nav
@@ -81,15 +131,38 @@ const Navbar: FC = () => {
             onClick={handleShowModal}
           />
           <Link href="/" className="lg:w-[200px] md:w-[160px] w-[100px]">
-            <img src={LOGO} alt="Logo" title="Logo" className="w-100" width="auto" height="auto" loading="lazy" />
+            <img
+              src={LOGO}
+              alt="Logo"
+              title="Logo"
+              className="w-100"
+              width="auto"
+              height="auto"
+              loading="lazy"
+            />
           </Link>
         </div>
 
-        <div className="lg:w-6/12 w-5/12">
-          <Search />
+        <div className="lg:w-6/12 w-5/12 sm:block hidden">
+          <Search
+            searchText={searchText}
+            onChange={onChangeValue}
+            onClearText={onClearSearchText}
+            listItem={listSearch}
+            noResult={noResult}
+          />
         </div>
 
         <div className="flex items-center justify-end w-3/12 md:gap-4 gap-3">
+          <div>
+            {!showNavbarMobile && (
+              <AiOutlineSearch
+                onClick={() => setShowNavarMobile(!showNavbarMobile)}
+                className="sm:hidden block md:text-2xl text-xl cursor-pointer"
+              />
+            )}
+          </div>
+
           <div
             className="relative cursor-pointer"
             onClick={() => setShowModalCart(true)}
@@ -99,7 +172,7 @@ const Navbar: FC = () => {
               {totalCart < 100 ? totalCart : "99"}
             </span>
           </div>
-          <button className="px-3 py-1 rounded-md bg-primary text-white text-lg">
+          <button className="px-3 py-1 rounded-md bg-primary text-white lg:text-lg text-base">
             Login
           </button>
         </div>
@@ -171,7 +244,7 @@ const Navbar: FC = () => {
 
       {/* navbar content on PC */}
       <ul className="xl:flex hidden w-full items-center justify-center bg-white border px-5 py-5 shadow-md gap-6">
-        {initItemDesktop.map((item: INavItem, index: number) => (
+        {initDataNavbar.map((item: INavItem, index: number) => (
           <li key={index} className={`${styles.navbarItem}`}>
             {item.path ? (
               <Link
@@ -310,6 +383,25 @@ const Navbar: FC = () => {
           </li>
         ))}
       </ul>
+
+      {/* Search on Mobile */}
+      <div
+        className={`w-full sm:hidden flex items-center ${
+          showNavbarMobile ? "px-5 py-2" : "h-0 p-0 overflow-hidden"
+        } bg-white border shadow-mdtransition-all ease-linear duration-100 gap-2`}
+      >
+        <Search
+          searchText={searchText}
+          onChange={onChangeValue}
+          onClearText={onClearSearchText}
+          listItem={listSearch}
+          noResult={noResult}
+        />
+        <IoMdCloseCircleOutline
+          onClick={() => setShowNavarMobile(!showNavbarMobile)}
+          className="text-2xl cursor-pointer"
+        />
+      </div>
 
       {/* modal cart */}
       <div

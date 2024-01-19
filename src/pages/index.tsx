@@ -4,15 +4,16 @@ import { Navigation, Pagination, EffectFade, Autoplay } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 // Interface
-import { ProductItem } from "~/components/Product/Item";
 import { IDataCategory, IProductHome, NextPageWithLayout } from "~/interfaces";
 import Brands from "~/components/Brands";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import Seo from "~/components/Seo";
 import { useCategoriesAll } from "~/hooks/useCategories";
 import { useProducts } from "~/hooks/useProducts";
-import { CategoryItem, CategoryLoading } from "~/components/Category";
-import { ProductLoading } from "~/components/Product";
+import CategoryItem from "~/components/Category/Item";
+import CategoryLoading from "~/components/Category/Loading";
+import ProductLoading from "~/components/Product/Loading";
+import ProductItem from "~/components/Product/Item";
 
 const Layout = DefaultLayout;
 
@@ -245,7 +246,7 @@ const Home: NextPageWithLayout = () => {
 
             {loadingProducts &&
               [...new Array(5)].map((item, index: number) => (
-                <ProductLoading key={index}/>
+                <ProductLoading key={index} />
               ))}
           </div>
         </div>

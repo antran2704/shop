@@ -1,105 +1,97 @@
 import Link from "next/link";
-import { Fragment, useRef, useState } from "react";
+import { ChangeEvent, Fragment, useRef, useState, memo } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
+import { IProductHome } from "~/interfaces";
+import { IoMdClose } from "react-icons/io";
 
-const Search = () => {
+interface Props {
+  placeholder?: string;
+  searchText: string | null;
+  listItem: IProductHome[];
+  noResult: boolean;
+  onClearText: () => void;
+  onChange: (value: string) => void;
+}
+
+const Search = (props: Props) => {
+  const {
+    searchText,
+    placeholder = "Search....",
+    listItem,
+    noResult = false,
+    onChange,
+    onClearText
+  } = props;
+
   const searchRef = useRef<HTMLDivElement>(null);
   const inpSearchRef = useRef<HTMLInputElement>(null);
-
   const [showSearch, setShowSearch] = useState<boolean>(false);
+
+  const onChangeValue = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    onChange(value);
+  };
 
   return (
     <Fragment>
       <div
         ref={searchRef}
-        className={`relative sm:flex hidden items-center justify-end w-full px-1 py-1 bg-white border  rounded-md transition-all ease-linear duration-100 z-30`}
+        className={`relative flex items-center justify-end w-full h-10 px-1 py-1 pl-2 bg-white border  rounded-md transition-all ease-linear duration-100 z-30`}
       >
+        <div className="min-w-6">
+          <AiOutlineSearch className="sm:text-2xl text-xl w-full cursor-pointer" />
+        </div>
         <input
           ref={inpSearchRef}
           type="text"
+          value={searchText || ""}
+          onChange={onChangeValue}
           onFocus={() => {
             searchRef.current?.classList.add("border-dark");
             setShowSearch(true);
           }}
           onBlur={() => searchRef.current?.classList.remove("border-dark")}
-          placeholder="Search Product"
+          placeholder={placeholder}
           className={`w-full px-2 outline-none transition-all ease-linear duration-100`}
         />
-        <AiOutlineSearch className="lg:text-3xl md:text-2xl text-xl cursor-pointer" />
+        {searchText && (
+          <div onClick={onClearText} className="min-w-6">
+            <IoMdClose className="text-xl w-full cursor-pointer" />
+          </div>
+        )}
 
-        {/* {showSearch && ( */}
         <div
           className={`absolute ${
             showSearch ? "block" : "hidden"
-          } top-[110%] left-0 right-0 bg-white border-2 rounded-md shadow-lg`}
+          } top-[110%] left-0 right-0 bg-white overflow-hidden rounded-md shadow-lg`}
         >
-          {/* <div className="flex flex-col items-center justify-center py-5 gap-2">
-              <img
+          {noResult && listItem.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-1 gap-2">
+              {/* <img
                 src="/no_result.svg"
                 alt="No Result"
                 className="w-[160px] h-[160px]"
-              />
+              /> */}
 
               <p className="text-base font-medium">No Result</p>
-            </div> */}
-          <ul className="w-full">
-            <li>
-              <Link
-                href={"/s"}
-                className="flex items-center text-base hover:bg-[#e5e5e5] py-2 px-3 transition-all ease-linear duration-75 gap-2"
-              >
-                <AiOutlineSearch className="text-lg" />
-                test
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={"/"}
-                className="flex items-center text-base hover:bg-[#e5e5e5] py-2 px-3 transition-all ease-linear duration-75 gap-2"
-              >
-                <AiOutlineSearch className="text-lg" />
-                test
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={"/"}
-                className="flex items-center text-base hover:bg-[#e5e5e5] py-2 px-3 transition-all ease-linear duration-75 gap-2"
-              >
-                <AiOutlineSearch className="text-lg" />
-                test
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={"/"}
-                className="flex items-center text-base hover:bg-[#e5e5e5] py-2 px-3 transition-all ease-linear duration-75 gap-2"
-              >
-                <AiOutlineSearch className="text-lg" />
-                test
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={"/"}
-                className="flex items-center text-base hover:bg-[#e5e5e5] py-2 px-3 transition-all ease-linear duration-75 gap-2"
-              >
-                <AiOutlineSearch className="text-lg" />
-                test
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={"/"}
-                className="flex items-center text-base hover:bg-[#e5e5e5] py-2 px-3 transition-all ease-linear duration-75 gap-2"
-              >
-                <AiOutlineSearch className="text-lg" />
-                test
-              </Link>
-            </li>
-          </ul>
+            </div>
+          )}
+          {!noResult && listItem.length > 0 && (
+            <ul className="w-full">
+              {listItem.map((item: IProductHome) => (
+                <li key={item._id}>
+                  <Link
+                    href={"/s"}
+                    className="flex items-center text-base hover:bg-[#e5e5e5] py-2 px-3 transition-all ease-linear duration-75 gap-2"
+                  >
+                    <AiOutlineSearch className="text-lg" />
+                    {item.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-        {/* )} */}
       </div>
       {showSearch && (
         <div
@@ -112,4 +104,4 @@ const Search = () => {
   );
 };
 
-export default Search;
+export default memo(Search);
