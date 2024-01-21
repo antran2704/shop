@@ -18,7 +18,7 @@ interface IDataCategory {
   childrens?: string[];
   title: string;
   description: string;
-  slug?: string | null;
+  slug: string | null;
   meta_title?: string;
   meta_description?: string;
   public: boolean;

@@ -37,7 +37,7 @@ const ImageCus = (props: Props) => {
   
   useEffect(() => {
     loadImage(src as string);
-  }, []);
+  }, [src]);
 
   return (
     <Fragment>

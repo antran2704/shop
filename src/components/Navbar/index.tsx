@@ -23,11 +23,13 @@ import { searchProductsMenu } from "~/api-client/search";
 
 import useDebounce from "~/hooks/useDebounce";
 
+import LayoutClose from "~/components/Layout/LayoutClose";
 import Search from "~/components/Search";
 import ImageCus from "~/components/Image";
 import { LOGO } from "~/configs/images";
 
 import styles from "./Navbar.module.scss";
+import AuthNavbar from "../Auth";
 
 const Navbar: FC = () => {
   const dispatch = useDispatch();
@@ -175,16 +177,13 @@ const Navbar: FC = () => {
           <button className="px-3 py-1 rounded-md bg-primary text-white lg:text-lg text-base">
             Login
           </button>
+          {/* <div>
+            <AuthNavbar />
+          </div> */}
         </div>
 
         {/* layout close modal */}
-        {showNavbar && (
-          <div
-            className={`xl:hidden block fixed top-0 bottom-0 left-0 right-0 z-30`}
-            style={{ backgroundColor: "rgba(1,1,1, 0.6)" }}
-            onClick={handleShowModal}
-          ></div>
-        )}
+        {showNavbar && <LayoutClose handleClose={handleShowModal} />}
       </nav>
 
       {/* navbar Tablet & Mobile */}

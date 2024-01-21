@@ -20,7 +20,6 @@ const Layout = DefaultLayout;
 const Home: NextPageWithLayout = () => {
   const { categories, loadingCategories } = useCategoriesAll();
   const { products, loadingProducts } = useProducts(1);
-
   return (
     <div>
       <Seo

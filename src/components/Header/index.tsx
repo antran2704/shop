@@ -16,7 +16,7 @@ const Header = (props: Props) => {
       }}
     >
       <div className="container__cus w-full px-5">
-        <h1 className="sm:block hidden lg:text-4xl md:text-2xl text-xl font-medium mb-2">
+        <h1 className="sm:block hidden lg:text-4xl md:text-2xl text-xl font-medium mb-2 capitalize">
           {title}
         </h1>
         <div className="flex flex-wrap items-center text-lg gap-2">
@@ -24,12 +24,21 @@ const Header = (props: Props) => {
             if (breadcrumbs.length - 1 !== index) {
               return (
                 <div className="flex items-center gap-2" key={index}>
-                  <Link href={`${item.url_path}`}>{item.label}</Link>
+                  <Link
+                    href={`${item.url_path}`}
+                    className="hover:text-primary capitalize"
+                  >
+                    {item.label}
+                  </Link>
                   <span>|</span>
                 </div>
               );
             } else {
-              return <span className="text-primary" key={index}>{item.label}</span>;
+              return (
+                <span className="text-primary capitalize" key={index}>
+                  {item.label}
+                </span>
+              );
             }
           })}
         </div>

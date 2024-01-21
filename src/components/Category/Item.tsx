@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import { IDataCategory } from "~/interfaces";
 import ImageCus from "../Image";
 import { memo } from "react";
@@ -12,7 +13,7 @@ const CategoryItem = (props: Props) => {
 
   return (
     <Link
-      href={`/collections/${data._id}`}
+      href={`/collections/${data.slug}.${data._id}`}
       className="flex flex-col items-center justify-center text-[#1e1e1e] hover:text-primary"
     >
       <ImageCus
