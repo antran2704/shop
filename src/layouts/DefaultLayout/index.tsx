@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import Footer from "~/components/Footer";
 import Navbar from "~/components/Navbar";
+import ScrollToTop from "~/components/ScrollToTop";
 import { GetListCart } from "~/store/actions";
 
 interface Props {
@@ -51,6 +52,7 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
         </div>
       </section>
       <Footer />
+      <ScrollToTop />
       <ToastContainer
         autoClose={5000}
         pauseOnFocusLoss={false}

@@ -38,8 +38,21 @@
 }
 
 body {
+  overflow-y: overlay;
   overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  overflow: overlay;
+}
+
+body::-webkit-scrollbar {
+  background-color: transparent;
+  width: 6px;
+  height: 2px;
+  overflow: overlay;
 }
 
 .container__cus {

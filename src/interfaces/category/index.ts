@@ -15,7 +15,7 @@ interface IParentCategory {
 interface IDataCategory {
   _id: string;
   parent_id: IParentCategory | string | null;
-  childrens?: string[];
+  childrens: Partial<IDataCategory>[];
   title: string;
   description: string;
   slug: string | null;

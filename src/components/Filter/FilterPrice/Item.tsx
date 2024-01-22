@@ -7,7 +7,7 @@ interface Props {
   data: IVariant;
 }
 
-const FilterItem: FC<Props> = (props: Props) => {
+const FilterPriceItem: FC<Props> = (props: Props) => {
   const { data, name } = props;
 
   const router = useRouter();
@@ -23,16 +23,11 @@ const FilterItem: FC<Props> = (props: Props) => {
       return true;
     }
 
-    if (typeof query[name.toLowerCase()] === "object") {
-      return (query[name.toLowerCase()] as string[]).some((value: string) => {
-        return value === item;
-      });
-    }
     return false;
   };
   useEffect(() => {
     if (router.isReady && inpRef.current) {
-      const isChecked = handleChecked(data.name);
+      const isChecked = handleChecked(data.value);
       inpRef.current.checked = isChecked;
     }
   }, [query]);
@@ -41,9 +36,9 @@ const FilterItem: FC<Props> = (props: Props) => {
     <li className="flex items-start gap-2">
       <input
         ref={inpRef}
-        type="checkbox"
+        type="radio"
         name={name.toLowerCase()}
-        value={data.name}
+        value={data.value}
         className="min-w-5 w-5 h-5 rounded-md"
       />
       <p className="text-sm capitalize">{data.name}</p>
@@ -51,4 +46,4 @@ const FilterItem: FC<Props> = (props: Props) => {
   );
 };
 
-export default memo(FilterItem);
+export default memo(FilterPriceItem);

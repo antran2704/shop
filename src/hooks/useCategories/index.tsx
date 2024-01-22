@@ -109,7 +109,7 @@ const useCategory = (
     }
   );
   return {
-    category: data.payload as IDataCategory,
+    category: data.payload || null as (IDataCategory | null),
     loadingCategory: isLoading,
     mutate,
   };

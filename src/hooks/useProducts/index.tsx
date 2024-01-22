@@ -64,14 +64,13 @@ const useProductsInCategory = (
   options?: Partial<SWRConfiguration>
 ) => {
   const { data, isLoading, mutate, error } = useSWR(
-    isReady ? [PRODUCT_KEY.PRODUCTS_PAGE, page, category_id, filter] : null,
+    isReady ? [PRODUCT_KEY.PRODUCTS_PAGE, category_id, filter, page] : null,
     () => fetcherProductsInCategory(category_id, filter, page),
     {
       ...options,
       revalidateOnFocus: false,
       dedupingInterval: REFESH_TIME,
       fallbackData: { payload: [], pagination: initPagination },
-      
     }
   );
 
