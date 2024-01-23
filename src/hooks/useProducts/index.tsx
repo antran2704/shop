@@ -63,7 +63,12 @@ const useProductsInCategory = (
   page: number = 1,
   options?: Partial<SWRConfiguration>
 ) => {
-  const { data, isLoading, mutate, error } = useSWR(
+  const {
+    data,
+    isLoading = true,
+    mutate,
+    error,
+  } = useSWR(
     isReady ? [PRODUCT_KEY.PRODUCTS_PAGE, category_id, filter, page] : null,
     () => fetcherProductsInCategory(category_id, filter, page),
     {

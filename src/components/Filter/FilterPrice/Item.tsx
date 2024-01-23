@@ -25,6 +25,14 @@ const FilterPriceItem: FC<Props> = (props: Props) => {
 
     return false;
   };
+
+  const onClick = () => {
+    if (router.isReady && inpRef.current) {
+      const isChecked = inpRef.current.checked;
+      inpRef.current.checked = !isChecked;
+    }
+  };
+
   useEffect(() => {
     if (router.isReady && inpRef.current) {
       const isChecked = handleChecked(data.value);
@@ -33,15 +41,19 @@ const FilterPriceItem: FC<Props> = (props: Props) => {
   }, [query]);
 
   return (
-    <li className="flex items-start gap-2">
+    <li className="flex items-center cursor-pointer gap-2">
       <input
         ref={inpRef}
+        id={data.value}
         type="radio"
         name={name.toLowerCase()}
         value={data.value}
-        className="min-w-5 w-5 h-5 rounded-md"
+        className="min-w-3 w-3 h-3 rounded-md"
       />
-      <p className="text-sm capitalize">{data.name}</p>
+
+      <p className="text-xs capitalizez" onClick={onClick}>
+        {data.name}
+      </p>
     </li>
   );
 };

@@ -4,6 +4,7 @@ import {
   getAllCategories,
   getCategories,
   getCategory,
+  getParentCategories,
 } from "~/api-client";
 import { initPagination } from "~/data";
 import { IDataCategory, IQueryParam } from "~/interfaces";
@@ -16,6 +17,18 @@ const selects: IQueryParam<Partial<IDataCategory>> = {};
 const fetcherCategoriesAll = async () => {
   try {
     const res = await getAllCategories(selects);
+
+    if (res.status === 200) {
+      return res;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const fetcherParentCategories = async (select?: IQueryParam<Partial<IDataCategory>>) => {
+  try {
+    const res = await getParentCategories(select);
 
     if (res.status === 200) {
       return res;
@@ -92,6 +105,25 @@ const useCategoriesAll = (options?: Partial<SWRConfiguration>) => {
   };
 };
 
+const useParentCategories = (select?: IQueryParam<Partial<IDataCategory>>, options?: Partial<SWRConfiguration>) => {
+  const { data, isLoading, mutate } = useSWR(
+    [CATEGORY_KEY.CATEGORIES_PARENT],
+    () => fetcherParentCategories(select),
+    {
+      ...options,
+      revalidateOnFocus: false,
+      dedupingInterval: REFESH_TIME,
+      keepPreviousData: true,
+      fallbackData: { payload: [], pagination: initPagination },
+    }
+  );
+  return {
+    categories: data.payload,
+    loadingCategories: isLoading,
+    mutate,
+  };
+};
+
 const useCategory = (
   isReady: boolean,
   category_id: string,
@@ -115,4 +147,4 @@ const useCategory = (
   };
 };
 
-export { useCategoriesAll, useCategories, useCategory };
+export { useCategoriesAll, useCategories, useParentCategories, useCategory };

@@ -7,6 +7,7 @@ const CATEGORY_KEY = {
   CATEGORIES_PAGE: "categories_page",
   CATEGORY_ID: "category_id",
   CATEGORIES_ALL: "categories_all",
+  CATEGORIES_PARENT: "categories_parent",
 };
 
 const getCategories = async (page: number = 1) => {
@@ -17,8 +18,9 @@ const getCategory = async (category_id: string) => {
   return await AxiosGet(`/categories/id/${category_id}`);
 };
 
-const getParentCategories = async () => {
-  return await AxiosGet("categories/parent");
+const getParentCategories = async (select?: IQueryParam<Partial<IDataCategory>>) => {
+  const parseQuery = qs.stringify(select);
+  return await AxiosGet(`categories/parent?${parseQuery}`);
 };
 
 const getAllCategories = async (

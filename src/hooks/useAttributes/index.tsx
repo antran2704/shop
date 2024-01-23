@@ -8,7 +8,7 @@ const handleGetAttributes = async () => {
   try {
     const res = await getAttributes();
     if (res.status === 200) {
-      return res.payload;
+      return res;
     }
   } catch (error) {
     console.log(error);
@@ -16,18 +16,18 @@ const handleGetAttributes = async () => {
 };
 
 const useGetAttributes = (options?: Partial<SWRConfiguration>) => {
-  const { data: attributes, isLoading: attributeLoading } = useSWR(
+  const { data, isLoading } = useSWR(
     ATTRIBUTE_KEY.ATTRIBUTE_ALL,
     () => handleGetAttributes(),
     {
       ...options,
       revalidateOnFocus: false,
       dedupingInterval: REFESH_TIME,
-      fallbackData: [],
+      fallbackData: { payload: [] },
     }
   );
 
-  return { attributes, attributeLoading };
+  return { attributes: data.payload, loadingAttributes: isLoading };
 };
 
 export default useGetAttributes;

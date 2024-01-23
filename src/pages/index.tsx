@@ -1,19 +1,18 @@
 import Link from "next/link";
-import { ReactElement, useEffect } from "react";
+import { ReactElement } from "react";
 import { Navigation, Pagination, EffectFade, Autoplay } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 // Interface
-import { IDataCategory, IProductHome, NextPageWithLayout } from "~/interfaces";
+import { IProductHome, NextPageWithLayout } from "~/interfaces";
 import Brands from "~/components/Brands";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import Seo from "~/components/Seo";
 import { useCategoriesAll } from "~/hooks/useCategories";
 import { useProducts } from "~/hooks/useProducts";
-import CategoryItem from "~/components/Category/Item";
-import CategoryLoading from "~/components/Category/Loading";
 import ProductLoading from "~/components/Product/Loading";
 import ProductItem from "~/components/Product/Item";
+import ListParentCategories from "~/components/Category/List";
 
 const Layout = DefaultLayout;
 
@@ -105,38 +104,7 @@ const Home: NextPageWithLayout = () => {
             <h3 className="text-xl font-medium text-[#1e1e1e]">Danh mục</h3>
           </div>
           <div className="p-5 border-2 rounded-md">
-            <Swiper
-              modules={[Navigation]}
-              cssMode={true}
-              slidesPerView={2}
-              spaceBetween={20}
-              navigation={true}
-              breakpoints={{
-                478: {
-                  slidesPerView: 3,
-                },
-                650: {
-                  slidesPerView: 4,
-                },
-                990: {
-                  slidesPerView: 6,
-                },
-              }}
-            >
-              {!loadingCategories &&
-                categories.map((category: IDataCategory) => (
-                  <SwiperSlide key={category._id}>
-                    <CategoryItem data={category} />
-                  </SwiperSlide>
-                ))}
-
-              {loadingCategories &&
-                [...new Array(6)].map((item, index: number) => (
-                  <SwiperSlide key={index}>
-                    <CategoryLoading />
-                  </SwiperSlide>
-                ))}
-            </Swiper>
+            <ListParentCategories />
           </div>
         </div>
       </section>
