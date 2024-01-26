@@ -2,14 +2,13 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import {
   useRef,
-  FC,
   useEffect,
   useState,
-  MouseEvent,
   Fragment,
   useMemo,
+  ReactElement,
 } from "react";
-// gallery
+
 import LightGallery from "lightgallery/react";
 import lgThumbnail from "lightgallery/plugins/thumbnail";
 import lgZoom from "lightgallery/plugins/zoom";
@@ -20,11 +19,7 @@ import {
   AiOutlineClose,
   AiFillCheckCircle,
 } from "react-icons/ai";
-import {
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-  MdOutlineZoomOutMap,
-} from "react-icons/md";
+import { MdOutlineZoomOutMap } from "react-icons/md";
 
 import Header from "~/components/Header";
 import ImageCus from "~/components/Image";
@@ -35,14 +30,21 @@ import {
   IDataCategory,
   IOptionProduct,
   IProductData,
+  ISpecificationAttributes,
+  ISpecificationsProduct,
   IValueOption,
   IVariantProduct,
+  NextPageWithLayout,
 } from "~/interfaces";
 import { GetStaticProps } from "next";
 import {
   formatBigNumber,
   getPercentPromotionPrice,
 } from "~/helpers/number/fomatterCurrency";
+import DefaultLayout from "~/layouts/DefaultLayout";
+import ShowMore from "~/components/ShowMore";
+import ListProducts from "~/components/Product/List";
+import { useProductsInCategory } from "~/hooks/useProducts";
 
 interface Props {
   product: IProductData;
@@ -52,21 +54,23 @@ interface ISelectOption {
   [x: string]: string;
 }
 
-const tags: string[] = ["Description", "Reviews", "Shipping Policy"];
+const Layout = DefaultLayout;
 
-const CollectionItem: FC<Props> = (props: Props) => {
+const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
   const { product } = props;
   const router = useRouter();
-  // console.log(product);
 
-  const firstRef = useRef<HTMLButtonElement>(null);
-  const lineRef = useRef<HTMLSpanElement>(null);
+  const { products, loadingProducts } = useProductsInCategory(
+    !!product,
+    product.category._id,
+    null
+  );
+  // console.log(product);
 
   const [totalProduct, setTotalProduct] = useState<number>(1);
   const [inventory, setInventory] = useState<number>(0);
 
   const [currentImage, setCurrentImage] = useState<string>("");
-  const [currentTag, setCurrentTag] = useState<string>("");
   const [message, setMessage] = useState<string | null>(null);
 
   const [variations, setVariations] = useState<IVariantProduct[]>([]);
@@ -107,23 +111,14 @@ const CollectionItem: FC<Props> = (props: Props) => {
     setCurrentImage(image);
   };
 
-  const handleChangeLine = (e: MouseEvent<HTMLButtonElement>): void => {
-    const width = e.currentTarget.clientWidth;
-    const offSetLeft = e.currentTarget.offsetLeft;
-    const lineEl = lineRef.current;
-    if (lineEl) {
-      lineEl.style.width = width + "px";
-      lineEl.style.left = offSetLeft + "px";
-      setCurrentTag(e.currentTarget.name);
-    }
-  };
-
   const handleGetVariation = () => {
     const keys = Object.keys(selectOption);
     const values = Object.values(selectOption);
 
     if (keys.length < product.options.length) {
       setVariation(null);
+      setTotalProduct(1);
+      setInventory(product.inventory);
       return;
     }
 
@@ -152,7 +147,6 @@ const CollectionItem: FC<Props> = (props: Props) => {
       if (res.status === 200) {
         setVariations(res.payload);
       }
-      console.log(res);
     } catch (error) {
       console.log(error);
     }
@@ -210,7 +204,7 @@ const CollectionItem: FC<Props> = (props: Props) => {
     if (product && product._id) {
       setCurrentImage(product.gallery[0]);
       handleGetVariations(product._id);
-      setInventory(product.inventory)
+      setInventory(product.inventory);
     }
   }, []);
 
@@ -224,18 +218,6 @@ const CollectionItem: FC<Props> = (props: Props) => {
     return <h1>Loading....</h1>;
   }
 
-  // useEffect(() => {
-  //   const lineEl = lineRef.current;
-  //   const firstEl = firstRef.current;
-  //   if (lineEl && firstEl) {
-  //     const width = firstEl.clientWidth;
-  //     const offSetLeft = firstEl.offsetLeft;
-  //     lineEl.style.width = width + "px";
-  //     lineEl.style.left = offSetLeft + "px";
-  //     setCurrentTag(firstEl.name);
-  //   }
-  // }, []);
-
   return (
     <div>
       <Header
@@ -248,568 +230,289 @@ const CollectionItem: FC<Props> = (props: Props) => {
       />
 
       <section className="container__cus">
-        <div className="flex lg:flex-nowrap flex-wrap items-start lg:justify-between justify-center my-14 lg:gap-5 gap-8">
-          <div className="relative lg:w-5/12 sm:w-10/12 w-full">
-            <div className="w-full sticky top-5">
-              <div className="w-full lg:h-[500px] h-[400px] rounded-md overflow-hidden">
-                <ImageCus
-                  title={product.title}
-                  alt={product.title}
-                  src={currentImage}
-                  className="w-full h-full"
-                />
-              </div>
-              <div>
-                {/* gallery image */}
-                <LightGallery
-                  elementClassNames="absolute top-0 left-4 flex items-center w-full mt-4 gap-2"
-                  speed={500}
-                  plugins={[lgThumbnail, lgZoom]}
-                >
-                  <a href={product.gallery[0]} className="w-1/4">
-                    <MdOutlineZoomOutMap className="text-2xl hover:text-primary" />
-                    <img
-                      className="w-full hidden"
-                      src={product.gallery[0]}
-                      alt="product image"
-                    />
-                  </a>
-                  {product.gallery
-                    .slice(1, product.gallery.length)
-                    .map((image: string, index: number) => (
-                      <a
-                        href={image}
-                        key={index}
-                        className="w-[100px] h-[100px] rounded-lg hidden"
-                      >
-                        <img
-                          className="w-full"
-                          src={image}
-                          alt="product image"
-                        />
-                      </a>
-                    ))}
-                </LightGallery>
-
-                <Swiper
-                  className="flex items-center w-full mt-4 gap-2"
-                  slidesPerView={3}
-                  spaceBetween={10}
-                  breakpoints={{
-                    800: {
-                      slidesPerView: 4,
-                    },
-                  }}
-                >
-                  {product.gallery.map((image: string, index: number) => (
-                    <SwiperSlide
-                      key={index}
-                      className="cursor-pointer"
-                      onClick={() => handleChangeImage(image)}
-                    >
-                      <ImageCus
-                        title={product.title}
-                        alt={product.title}
-                        src={image}
-                        className={`w-full lg:h-[100px] h-[120px] ${
-                          currentImage.includes(image)
-                            ? "border-primary"
-                            : "border-white"
-                        } border-2 rounded-lg`}
-                      />
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-              </div>
+        <div className="flex lg:flex-nowrap flex-wrap items-start lg:justify-between justify-center my-14 gap-10">
+          <div className="lg:sticky lg:top-32 lg:w-5/12 sm:w-10/12 w-full bg-white p-5 rounded-md select-none overflow-hidden">
+            <div className="w-full lg:h-[500px] h-[400px] rounded-md overflow-hidden">
+              <ImageCus
+                title={product.title}
+                alt={product.title}
+                src={currentImage}
+                className="w-full h-full"
+              />
             </div>
-          </div>
-          <div className="lg:w-6/12 w-full">
-            <div className="pb-5 mb-5 border-b border-borderColor">
-              {!variation && (
-                <h3 className="text-2xl font-medium">{product.title}</h3>
-              )}
-              {variation && (
-                <h3 className="text-2xl font-medium">{variation.title}</h3>
-              )}
-              {!variation && (
-                <div className="flex flex-wrap items-end my-3 gap-3">
-                  {product.promotion_price > 0 &&
-                  product.promotion_price < product.price ? (
-                    <Fragment>
-                      <h3 className="text-2xl font-medium text-[#6a7779] line-through">
-                        {formatBigNumber(product.price)}
-                      </h3>
-                      <h2 className="text-3xl font-medium">
-                        {formatBigNumber(product.promotion_price)}
-                      </h2>
-                      <span className="text-sm font-medium text-white px-2 py-0.5 bg-primary rounded-md">
-                        Save -
-                        {getPercentPromotionPrice(
-                          product.price,
-                          product.promotion_price
-                        )}
-                        %
-                      </span>
-                    </Fragment>
-                  ) : (
-                    <h2 className="text-3xl font-medium">
-                      {formatBigNumber(product.price)}
-                    </h2>
-                  )}
-                </div>
-              )}
-
-              {variation && (
-                <div className="flex flex-wrap items-end my-3 gap-3">
-                  {variation.promotion_price > 0 &&
-                  variation.promotion_price < variation.price ? (
-                    <Fragment>
-                      <h3 className="text-2xl font-medium text-[#6a7779] line-through">
-                        {formatBigNumber(variation.price)}
-                      </h3>
-                      <h2 className="text-3xl font-medium">
-                        {formatBigNumber(variation.promotion_price)}
-                      </h2>
-                      <span className="text-sm font-medium text-white px-2 py-0.5 bg-primary rounded-md">
-                        Save -
-                        {getPercentPromotionPrice(
-                          variation.price,
-                          variation.promotion_price
-                        )}
-                        %
-                      </span>
-                    </Fragment>
-                  ) : (
-                    <h2 className="text-3xl font-medium">
-                      {formatBigNumber(variation.price)}
-                    </h2>
-                  )}
-                </div>
-              )}
-              <p className="text-base text-[#071c1f]">
-                {product.shortDescription}
-              </p>
-            </div>
-            <div className="pb-5 mb-5 border-b border-borderColor">
-              <div className="flex items-center text-sm mb-5">
-                <span className="text-base font-medium min-w-[100px]">
-                  Sold:
-                </span>
-                {!variation && <p>{formatBigNumber(product.sold)}</p>}
-                {variation && <p>{formatBigNumber(variation.sold)}</p>}
-              </div>
-              <div className="flex items-center text-sm mb-5">
-                <span className="text-base font-medium min-w-[100px]">
-                  Brand:
-                </span>
-                Brand
-              </div>
-              <div className="flex items-center text-sm mb-5">
-                <span className="text-base font-medium min-w-[100px]">
-                  Inventory:
-                </span>
-                {!variation && <p>{formatBigNumber(product.inventory)}</p>}
-                {variation && <p>{formatBigNumber(variation.inventory)}</p>}
-              </div>
-            </div>
-            <div className="pb-5 mb-5 border-b border-borderColor">
-              {product._id &&
-                product.options.length > 0 &&
-                product.options.map((option: IOptionProduct) => (
-                  <div
-                    key={option._id}
-                    className="flex items-center mb-5 gap-5"
-                  >
-                    <span className="text-base font-medium min-w-[100px]">
-                      {option.name}:
-                    </span>
-                    <div className="flex flex-wrap items-center gap-2">
-                      {option.values.map((value: IValueOption) => (
-                        <button
-                          key={value._id}
-                          onClick={() =>
-                            onSelectOption(option.code, value.label)
-                          }
-                          className={`text-sm px-4 py-1 hover:text-white ${
-                            selectOption[option.code] === value.label
-                              ? "bg-primary text-white"
-                              : ""
-                          } hover:bg-primary border border-borderColor rounded-lg transition-all ease-linear duration-100 cursor-pointer`}
-                        >
-                          {value.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-
-              {message && <p className="text-base text-red-500">{message}</p>}
-            </div>
-            {product && (
-              <div className="pb-5 mb-5 border-b border-borderColor">
-                {inventory > 0 ? (
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="lg:w-3/12 w-6/12">
-                      <ProductQuantity
-                        total={totalProduct}
-                        max={inventory}
-                        setTotalProduct={setTotalProduct}
-                      />
-                    </div>
-                    <div className="lg:w-8/12 sm:flex-nowrap flex-wrap w-full flex items-center h-14 gap-3">
-                      <button className="sm:w-6/12 w-full h-full">
-                        <p
-                          className="flex items-center justify-center w-full h-full text-base font-medium text-white hover:text-dark bg-primary hover:bg-white px-4 gap-2 border border-primary hover:border-dark transition-all ease-linear duration-100"
-                          // onClick={hanldeAddCart}
-                        >
-                          <AiOutlineShoppingCart className="text-2xl" />
-                          Add to cart
-                        </p>
-                      </button>
-                      <button className="sm:w-6/12 w-full h-full">
-                        <p className="flex items-center justify-center w-full h-full text-base font-medium text-white bg-dark hover:bg-primary px-4 transition-all ease-linear duration-100 gap-2">
-                          Buy it now
-                        </p>
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-base font-medium text-primary">Sold out</p>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-      <section className="container__cus">
-        <div className="my-10">
-          <div
-            className={`product__tags relative flex items-center border-b-2 border-borderColor sm:overflow-x-visible overflow-x-scroll gap-10`}
-          >
-            {tags.map((tag: string, index: number) => (
-              <button
-                key={index}
-                ref={index === 0 ? firstRef : null}
-                name={tag}
-                className={`text-lg whitespace-nowrap font-medium ${
-                  tag === currentTag ? "text-primary" : ""
-                } py-3`}
-                onClick={handleChangeLine}
+            <div>
+              {/* gallery image */}
+              <LightGallery
+                elementClassNames="absolute top-4 left-8 flex items-center w-full mt-4 gap-2"
+                speed={500}
+                plugins={[lgThumbnail, lgZoom]}
               >
-                {tag}
-              </button>
-            ))}
+                <a href={product.gallery[0]} className="w-1/4">
+                  <MdOutlineZoomOutMap className="text-2xl hover:text-primary" />
+                  <img
+                    className="w-full hidden"
+                    src={product.gallery[0]}
+                    alt="product image"
+                  />
+                </a>
+                {product.gallery
+                  .slice(1, product.gallery.length)
+                  .map((image: string, index: number) => (
+                    <a
+                      href={image}
+                      key={index}
+                      className="w-[100px] h-[100px] rounded-lg hidden"
+                    >
+                      <img className="w-full" src={image} alt="product image" />
+                    </a>
+                  ))}
+              </LightGallery>
 
-            <span
-              ref={lineRef}
-              className="absolute h-0.5 bg-primary -bottom-0.5 left-0 transition-all ease-linear duration-200"
-            ></span>
+              <Swiper
+                className="flex items-center w-full mt-4 gap-2"
+                modules={[Navigation]}
+                navigation={true}
+                slidesPerView={3}
+                spaceBetween={10}
+                breakpoints={{
+                  800: {
+                    slidesPerView: 4,
+                  },
+                }}
+              >
+                {product.gallery.map((image: string, index: number) => (
+                  <SwiperSlide
+                    key={index}
+                    className="cursor-pointer"
+                    onClick={() => handleChangeImage(image)}
+                  >
+                    <ImageCus
+                      title={product.title}
+                      alt={product.title}
+                      src={image}
+                      className={`w-full lg:h-[100px] h-[120px] ${
+                        currentImage.includes(image)
+                          ? "border-primary"
+                          : "border-white"
+                      } border-2 rounded-lg`}
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
           </div>
-          <div className="mt-10">
-            {currentTag === "Description" && (
-              <div>
-                <p className="text-lg mb-5">{product.description}</p>
-              </div>
-            )}
+          <div className="lg:w-7/12 w-full flex flex-col gap-5">
+            <div className="w-full bg-white p-5 rounded-md">
+              <div className="pb-5 mb-5 border-b border-borderColor">
+                <h3 className="lg:text-2xl md:text-xl text-lg text-lg font-medium">
+                  {!variation ? product.title : variation.title}
+                </h3>
 
-            {/* Reviews */}
-            {currentTag === "Reviews" && (
-              <div className="p-6 border border-borderColor rounded">
-                <h2 className="text-2xl font-medium">Customer Reviews</h2>
-                <p className="text-base mt-5">No reviews yet</p>
-              </div>
-            )}
+                {!variation && (
+                  <div className="flex flex-wrap items-end my-3 gap-3">
+                    {product.promotion_price > 0 &&
+                    product.promotion_price < product.price ? (
+                      <Fragment>
+                        <h3 className="lg:text-2xl md:text-xl text-lg font-medium text-[#6a7779] line-through">
+                          {formatBigNumber(product.price)}
+                        </h3>
+                        <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
+                          {formatBigNumber(product.promotion_price)}
+                        </h2>
+                        <span className="md:text-sm text-xs font-medium text-white px-2 py-0.5 bg-primary rounded-md">
+                          Save -
+                          {getPercentPromotionPrice(
+                            product.price,
+                            product.promotion_price
+                          )}
+                          %
+                        </span>
+                      </Fragment>
+                    ) : (
+                      <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
+                        {formatBigNumber(product.price)}
+                      </h2>
+                    )}
+                  </div>
+                )}
 
-            {/* Shipping Policy */}
-            {currentTag === "Shipping Policy" && (
-              <div className="flex flex-col items-start gap-10">
-                <div className="flex flex-col items-start gap-4">
-                  <h3 className="text-2xl font-medium">Shipping policy</h3>
-                  <p className="text-lg italic font-medium">
-                    It's important to start by clarifying to customers that your
-                    order processing times are separate from the shipping times
-                    they see at checkout.
-                  </p>
-                  <p className="text-lg">
-                    All orders are processed within X to X business days
-                    (excluding weekends and holidays) after receiving your order
-                    confirmation email. You will receive another notification
-                    when your order has shipped.
-                  </p>
-                  <p className="text-lg italic font-medium">
-                    Include any other pertinent information towards the
-                    beginning, such as potential delays due to a high volume of
-                    orders or postal service problems that are outside of your
-                    control.
-                  </p>
+                {variation && (
+                  <div className="flex flex-wrap items-end my-3 gap-3">
+                    {variation.promotion_price > 0 &&
+                    variation.promotion_price < variation.price ? (
+                      <Fragment>
+                        <h3 className="lg:text-2xl md:text-xl text-lg font-medium text-[#6a7779] line-through">
+                          {formatBigNumber(variation.price)}
+                        </h3>
+                        <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
+                          {formatBigNumber(variation.promotion_price)}
+                        </h2>
+                        <span className="md:text-sm text-xs font-medium text-white px-2 py-0.5 bg-primary rounded-md">
+                          Save -
+                          {getPercentPromotionPrice(
+                            variation.price,
+                            variation.promotion_price
+                          )}
+                          %
+                        </span>
+                      </Fragment>
+                    ) : (
+                      <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
+                        {formatBigNumber(variation.price)}
+                      </h2>
+                    )}
+                  </div>
+                )}
+                <p className="md:text-base text-sm text-[#071c1f]">
+                  {product.shortDescription}
+                </p>
+              </div>
+              <div className="pb-5 mb-5 border-b border-borderColor">
+                <div className="flex items-center text-sm mb-5">
+                  <span className="md:text-base text-sm font-medium min-w-[100px]">
+                    Sold:
+                  </span>
+                  {!variation && <p>{formatBigNumber(product.sold)}</p>}
+                  {variation && <p>{formatBigNumber(variation.sold)}</p>}
                 </div>
-                <div className="flex flex-col items-start gap-4">
-                  <h3 className="text-2xl font-medium">Local delivery</h3>
-                  <p className="text-lg italic font-medium">
-                    If you offer local delivery or in-store pickup to customers
-                    in your area, you can dedicate a section of your shipping
-                    policy page to explain the process or create a separate
-                    shipping page specifically for local customers.
-                  </p>
-                  <p className="text-lg">
-                    Free local delivery is available for orders over $X within
-                    [area of coverage]. For orders under $X, we charge $X for
-                    local delivery.
-                  </p>
-                  <p className="text-lg">
-                    Deliveries are made from [delivery hours] on [available
-                    days]. We will contact you via text message with the phone
-                    number you provided at checkout to notify you on the day of
-                    our arrival.
-                  </p>
-                  <p className="text-lg italic font-medium">
-                    You can list out the ZIP/postal codes you service and/or
-                    consider embedding a map here so customers can easily see if
-                    they are within your local delivery range.
-                  </p>
+                <div className="flex items-center text-sm mb-5">
+                  <span className="md:text-base text-sm font-medium min-w-[100px]">
+                    Brand:
+                  </span>
+                  Brand
                 </div>
-                <div className="flex flex-col items-start gap-4">
-                  <h3 className="text-2xl font-medium">In-store pickup</h3>
-                  <p className="text-lg">
-                    You can skip the shipping fees with free local pickup at
-                    [list the locations where in-store pickup is available].
-                    After placing your order and selecting local pickup at
-                    checkout, your order will be prepared and ready for pick up
-                    within X to X business days. We will send you an email when
-                    your order is ready along with instructions.
-                  </p>
-                  <p className="text-lg">
-                    Our in-store pickup hours are [store hours] on [available
-                    days of the week]. Please have your order confirmation email
-                    with you when you come.
+                <div className="flex items-center text-sm mb-5">
+                  <span className="md:text-base text-sm font-medium min-w-[100px]">
+                    Inventory:
+                  </span>
+                  <p>
+                    {!variation
+                      ? formatBigNumber(product.inventory)
+                      : formatBigNumber(variation.inventory)}
                   </p>
                 </div>
               </div>
+              <div className="pb-5 mb-5 border-b border-borderColor">
+                {product._id &&
+                  product.options.length > 0 &&
+                  product.options.map((option: IOptionProduct) => (
+                    <div
+                      key={option._id}
+                      className="flex items-start mb-5 gap-5"
+                    >
+                      <span className="md:text-base text-sm font-medium min-w-[100px]">
+                        {option.name}:
+                      </span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {option.values.map((value: IValueOption) => (
+                          <button
+                            key={value._id}
+                            onClick={() =>
+                              onSelectOption(option.code, value.label)
+                            }
+                            className={`text-sm px-4 py-1 hover:text-white ${
+                              selectOption[option.code] === value.label
+                                ? "bg-primary text-white"
+                                : ""
+                            } hover:bg-primary border border-borderColor rounded-lg transition-all ease-linear duration-100 cursor-pointer`}
+                          >
+                            {value.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+
+                {message && <p className="text-base text-red-500">{message}</p>}
+              </div>
+              {product && (
+                <div>
+                  {inventory > 0 ? (
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="lg:w-3/12 md:w-6/12 w-full my-5">
+                        <ProductQuantity
+                          total={totalProduct}
+                          max={inventory}
+                          setTotalProduct={setTotalProduct}
+                        />
+                      </div>
+                      <div className="lg:w-8/12 sm:flex-nowrap flex-wrap w-full flex items-center gap-3">
+                        <button className="sm:w-6/12 w-full h-full">
+                          <p
+                            className="flex items-center justify-center w-full h-14 md:text-base text-sm font-medium text-white hover:text-dark bg-primary hover:bg-white px-4 gap-2 border border-primary hover:border-dark transition-all ease-linear duration-100"
+                            // onClick={hanldeAddCart}
+                          >
+                            <AiOutlineShoppingCart className="lg:text-2xl text-xl" />
+                            Add to cart
+                          </p>
+                        </button>
+                        <button className="sm:w-6/12 w-full h-full">
+                          <p className="flex items-center justify-center w-full h-14 md:text-base text-sm font-medium text-white bg-dark hover:bg-primary px-4 transition-all ease-linear duration-100 gap-2">
+                            Buy it now
+                          </p>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-base font-medium text-primary">
+                      Sold out
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="w-full bg-white p-5 rounded-md">
+              <h3 className="text-lg font-medium min-w-[100px]">Mô tả</h3>
+
+              <ShowMore maxHeight={140}>
+                <p className="text-base text-justify">{product.description}</p>
+              </ShowMore>
+            </div>
+
+            {product.specifications.map(
+              (specification: ISpecificationsProduct) => (
+                <div
+                  key={specification._id}
+                  className="w-full bg-white p-5 rounded-md"
+                >
+                  <h3 className="text-base font-medium">
+                    {specification.name}
+                  </h3>
+
+                  <div className="mt-5">
+                    {specification.attributes.map(
+                      (attribute: ISpecificationAttributes, index: number) => (
+                        <div
+                          key={attribute._id}
+                          className={`flex items-start justify-between pb-2 ${
+                            index !== specification.attributes.length - 1
+                              ? "mb-5 border-b border-borderColor"
+                              : ""
+                          } gap-5`}
+                        >
+                          <h4 className="w-2/4 text-base">{attribute.name}</h4>
+
+                          <ShowMore maxHeight={70}>
+                            <p className="text-base">{attribute.value}</p>
+                          </ShowMore>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )
             )}
           </div>
         </div>
       </section>
 
-      {/* Category */}
-      <section className="category my-10">
-        <div className="container__cus">
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-xl font-normal text-[#1e1e1e]">
-              Shop By Category
-            </p>
-            <div className="flex items-center gap-2">
-              <button className="category__btn-prev flex items-center justify-center w-8 h-8 bg-[#f0f0f0] hover:bg-primary rounded-full transition-all duration-100">
-                <MdKeyboardArrowLeft className="text-3xl text-[#9ea18e] hover:text-white" />
-              </button>
-              <button className="category__btn-next flex items-center justify-center w-8 h-8 bg-[#f0f0f0] hover:bg-primary rounded-full transition-all duration-100">
-                <MdKeyboardArrowRight className="text-3xl text-[#9ea18e] hover:text-white" />
-              </button>
-            </div>
-          </div>
-          <div className="lg:p-8 md:p-6 p-4 rounded-md border border-[#e5e5e5] ">
-            <Swiper
-              modules={[Navigation]}
-              slidesPerView={2}
-              spaceBetween={20}
-              navigation={{
-                nextEl: ".category__btn-next",
-                prevEl: ".category__btn-prev",
-              }}
-              breakpoints={{
-                478: {
-                  slidesPerView: 3,
-                },
-                650: {
-                  slidesPerView: 4,
-                },
-                990: {
-                  slidesPerView: 5,
-                },
-              }}
-            >
-              <SwiperSlide className="w-2/12">
-                <Link href={"/"} className="w-ful">
-                  <img
-                    src="/images/category-1.avif"
-                    alt="image category"
-                    className="w-full rounded-xl"
-                  />
-                </Link>
-                <p className="text-base font-normal text-[#1e1e1e] text-center mt-3 truncate">
-                  Architecture Art Lorem
-                </p>
-                <a
-                  href="#"
-                  className="block w-full text-sm font-medium text-primary text-center hover:underline"
-                >
-                  View more
-                </a>
-              </SwiperSlide>
-              <SwiperSlide className="w-2/12">
-                <Link href={"/"} className="w-ful">
-                  <img
-                    src="/images/category-2.avif"
-                    alt="image category"
-                    className="w-full rounded-xl"
-                  />
-                </Link>
-                <p className="text-base font-normal text-[#1e1e1e] text-center mt-3 truncate">
-                  Theater Art
-                </p>
-                <a
-                  href="#"
-                  className="block w-full text-sm font-medium text-primary text-center hover:underline"
-                >
-                  View more
-                </a>
-              </SwiperSlide>
-              <SwiperSlide className="w-2/12">
-                <Link href={"/"} className="w-ful">
-                  <img
-                    src="/images/category-3.avif"
-                    alt="image category"
-                    className="w-full rounded-xl"
-                  />
-                </Link>
-                <p className="text-base font-normal text-[#1e1e1e] text-center mt-3 truncate">
-                  Ceramics Art
-                </p>
-                <a
-                  href="#"
-                  className="block w-full text-sm font-medium text-primary text-center hover:underline"
-                >
-                  View more
-                </a>
-              </SwiperSlide>
-              <SwiperSlide className="w-2/12">
-                <Link href={"/"} className="w-ful">
-                  <img
-                    src="/images/category-4.avif"
-                    alt="image category"
-                    className="w-full rounded-xl"
-                  />
-                </Link>
-                <p className="text-base font-normal text-[#1e1e1e] text-center mt-3 truncate">
-                  Sculpture Art
-                </p>
-                <a
-                  href="#"
-                  className="block w-full text-sm font-medium text-primary text-center hover:underline"
-                >
-                  View more
-                </a>
-              </SwiperSlide>
-              <SwiperSlide className="w-2/12">
-                <Link href={"/"} className="w-ful">
-                  <img
-                    src="/images/category-5.avif"
-                    alt="image category"
-                    className="w-full rounded-xl"
-                  />
-                </Link>
-                <p className="text-base font-normal text-[#1e1e1e] text-center mt-3 truncate">
-                  Painting Art
-                </p>
-                <a
-                  href="#"
-                  className="block w-full text-sm font-medium text-primary text-center hover:underline"
-                >
-                  View more
-                </a>
-              </SwiperSlide>
-              <SwiperSlide className="w-2/12">
-                <Link href={"/"} className="w-ful">
-                  <img
-                    src="/images/category-1.avif"
-                    alt="image category"
-                    className="w-full rounded-xl"
-                  />
-                </Link>
-                <p className="text-base font-normal text-[#1e1e1e] text-center mt-3 truncate">
-                  Architecture Art Lorem
-                </p>
-                <a
-                  href="#"
-                  className="block w-full text-sm font-medium text-primary text-center hover:underline"
-                >
-                  View more
-                </a>
-              </SwiperSlide>
-              <SwiperSlide className="w-2/12">
-                <Link href={"/"} className="w-ful">
-                  <img
-                    src="/images/category-2.avif"
-                    alt="image category"
-                    className="w-full rounded-xl"
-                  />
-                </Link>
-                <p className="text-base font-normal text-[#1e1e1e] text-center mt-3 truncate">
-                  Theater Art
-                </p>
-                <a
-                  href="#"
-                  className="block w-full text-sm font-medium text-primary text-center hover:underline"
-                >
-                  View more
-                </a>
-              </SwiperSlide>
-              <SwiperSlide className="w-2/12">
-                <Link href={"/"} className="w-ful">
-                  <img
-                    src="/images/category-3.avif"
-                    alt="image category"
-                    className="w-full rounded-xl"
-                  />
-                </Link>
-                <p className="text-base font-normal text-[#1e1e1e] text-center mt-3 truncate">
-                  Ceramics Art
-                </p>
-                <a
-                  href="#"
-                  className="block w-full text-sm font-medium text-primary text-center hover:underline"
-                >
-                  View more
-                </a>
-              </SwiperSlide>
-              <SwiperSlide className="w-2/12">
-                <Link href={"/"} className="w-ful">
-                  <img
-                    src="/images/category-4.avif"
-                    alt="image category"
-                    className="w-full rounded-xl"
-                  />
-                </Link>
-                <p className="text-base font-normal text-[#1e1e1e] text-center mt-3 truncate">
-                  Sculpture Art
-                </p>
-                <a
-                  href="#"
-                  className="block w-full text-sm font-medium text-primary text-center hover:underline"
-                >
-                  View more
-                </a>
-              </SwiperSlide>
-              <SwiperSlide className="w-2/12">
-                <Link href={"/"} className="w-ful">
-                  <img
-                    src="/images/category-5.avif"
-                    alt="image category"
-                    className="w-full rounded-xl"
-                  />
-                </Link>
-                <p className="text-base font-normal text-[#1e1e1e] text-center mt-3 truncate">
-                  Painting Art
-                </p>
-                <a
-                  href="#"
-                  className="block w-full text-sm font-medium text-primary text-center hover:underline"
-                >
-                  View more
-                </a>
-              </SwiperSlide>
-            </Swiper>
-          </div>
-        </div>
+      <section className="container__cus py-10">
+        <ListProducts
+          title="Có thể bạn thích"
+          isLoading={loadingProducts}
+          items={products}
+        />
       </section>
 
       {/* popups */}
@@ -862,7 +565,11 @@ const CollectionItem: FC<Props> = (props: Props) => {
   );
 };
 
-export default CollectionItem;
+export default ProductPage;
+
+ProductPage.getLayout = function getLayout(page: ReactElement) {
+  return <Layout>{page}</Layout>;
+};
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   try {

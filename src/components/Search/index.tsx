@@ -1,8 +1,16 @@
 import Link from "next/link";
-import { ChangeEvent, Fragment, useRef, useState, memo } from "react";
+import {
+  ChangeEvent,
+  Fragment,
+  useRef,
+  useState,
+  memo,
+  useEffect,
+} from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { IProductHome } from "~/interfaces";
 import { IoMdClose } from "react-icons/io";
+import { useRouter } from "next/router";
 
 interface Props {
   placeholder?: string;
@@ -20,8 +28,10 @@ const Search = (props: Props) => {
     listItem,
     noResult = false,
     onChange,
-    onClearText
+    onClearText,
   } = props;
+
+  const router = useRouter();
 
   const searchRef = useRef<HTMLDivElement>(null);
   const inpSearchRef = useRef<HTMLInputElement>(null);
@@ -31,6 +41,13 @@ const Search = (props: Props) => {
     const value = e.target.value;
     onChange(value);
   };
+
+  useEffect(() => {
+    if (showSearch) {
+      setShowSearch(false);
+      onClearText();
+    }
+  }, [router.pathname]);
 
   return (
     <Fragment>
@@ -81,7 +98,7 @@ const Search = (props: Props) => {
               {listItem.map((item: IProductHome) => (
                 <li key={item._id}>
                   <Link
-                    href={"/s"}
+                    href={`/collections/product/${item.slug}`}
                     className="flex items-center text-base hover:bg-[#e5e5e5] py-2 px-3 transition-all ease-linear duration-75 gap-2"
                   >
                     <AiOutlineSearch className="text-lg" />

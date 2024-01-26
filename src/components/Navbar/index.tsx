@@ -119,8 +119,16 @@ const Navbar: FC = () => {
   useEffect(() => {
     if (searchText) {
       handelSearch();
+    } else {
+      setListSearch([]);
     }
   }, [debouce]);
+
+  useEffect(() => {
+    if (showNavbarMobile) {
+      setShowNavarMobile(false);
+    }
+  }, [router.pathname]);
 
   return (
     <header className="sticky top-0 left-0 right-0 z-30">

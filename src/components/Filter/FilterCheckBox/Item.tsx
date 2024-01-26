@@ -30,6 +30,14 @@ const FilterCheckBoxItem: FC<Props> = (props: Props) => {
     }
     return false;
   };
+
+  const onClick = () => {
+    if (router.isReady && inpRef.current) {
+      const isChecked = inpRef.current.checked;
+      inpRef.current.checked = !isChecked;
+    }
+  };
+
   useEffect(() => {
     if (router.isReady && inpRef.current) {
       const isChecked = handleChecked(data.name);
@@ -38,7 +46,7 @@ const FilterCheckBoxItem: FC<Props> = (props: Props) => {
   }, [query]);
 
   return (
-    <li className="flex items-start gap-2">
+    <li className="flex items-start w-full cursor-pointer gap-2" onClick={onClick}>
       <input
         ref={inpRef}
         type="checkbox"

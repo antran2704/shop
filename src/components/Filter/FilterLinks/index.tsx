@@ -16,7 +16,7 @@ const FilterLinks = (props: Props) => {
     <FilterLayout title={title}>
       <Fragment>
         {items.map((item: Partial<IDataCategory>) => (
-          <li key={item._id}>
+          <li key={item._id} className="w-full">
             <Link
               href={`${path}/${item.slug}.${item._id}`}
               className="block w-full text-sm hover:text-primary capitalize"

@@ -41,7 +41,7 @@ const FilterPriceItem: FC<Props> = (props: Props) => {
   }, [query]);
 
   return (
-    <li className="flex items-center cursor-pointer gap-2">
+    <li className="flex items-center w-full cursor-pointer gap-2" onClick={onClick}>
       <input
         ref={inpRef}
         id={data.value}
@@ -51,9 +51,7 @@ const FilterPriceItem: FC<Props> = (props: Props) => {
         className="min-w-3 w-3 h-3 rounded-md"
       />
 
-      <p className="text-xs capitalizez" onClick={onClick}>
-        {data.name}
-      </p>
+      <p className="text-xs capitalizez">{data.name}</p>
     </li>
   );
 };

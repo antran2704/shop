@@ -87,7 +87,7 @@ const ProductQuantity: FC<Props> = (props: Props) => {
         </button>
       </div>
 
-      {message && <p className="text-sm font-medium text-primary">{message}</p>}
+      {message && <p className="text-sm font-medium text-primary py-2">{message}</p>}
     </div>
   );
 };

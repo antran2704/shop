@@ -4,20 +4,17 @@ import { Navigation, Pagination, EffectFade, Autoplay } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 // Interface
-import { IProductHome, NextPageWithLayout } from "~/interfaces";
+import { NextPageWithLayout } from "~/interfaces";
 import Brands from "~/components/Brands";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import Seo from "~/components/Seo";
-import { useCategoriesAll } from "~/hooks/useCategories";
 import { useProducts } from "~/hooks/useProducts";
-import ProductLoading from "~/components/Product/Loading";
-import ProductItem from "~/components/Product/Item";
 import ListParentCategories from "~/components/Category/List";
+import ListProducts from "~/components/Product/List";
 
 const Layout = DefaultLayout;
 
 const Home: NextPageWithLayout = () => {
-  const { categories, loadingCategories } = useCategoriesAll();
   const { products, loadingProducts } = useProducts(1);
   return (
     <div>
@@ -109,114 +106,28 @@ const Home: NextPageWithLayout = () => {
         </div>
       </section>
 
-      <section className="py-5">
-        <div className="container__cus bg-white p-5 rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xl font-medium text-[#1e1e1e]">
-              Sản phẩm Hot 🔥
-            </h3>
-          </div>
-          <div>
-            <Swiper
-              modules={[Navigation]}
-              slidesPerView={2}
-              spaceBetween={20}
-              navigation={true}
-              breakpoints={{
-                478: {
-                  slidesPerView: 3,
-                },
-                650: {
-                  slidesPerView: 4,
-                },
-                990: {
-                  slidesPerView: 5,
-                },
-              }}
-            >
-              {!loadingProducts &&
-                products.map((product: IProductHome) => (
-                  <SwiperSlide key={product._id}>
-                    <ProductItem data={product} key={product._id} />
-                  </SwiperSlide>
-                ))}
-
-              {loadingProducts &&
-                [...new Array(5)].map((item, index: number) => (
-                  <SwiperSlide key={index}>
-                    <ProductLoading />
-                  </SwiperSlide>
-                ))}
-            </Swiper>
-          </div>
-        </div>
+      <section className="container__cus py-5">
+        <ListProducts
+          title="Sản phẩm Hot 🔥"
+          isLoading={loadingProducts}
+          items={products}
+        />
       </section>
 
-      <section className="py-5">
-        <div className="container__cus bg-white p-5 rounded-lg">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xl font-medium text-[#1e1e1e]">
-              Có thể bạn thích
-            </h3>
-          </div>
-          <div>
-            <Swiper
-              modules={[Navigation]}
-              cssMode={true}
-              slidesPerView={2}
-              spaceBetween={20}
-              navigation={true}
-              breakpoints={{
-                478: {
-                  slidesPerView: 3,
-                },
-                650: {
-                  slidesPerView: 4,
-                },
-                990: {
-                  slidesPerView: 5,
-                },
-              }}
-            >
-              {!loadingProducts &&
-                products.map((product: IProductHome) => (
-                  <SwiperSlide key={product._id}>
-                    <ProductItem data={product} key={product._id} />
-                  </SwiperSlide>
-                ))}
-
-              {loadingProducts &&
-                [...new Array(5)].map((item, index: number) => (
-                  <SwiperSlide key={index}>
-                    <ProductLoading />
-                  </SwiperSlide>
-                ))}
-            </Swiper>
-          </div>
-        </div>
+      <section className="container__cus py-5">
+        <ListProducts
+          title="Có thể bạn thích"
+          isLoading={loadingProducts}
+          items={products}
+        />
       </section>
 
-      <section className="py-5">
-        <div className="container__cus bg-white p-5 rounded-lg">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xl font-medium text-[#1e1e1e]">Sản phẩm gợi ý</p>
-          </div>
-          <div className="grid lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-3 grid-cols-2 gap-5">
-            {!loadingProducts &&
-              products.map((product: IProductHome) => (
-                <ProductItem
-                  hoverScale={true}
-                  data={product}
-                  key={product._id}
-                />
-              ))}
-
-            {loadingProducts &&
-              [...new Array(5)].map((item, index: number) => (
-                <ProductLoading key={index} />
-              ))}
-          </div>
-        </div>
+      <section className="container__cus py-5">
+        <ListProducts
+          title="Sản phẩm gợi ý"
+          isLoading={loadingProducts}
+          items={products}
+        />
       </section>
 
       {/* Brands */}

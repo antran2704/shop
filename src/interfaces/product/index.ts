@@ -13,12 +13,13 @@ interface IOptionProduct {
 }
 
 interface ISpecificationAttributes {
-  id: string;
-  [name: string]: string;
+  _id: string;
+  name: string;
+  value: string;
 }
 
 interface ISpecificationsProduct {
-  id: string;
+  _id: string;
   name: string;
   attributes: ISpecificationAttributes[];
 }

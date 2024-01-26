@@ -8,7 +8,7 @@ interface IBreadcrumb {
 }
 
 interface IParentCategory {
-  _id: string | null;
+  _id: string;
   title: string;
 }
 
