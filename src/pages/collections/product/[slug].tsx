@@ -1,9 +1,14 @@
-import { GetServerSideProps } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useRef, FC, useEffect, useState, MouseEvent, Fragment } from "react";
-import { useDispatch } from "react-redux";
-import axios from "axios";
+import {
+  useRef,
+  FC,
+  useEffect,
+  useState,
+  MouseEvent,
+  Fragment,
+  useMemo,
+} from "react";
 // gallery
 import LightGallery from "lightgallery/react";
 import lgThumbnail from "lightgallery/plugins/thumbnail";
@@ -21,47 +26,85 @@ import {
   MdOutlineZoomOutMap,
 } from "react-icons/md";
 
-import {
-  IProduct,
-  IOptionProduct,
-  IOrderProduct,
-} from "~/interfaces/apiResponse";
-
-import { GetListCart } from "~/store/actions";
-
-import percentPromotionPrice from "~/helpers/percentPromotionPrice";
-
 import Header from "~/components/Header";
+import ImageCus from "~/components/Image";
 import ProductQuantity from "~/components/ProductQuantity";
+import { getProductBySlug, getProducts, getVariations } from "~/api-client";
+import {
+  IBreadcrumb,
+  IDataCategory,
+  IOptionProduct,
+  IProductData,
+  IValueOption,
+  IVariantProduct,
+} from "~/interfaces";
+import { GetStaticProps } from "next";
+import {
+  formatBigNumber,
+  getPercentPromotionPrice,
+} from "~/helpers/number/fomatterCurrency";
 
 interface Props {
-  query: any;
-  productData: IProduct;
-  listImages: string[];
+  product: IProductData;
+}
+
+interface ISelectOption {
+  [x: string]: string;
 }
 
 const tags: string[] = ["Description", "Reviews", "Shipping Policy"];
 
 const CollectionItem: FC<Props> = (props: Props) => {
-  const { query, productData, listImages } = props;
+  const { product } = props;
   const router = useRouter();
-
-  const dispatch = useDispatch();
+  // console.log(product);
 
   const firstRef = useRef<HTMLButtonElement>(null);
   const lineRef = useRef<HTMLSpanElement>(null);
 
-  const [showPopup, setShow] = useState<boolean>(false);
   const [totalProduct, setTotalProduct] = useState<number>(1);
-  const [currentImage, setCurrentImage] = useState<string>(listImages[0]);
-  const [currentTag, setCurrentTag] = useState<string>("");
-  const [message, setMessage] = useState({
-    messageSize: "",
-    messageColor: "",
-  });
+  const [inventory, setInventory] = useState<number>(0);
 
-  const handleChangeImage = (e: MouseEvent<HTMLImageElement>) => {
-    setCurrentImage(e.currentTarget.src);
+  const [currentImage, setCurrentImage] = useState<string>("");
+  const [currentTag, setCurrentTag] = useState<string>("");
+  const [message, setMessage] = useState<string | null>(null);
+
+  const [variations, setVariations] = useState<IVariantProduct[]>([]);
+  const [variation, setVariation] = useState<IVariantProduct | null>(null);
+
+  const [selectOption, setSelectOption] = useState<ISelectOption>({});
+
+  const [showPopup, setShow] = useState<boolean>(false);
+
+  const onSelectOption = (key: string, value: string) => {
+    if (message) {
+      setMessage(null);
+    }
+
+    if (selectOption[key] === value) {
+      let newOption = selectOption;
+      delete newOption[key];
+
+      setSelectOption({ ...newOption });
+      return;
+    }
+
+    setSelectOption({ ...selectOption, [key]: value });
+  };
+
+  const getBreadcrumbs = useMemo(
+    () =>
+      (breadcrumbs: IDataCategory[]): IBreadcrumb[] => {
+        return breadcrumbs.map((breadcrumb: IDataCategory) => ({
+          label: breadcrumb.title,
+          url_path: `/collections/${breadcrumb.slug}.${breadcrumb._id}`,
+        }));
+      },
+    []
+  );
+
+  const handleChangeImage = (image: string) => {
+    setCurrentImage(image);
   };
 
   const handleChangeLine = (e: MouseEvent<HTMLButtonElement>): void => {
@@ -75,166 +118,276 @@ const CollectionItem: FC<Props> = (props: Props) => {
     }
   };
 
-  const hanldeAddCart = () => {
-    if (productData.listSizes.length > 0 || productData.listColors.length > 0) {
-      if (productData.listSizes.length > 0 && !query.size) {
-        setMessage({ ...message, messageSize: "Please choose your size!!!" });
-        return;
-      }
+  const handleGetVariation = () => {
+    const keys = Object.keys(selectOption);
+    const values = Object.values(selectOption);
 
-      if (productData.listColors.length > 0 && !query.color) {
-        setMessage({ ...message, messageColor: "Please choose your color!!!" });
-        return;
-      }
+    if (keys.length < product.options.length) {
+      setVariation(null);
+      return;
     }
 
-    let exitIndex = 0;
-    const dataProduct: IOrderProduct = {
-      name: productData.name,
-      slug: router.asPath,
-      count: totalProduct,
-      price: productData.promotionPrice
-        ? productData.promotionPrice
-        : productData.price,
-      size: query.size || undefined,
-      color: query.color || undefined,
-      avatarProduct: listImages[0],
-    };
-    const listCarted = JSON.parse(localStorage.getItem("listCart") || "[]");
-    const exitItem = listCarted.find((item: IOrderProduct, index: number) => {
-      if (item.name === dataProduct.name && item.slug === dataProduct.slug) {
-        exitIndex = index;
-        return item;
-      }
+    const item = variations.find((variation: IVariantProduct) => {
+      const optitons = variation.options;
+
+      return optitons.every((option: string) => values.includes(option));
     });
 
-    if (exitItem) {
-      listCarted[exitIndex] = {
-        ...exitItem,
-        count: exitItem.count + dataProduct.count,
-      };
-      localStorage.setItem("listCart", JSON.stringify(listCarted));
-      setShow(true);
-    } else {
-      listCarted.push(dataProduct);
-      localStorage.setItem("listCart", JSON.stringify(listCarted));
-      setShow(true);
+    if (item) {
+      if (item.thumbnail) {
+        setCurrentImage(item.thumbnail);
+      }
+
+      setVariation(item);
+      setTotalProduct(1);
+      setInventory(item.inventory);
     }
-    dispatch(GetListCart());
+    console.log("item:::", item);
   };
 
+  const handleGetVariations = async (product_id: string) => {
+    try {
+      const res = await getVariations(product_id);
+
+      if (res.status === 200) {
+        setVariations(res.payload);
+      }
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // const hanldeAddCart = () => {
+  //   if (productData.listSizes.length > 0 || productData.listColors.length > 0) {
+  //     if (productData.listSizes.length > 0 && !query.size) {
+  //       setMessage({ ...message, messageSize: "Please choose your size!!!" });
+  //       return;
+  //     }
+
+  //     if (productData.listColors.length > 0 && !query.color) {
+  //       setMessage({ ...message, messageColor: "Please choose your color!!!" });
+  //       return;
+  //     }
+  //   }
+
+  //   let exitIndex = 0;
+  //   const dataProduct: IOrderProduct = {
+  //     name: productData.name,
+  //     slug: router.asPath,
+  //     count: totalProduct,
+  //     price: productData.promotionPrice
+  //       ? productData.promotionPrice
+  //       : productData.price,
+  //     size: query.size || undefined,
+  //     color: query.color || undefined,
+  //     avatarProduct: listImages[0],
+  //   };
+  //   const listCarted = JSON.parse(localStorage.getItem("listCart") || "[]");
+  //   const exitItem = listCarted.find((item: IOrderProduct, index: number) => {
+  //     if (item.name === dataProduct.name && item.slug === dataProduct.slug) {
+  //       exitIndex = index;
+  //       return item;
+  //     }
+  //   });
+
+  //   if (exitItem) {
+  //     listCarted[exitIndex] = {
+  //       ...exitItem,
+  //       count: exitItem.count + dataProduct.count,
+  //     };
+  //     localStorage.setItem("listCart", JSON.stringify(listCarted));
+  //     setShow(true);
+  //   } else {
+  //     listCarted.push(dataProduct);
+  //     localStorage.setItem("listCart", JSON.stringify(listCarted));
+  //     setShow(true);
+  //   }
+  //   dispatch(GetListCart());
+  // };
+
   useEffect(() => {
-    const lineEl = lineRef.current;
-    const firstEl = firstRef.current;
-    if (lineEl && firstEl) {
-      const width = firstEl.clientWidth;
-      const offSetLeft = firstEl.offsetLeft;
-      lineEl.style.width = width + "px";
-      lineEl.style.left = offSetLeft + "px";
-      setCurrentTag(firstEl.name);
+    if (product && product._id) {
+      setCurrentImage(product.gallery[0]);
+      handleGetVariations(product._id);
+      setInventory(product.inventory)
     }
   }, []);
+
+  useEffect(() => {
+    if (product.options.length > 0) {
+      handleGetVariation();
+    }
+  }, [selectOption]);
+
+  if (router.isFallback && !product) {
+    return <h1>Loading....</h1>;
+  }
+
+  // useEffect(() => {
+  //   const lineEl = lineRef.current;
+  //   const firstEl = firstRef.current;
+  //   if (lineEl && firstEl) {
+  //     const width = firstEl.clientWidth;
+  //     const offSetLeft = firstEl.offsetLeft;
+  //     lineEl.style.width = width + "px";
+  //     lineEl.style.left = offSetLeft + "px";
+  //     setCurrentTag(firstEl.name);
+  //   }
+  // }, []);
+
   return (
     <div>
       <Header
-        title={productData.name}
-        listBackLinks={[
-          { title: "Home", link: "/" },
-          {
-            title: productData.category.title,
-            link: `/collections/${productData.category.slug}`,
-          },
+        title={product.title}
+        breadcrumbs={[
+          { label: "Home", url_path: "/" },
+          ...getBreadcrumbs(product.breadcrumbs as IDataCategory[]),
+          { label: product.title, url_path: "/" },
         ]}
       />
 
       <section className="container__cus">
         <div className="flex lg:flex-nowrap flex-wrap items-start lg:justify-between justify-center my-14 lg:gap-5 gap-8">
-          <div className="relative lg:w-5/12 sm:w-6/12 w-full">
-            <img className="w-full" src={currentImage} alt="product image" />
-            <div>
-              {/* gallery image */}
-              <LightGallery
-                elementClassNames="absolute top-0 left-4 flex items-center w-full mt-4 gap-2"
-                speed={500}
-                plugins={[lgThumbnail, lgZoom]}
-              >
-                <a href={listImages[0]} className="w-1/4">
-                  <MdOutlineZoomOutMap className="text-2xl" />
-                  <img
-                    className="w-full hidden"
-                    src={listImages[0]}
-                    alt="product image"
-                  />
-                </a>
-                {listImages
-                  .slice(1, listImages.length)
-                  .map((image: string, index: number) => (
-                    <a href={image} key={index} className="w-1/4  hidden">
-                      <img className="w-full" src={image} alt="product image" />
-                    </a>
-                  ))}
-              </LightGallery>
-
-              {/* slide image */}
-              <Swiper
-                className="flex items-center w-full mt-4 gap-2"
-                slidesPerView={3}
-                spaceBetween={20}
-                breakpoints={{
-                  800: {
-                    slidesPerView: 4,
-                  },
-                }}
-              >
-                {listImages.map((image: string, index: number) => (
-                  <SwiperSlide
-                    key={index}
-                    className={`w-1/4 border ${
-                      currentImage.includes(image)
-                        ? "border-primary"
-                        : "border-white"
-                    } cursor-pointer`}
-                  >
+          <div className="relative lg:w-5/12 sm:w-10/12 w-full">
+            <div className="w-full sticky top-5">
+              <div className="w-full lg:h-[500px] h-[400px] rounded-md overflow-hidden">
+                <ImageCus
+                  title={product.title}
+                  alt={product.title}
+                  src={currentImage}
+                  className="w-full h-full"
+                />
+              </div>
+              <div>
+                {/* gallery image */}
+                <LightGallery
+                  elementClassNames="absolute top-0 left-4 flex items-center w-full mt-4 gap-2"
+                  speed={500}
+                  plugins={[lgThumbnail, lgZoom]}
+                >
+                  <a href={product.gallery[0]} className="w-1/4">
+                    <MdOutlineZoomOutMap className="text-2xl hover:text-primary" />
                     <img
-                      className="w-full"
-                      src={image}
-                      onClick={handleChangeImage}
+                      className="w-full hidden"
+                      src={product.gallery[0]}
                       alt="product image"
                     />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
+                  </a>
+                  {product.gallery
+                    .slice(1, product.gallery.length)
+                    .map((image: string, index: number) => (
+                      <a
+                        href={image}
+                        key={index}
+                        className="w-[100px] h-[100px] rounded-lg hidden"
+                      >
+                        <img
+                          className="w-full"
+                          src={image}
+                          alt="product image"
+                        />
+                      </a>
+                    ))}
+                </LightGallery>
+
+                <Swiper
+                  className="flex items-center w-full mt-4 gap-2"
+                  slidesPerView={3}
+                  spaceBetween={10}
+                  breakpoints={{
+                    800: {
+                      slidesPerView: 4,
+                    },
+                  }}
+                >
+                  {product.gallery.map((image: string, index: number) => (
+                    <SwiperSlide
+                      key={index}
+                      className="cursor-pointer"
+                      onClick={() => handleChangeImage(image)}
+                    >
+                      <ImageCus
+                        title={product.title}
+                        alt={product.title}
+                        src={image}
+                        className={`w-full lg:h-[100px] h-[120px] ${
+                          currentImage.includes(image)
+                            ? "border-primary"
+                            : "border-white"
+                        } border-2 rounded-lg`}
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
             </div>
           </div>
           <div className="lg:w-6/12 w-full">
             <div className="pb-5 mb-5 border-b border-borderColor">
-              <h3 className="text-2xl font-medium">{productData.name}</h3>
-              {/* price */}
-              <div className="flex flex-wrap items-end my-3 gap-3">
-                {productData.promotionPrice && (
-                  <Fragment>
-                    <h3 className="text-2xl font-medium text-[#6a7779] line-through">
-                      ${productData.promotionPrice}.00
-                    </h3>
+              {!variation && (
+                <h3 className="text-2xl font-medium">{product.title}</h3>
+              )}
+              {variation && (
+                <h3 className="text-2xl font-medium">{variation.title}</h3>
+              )}
+              {!variation && (
+                <div className="flex flex-wrap items-end my-3 gap-3">
+                  {product.promotion_price > 0 &&
+                  product.promotion_price < product.price ? (
+                    <Fragment>
+                      <h3 className="text-2xl font-medium text-[#6a7779] line-through">
+                        {formatBigNumber(product.price)}
+                      </h3>
+                      <h2 className="text-3xl font-medium">
+                        {formatBigNumber(product.promotion_price)}
+                      </h2>
+                      <span className="text-sm font-medium text-white px-2 py-0.5 bg-primary rounded-md">
+                        Save -
+                        {getPercentPromotionPrice(
+                          product.price,
+                          product.promotion_price
+                        )}
+                        %
+                      </span>
+                    </Fragment>
+                  ) : (
                     <h2 className="text-3xl font-medium">
-                      ${productData.price}.00
+                      {formatBigNumber(product.price)}
                     </h2>
-                    <span className="text-sm font-medium text-white px-2 py-0.5 bg-primary rounded-md">
-                      Save -
-                      {percentPromotionPrice(
-                        productData.price,
-                        productData.promotionPrice
-                      )}
-                      %
-                    </span>
-                  </Fragment>
-                )}
-                {!productData.promotionPrice && (
-                  <h2 className="text-3xl font-medium">${productData.price}</h2>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
+
+              {variation && (
+                <div className="flex flex-wrap items-end my-3 gap-3">
+                  {variation.promotion_price > 0 &&
+                  variation.promotion_price < variation.price ? (
+                    <Fragment>
+                      <h3 className="text-2xl font-medium text-[#6a7779] line-through">
+                        {formatBigNumber(variation.price)}
+                      </h3>
+                      <h2 className="text-3xl font-medium">
+                        {formatBigNumber(variation.promotion_price)}
+                      </h2>
+                      <span className="text-sm font-medium text-white px-2 py-0.5 bg-primary rounded-md">
+                        Save -
+                        {getPercentPromotionPrice(
+                          variation.price,
+                          variation.promotion_price
+                        )}
+                        %
+                      </span>
+                    </Fragment>
+                  ) : (
+                    <h2 className="text-3xl font-medium">
+                      {formatBigNumber(variation.price)}
+                    </h2>
+                  )}
+                </div>
+              )}
               <p className="text-base text-[#071c1f]">
-                {productData.shortDescription}
+                {product.shortDescription}
               </p>
             </div>
             <div className="pb-5 mb-5 border-b border-borderColor">
@@ -242,82 +395,92 @@ const CollectionItem: FC<Props> = (props: Props) => {
                 <span className="text-base font-medium min-w-[100px]">
                   Sold:
                 </span>
-                <p>{productData.sold}</p>
+                {!variation && <p>{formatBigNumber(product.sold)}</p>}
+                {variation && <p>{formatBigNumber(variation.sold)}</p>}
               </div>
               <div className="flex items-center text-sm mb-5">
                 <span className="text-base font-medium min-w-[100px]">
                   Brand:
                 </span>
-                <p>{productData.brand ? productData.brand : "Updating"}</p>
+                Brand
               </div>
               <div className="flex items-center text-sm mb-5">
                 <span className="text-base font-medium min-w-[100px]">
-                  Quantity:
+                  Inventory:
                 </span>
-                <p>{productData.quantity}</p>
+                {!variation && <p>{formatBigNumber(product.inventory)}</p>}
+                {variation && <p>{formatBigNumber(variation.inventory)}</p>}
               </div>
             </div>
             <div className="pb-5 mb-5 border-b border-borderColor">
-              <div className="flex items-center">
-                {productData.listSizes.length > 0 && (
-                  <Fragment>
+              {product._id &&
+                product.options.length > 0 &&
+                product.options.map((option: IOptionProduct) => (
+                  <div
+                    key={option._id}
+                    className="flex items-center mb-5 gap-5"
+                  >
                     <span className="text-base font-medium min-w-[100px]">
-                      Size:
+                      {option.name}:
                     </span>
-                    <form className="flex flex-wrap items-center gap-2">
-                      {productData.listSizes.map(
-                        (size: IOptionProduct, index: number) => (
-                          <input
-                            key={index}
-                            type="submit"
-                            name="size"
-                            value={size.value}
-                            className={`text-sm px-4 py-0.5 font-medium hover:text-white ${
-                              query.size === size.value
-                                ? "bg-primary text-white"
-                                : ""
-                            } hover:bg-primary border border-borderColor transition-all ease-linear duration-100 cursor-pointer`}
-                          />
-                        )
-                      )}
-                    </form>
-                  </Fragment>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {option.values.map((value: IValueOption) => (
+                        <button
+                          key={value._id}
+                          onClick={() =>
+                            onSelectOption(option.code, value.label)
+                          }
+                          className={`text-sm px-4 py-1 hover:text-white ${
+                            selectOption[option.code] === value.label
+                              ? "bg-primary text-white"
+                              : ""
+                          } hover:bg-primary border border-borderColor rounded-lg transition-all ease-linear duration-100 cursor-pointer`}
+                        >
+                          {value.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+              {message && <p className="text-base text-red-500">{message}</p>}
+            </div>
+            {product && (
+              <div className="pb-5 mb-5 border-b border-borderColor">
+                {inventory > 0 ? (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="lg:w-3/12 w-6/12">
+                      <ProductQuantity
+                        total={totalProduct}
+                        max={inventory}
+                        setTotalProduct={setTotalProduct}
+                      />
+                    </div>
+                    <div className="lg:w-8/12 sm:flex-nowrap flex-wrap w-full flex items-center h-14 gap-3">
+                      <button className="sm:w-6/12 w-full h-full">
+                        <p
+                          className="flex items-center justify-center w-full h-full text-base font-medium text-white hover:text-dark bg-primary hover:bg-white px-4 gap-2 border border-primary hover:border-dark transition-all ease-linear duration-100"
+                          // onClick={hanldeAddCart}
+                        >
+                          <AiOutlineShoppingCart className="text-2xl" />
+                          Add to cart
+                        </p>
+                      </button>
+                      <button className="sm:w-6/12 w-full h-full">
+                        <p className="flex items-center justify-center w-full h-full text-base font-medium text-white bg-dark hover:bg-primary px-4 transition-all ease-linear duration-100 gap-2">
+                          Buy it now
+                        </p>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-base font-medium text-primary">Sold out</p>
                 )}
               </div>
-              <p className="text-lg text-primary font-medium mt-3">
-                {message.messageSize}
-              </p>
-            </div>
-            <div className="pb-5 mb-5 border-b border-borderColor">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="lg:w-3/12 w-6/12">
-                  <ProductQuantity
-                    totalProduct={totalProduct}
-                    setTotalProduct={setTotalProduct}
-                  />
-                </div>
-                <div className="lg:w-8/12 sm:flex-nowrap flex-wrap w-full flex items-center h-14 gap-3">
-                  <button className="sm:w-6/12 w-full h-full">
-                    <p
-                      className="flex items-center justify-center w-full h-full text-base font-medium text-white hover:text-dark bg-primary hover:bg-white px-4 gap-2 border border-primary hover:border-dark transition-all ease-linear duration-100"
-                      onClick={hanldeAddCart}
-                    >
-                      <AiOutlineShoppingCart className="text-2xl" />
-                      Add to cart
-                    </p>
-                  </button>
-                  <button className="sm:w-6/12 w-full h-full">
-                    <p className="flex items-center justify-center w-full h-full text-base font-medium text-white bg-dark hover:bg-primary px-4 transition-all ease-linear duration-100 gap-2">
-                      Buy it now
-                    </p>
-                  </button>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
-
       <section className="container__cus">
         <div className="my-10">
           <div
@@ -345,7 +508,7 @@ const CollectionItem: FC<Props> = (props: Props) => {
           <div className="mt-10">
             {currentTag === "Description" && (
               <div>
-                <p className="text-lg mb-5">{productData.description}</p>
+                <p className="text-lg mb-5">{product.description}</p>
               </div>
             )}
 
@@ -667,7 +830,7 @@ const CollectionItem: FC<Props> = (props: Props) => {
             />
             <div className="flex items-center gap-5">
               <img
-                src={listImages[0]}
+                src={product.gallery[0]}
                 alt="image"
                 className="w-[100px] h-100px"
               />
@@ -701,19 +864,32 @@ const CollectionItem: FC<Props> = (props: Props) => {
 
 export default CollectionItem;
 
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
-  const { slug } = query;
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  try {
+    const res = await getProductBySlug(params?.slug as string);
+    const product: IProductData = res.payload;
 
-  const productData: IProduct = await axios
-    .get(`${process.env.NEXT_PUBLIC_ENDPOINT_API}/product/${slug}`)
-    .then((res) => res.data.payload);
-
-  const listImages: string[] = productData.listImages;
-  return {
-    props: {
-      productData,
-      listImages,
-      query,
-    },
-  };
+    return {
+      props: { product },
+      revalidate: 10,
+    };
+  } catch (error: any) {
+    // console.log(error.response.data);
+    return {
+      props: { product: null },
+      revalidate: 10,
+      notFound: true,
+    };
+  }
 };
+
+export async function getStaticPaths() {
+  const res = await getProducts();
+  const products = await res.payload;
+
+  const paths = products.map((product: IProductData) => ({
+    params: { slug: product.slug },
+  }));
+
+  return { paths, fallback: true };
+}

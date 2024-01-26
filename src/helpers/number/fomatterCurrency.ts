@@ -5,6 +5,10 @@ const formatBigNumber = (value: number) => {
 };
 
 const getPercentPromotionPrice = (price: number, promotion_price: number) => {
+  if (price < promotion_price) {
+    return 0;
+  }
+
   return Math.ceil((promotion_price / price) * 100);
 };
 

@@ -1,11 +1,12 @@
-import { IParentCategory } from "../category";
+import { IDataCategory, IParentCategory } from "../category";
 
 interface IValueOption {
   label: string;
-  _id?: string;
+  _id: string;
 }
 
 interface IOptionProduct {
+  _id: string;
   code: string;
   name: string;
   values: IValueOption[];
@@ -30,6 +31,7 @@ interface IProduct {
   thumbnail: string | null;
   barcode: string | null;
   sku: string | null;
+  slug: string;
   public: boolean;
   price: number;
   promotion_price: number;
@@ -61,7 +63,7 @@ interface IProductData extends IProduct {
   viewer: number;
   rate: number;
   variants: IVariantProduct[];
-  breadcrumbs: string[];
+  breadcrumbs: string[] | IDataCategory[];
   createdAt?: string;
 }
 
@@ -75,6 +77,7 @@ type IProductHome = Pick<
   | "inventory"
   | "category"
   | "thumbnail"
+  | "slug"
 >;
 
 export type {

@@ -5,8 +5,6 @@ import { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
-import { IOrderProduct } from "~/interfaces/apiResponse";
-
 import Header from "~/components/Header";
 import CartItem from "~/components/CartItem";
 
@@ -20,15 +18,15 @@ const Cart: FC = () => {
   );
   return (
     <div>
-      <Header title={"Cart"} listBackLinks={[{ title: "Home", link: "/" }]} />
+      {/* <Header title={"Cart"} listBackLinks={[{ title: "Home", link: "/" }]} /> */}
 
       <section className="container__cus">
         {listCarts.length > 0 ? (
           <div>
             <ul className="flex flex-col items-start my-10 lg:gap-5 gap-10">
-              {listCarts.map((item: IOrderProduct, index: number) => (
+              {/* {listCarts.map((item: IOrderProduct, index: number) => (
                 <CartItem data={item} index={index} key={index} />
-              ))}
+              ))} */}
             </ul>
             <div className="flex lg:flex-nowrap flex-wrap items-start justify-between gap-5">
               <div className="lg:w-4/12 w-full">

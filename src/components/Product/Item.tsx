@@ -24,7 +24,7 @@ const ProductItem = (props: Props) => {
       } hover:shadow-lg border rounded-md overflow-hidden transition-all ease-linear duration-100`}
     >
       <Link
-        href={`/collections/product/${data._id}`}
+        href={`/collections/product/${data.slug}`}
         className="block w-full h-full"
       >
         <ImageCus

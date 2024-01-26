@@ -3,14 +3,13 @@ import { FC, useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { AiOutlineClose } from "react-icons/ai";
 
-import { IInforProduct } from "~/interfaces";
 import { RootState } from "~/store";
 import { handleDeleteProductInCart, GetListCart } from "~/store/actions";
 
 import ProductQuantity from "~/components/ProductQuantity";
 
 interface Props {
-  data: IInforProduct;
+  data: any;
   index: number;
 }
 

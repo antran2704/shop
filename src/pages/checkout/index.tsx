@@ -2,8 +2,6 @@ import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { FC, useState, ChangeEvent, FormEvent, useEffect } from "react";
 
-import { IOrderProduct } from "~/interfaces/apiResponse";
-
 import { AppDispatch, RootState } from "~/store";
 
 import Header from "~/components/Header";
@@ -68,10 +66,10 @@ const CheckOut: FC = () => {
 
   return (
     <div>
-      <Header
+      {/* <Header
         title={"Payment"}
         listBackLinks={[{ title: "Home", link: "/" }]}
-      />
+      /> */}
 
       <div className="container__cus">
         <div className="flex lg:flex-row flex-col-reverse items-start justify-between mt-10 gap-10">
@@ -186,7 +184,7 @@ const CheckOut: FC = () => {
           </div>
           <div className="lg:w-5/12 w-full">
             <ul className="scroll flex flex-col lg:max-h-[600px] max-h-[400px] pt-5 overflow-auto gap-6">
-              {listCarts.map((cart: IOrderProduct, index: number) => (
+              {/* {listCarts.map((cart: IOrderProduct, index: number) => (
                 <li
                   key={index}
                   className="flex items-center justify-between w-full pb-5 border-b border-borderColor gap-4"
@@ -213,7 +211,7 @@ const CheckOut: FC = () => {
                     ${cart.price * cart.count}.00
                   </p>
                 </li>
-              ))}
+              ))} */}
             </ul>
             <div className="flex items-center justify-between mt-5 gap-5">
               <p className="text-base font-medium">Total:</p>

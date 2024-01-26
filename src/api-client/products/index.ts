@@ -29,6 +29,11 @@ const getProduct = async (product_id: string) => {
   return await AxiosGet(`/products/id/${product_id}`);
 };
 
+
+const getProductBySlug = async (slug: string) => {
+  return await AxiosGet(`/products/${slug}`);
+};
+
 const getProductsWithFilter = async (
   filter: IFilter | null,
   page: number = 1
@@ -44,6 +49,7 @@ export {
   getProducts,
   getProductsInCategory,
   getProduct,
+  getProductBySlug,
   getProductsWithFilter,
   PRODUCT_KEY,
 };
