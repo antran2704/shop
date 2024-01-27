@@ -44,7 +44,9 @@ import {
 import DefaultLayout from "~/layouts/DefaultLayout";
 import ShowMore from "~/components/ShowMore";
 import ListProducts from "~/components/Product/List";
-import { useProductsInCategory } from "~/hooks/useProducts";
+import { useOtherProducts } from "~/hooks/useProducts";
+import Seo from "~/components/Seo";
+import Loading from "~/components/Loading";
 
 interface Props {
   product: IProductData;
@@ -59,13 +61,9 @@ const Layout = DefaultLayout;
 const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
   const { product } = props;
   const router = useRouter();
+  const { slug } = router.query;
 
-  const { products, loadingProducts } = useProductsInCategory(
-    !!product,
-    product.category._id,
-    null
-  );
-  // console.log(product);
+  //   console.log(product)
 
   const [totalProduct, setTotalProduct] = useState<number>(1);
   const [inventory, setInventory] = useState<number>(0);
@@ -79,6 +77,14 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
   const [selectOption, setSelectOption] = useState<ISelectOption>({});
 
   const [showPopup, setShow] = useState<boolean>(false);
+
+  const { otherProducts, loadingOtherProducts } = useOtherProducts(
+    !!product,
+    product?.category._id as string,
+    product?._id as string,
+    1,
+    { title: "1", slug: "1", thumbnail: "1", price: "1", promotion_price: "1" }
+  );
 
   const onSelectOption = (key: string, value: string) => {
     if (message) {
@@ -206,20 +212,21 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
       handleGetVariations(product._id);
       setInventory(product.inventory);
     }
-  }, []);
+  }, [slug]);
 
   useEffect(() => {
-    if (product.options.length > 0) {
+    if (product && product.options.length > 0) {
       handleGetVariation();
     }
   }, [selectOption]);
 
   if (router.isFallback && !product) {
-    return <h1>Loading....</h1>;
+    return <Loading />;
   }
 
   return (
     <div>
+      <Seo title={product.title} description={product.description} />
       <Header
         title={product.title}
         breadcrumbs={[
@@ -231,7 +238,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
       <section className="container__cus">
         <div className="flex lg:flex-nowrap flex-wrap items-start lg:justify-between justify-center my-14 gap-10">
-          <div className="lg:sticky lg:top-32 lg:w-5/12 sm:w-10/12 w-full bg-white p-5 rounded-md select-none overflow-hidden">
+          <div className="lg:sticky relative lg:top-32 lg:w-5/12 sm:w-10/12 w-full bg-white p-5 rounded-md select-none overflow-hidden">
             <div className="w-full lg:h-[500px] h-[400px] rounded-md overflow-hidden">
               <ImageCus
                 title={product.title}
@@ -249,10 +256,11 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
               >
                 <a href={product.gallery[0]} className="w-1/4">
                   <MdOutlineZoomOutMap className="text-2xl hover:text-primary" />
-                  <img
+                  <ImageCus
                     className="w-full hidden"
                     src={product.gallery[0]}
-                    alt="product image"
+                    alt={product.title}
+                    title={product.title}
                   />
                 </a>
                 {product.gallery
@@ -263,7 +271,12 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                       key={index}
                       className="w-[100px] h-[100px] rounded-lg hidden"
                     >
-                      <img className="w-full" src={image} alt="product image" />
+                      <ImageCus
+                        className="w-full"
+                        src={image}
+                        alt={product.title}
+                        title={product.title}
+                      />
                     </a>
                   ))}
               </LightGallery>
@@ -304,9 +317,9 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
           <div className="lg:w-7/12 w-full flex flex-col gap-5">
             <div className="w-full bg-white p-5 rounded-md">
               <div className="pb-5 mb-5 border-b border-borderColor">
-                <h3 className="lg:text-2xl md:text-xl text-lg text-lg font-medium">
+                <h2 className="lg:text-2xl md:text-xl text-lg font-medium">
                   {!variation ? product.title : variation.title}
-                </h3>
+                </h2>
 
                 {!variation && (
                   <div className="flex flex-wrap items-end my-3 gap-3">
@@ -316,9 +329,9 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                         <h3 className="lg:text-2xl md:text-xl text-lg font-medium text-[#6a7779] line-through">
                           {formatBigNumber(product.price)}
                         </h3>
-                        <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
+                        <h3 className="lg:text-3xl md:text-2xl text-lg font-medium">
                           {formatBigNumber(product.promotion_price)}
-                        </h2>
+                        </h3>
                         <span className="md:text-sm text-xs font-medium text-white px-2 py-0.5 bg-primary rounded-md">
                           Save -
                           {getPercentPromotionPrice(
@@ -329,9 +342,9 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                         </span>
                       </Fragment>
                     ) : (
-                      <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
+                      <h3 className="lg:text-3xl md:text-2xl text-lg font-medium">
                         {formatBigNumber(product.price)}
-                      </h2>
+                      </h3>
                     )}
                   </div>
                 )}
@@ -392,14 +405,15 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                   </p>
                 </div>
               </div>
-              <div className="pb-5 mb-5 border-b border-borderColor">
-                {product._id &&
-                  product.options.length > 0 &&
-                  product.options.map((option: IOptionProduct) => (
-                    <div
-                      key={option._id}
-                      className="flex items-start mb-5 gap-5"
-                    >
+
+              {product._id &&
+                product.options.length > 0 &&
+                product.options.map((option: IOptionProduct) => (
+                  <div
+                    key={option._id}
+                    className="pb-5 mb-5 border-b border-borderColor"
+                  >
+                    <div className="flex items-start mb-5 gap-5">
                       <span className="md:text-base text-sm font-medium min-w-[100px]">
                         {option.name}:
                       </span>
@@ -421,10 +435,12 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                         ))}
                       </div>
                     </div>
-                  ))}
+                    {message && (
+                      <p className="text-base text-red-500">{message}</p>
+                    )}
+                  </div>
+                ))}
 
-                {message && <p className="text-base text-red-500">{message}</p>}
-              </div>
               {product && (
                 <div>
                   {inventory > 0 ? (
@@ -510,8 +526,8 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
       <section className="container__cus py-10">
         <ListProducts
           title="Có thể bạn thích"
-          isLoading={loadingProducts}
-          items={products}
+          isLoading={loadingOtherProducts}
+          items={otherProducts}
         />
       </section>
 
@@ -532,9 +548,10 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
               onClick={() => setShow(false)}
             />
             <div className="flex items-center gap-5">
-              <img
+              <ImageCus
                 src={product.gallery[0]}
                 alt="image"
+                title="image"
                 className="w-[100px] h-100px"
               />
               <div>

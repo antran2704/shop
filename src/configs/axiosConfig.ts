@@ -54,8 +54,7 @@ http.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    const response = error.response.data;
-
+    const response = error.response;
     if (!response) return Promise.reject(error);
 
     if (response.status === 500) {

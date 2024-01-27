@@ -55,7 +55,7 @@ const CartItem: FC<Props> = (props: Props) => {
       <p className="lg:w-1/12 w-full text-base text-center">${data.price}.00</p>
       <div className="lg:w-2/12 w-full">
         <ProductQuantity
-          totalProduct={totalProduct}
+          total={totalProduct}
           setTotalProduct={setTotalProduct}
         />
       </div>

@@ -1,15 +1,28 @@
 import qs from "qs";
-import { IFilter } from "~/interfaces";
+import { IFilter, IProductData, IQueryParam } from "~/interfaces";
 import { AxiosGet } from "~/configs/axiosConfig";
 
 const PRODUCT_KEY = {
   PRODUCTS_PAGE: "products_page",
+  PRODUCTS_OTHER: "products_other",
   PRODUCTS_CATEGORY: "products_category",
   PRODUCT_ID: "product_id",
 };
 
 const getProducts = async (page: number = 1) => {
   return await AxiosGet(`/products?page=${page}`);
+};
+
+const getOtherProducts = async (
+  product_id: string,
+  category_id: string,
+  page: number = 1,
+  select?: IQueryParam<Partial<IProductData>>
+) => {
+  const parseQuery = qs.stringify(select);
+  return await AxiosGet(
+    `/products/other?category_id=${category_id}&product_id=${product_id}&page=${page}&${parseQuery}`
+  );
 };
 
 const getProductsInCategory = async (
@@ -28,7 +41,6 @@ const getProductsInCategory = async (
 const getProduct = async (product_id: string) => {
   return await AxiosGet(`/products/id/${product_id}`);
 };
-
 
 const getProductBySlug = async (slug: string) => {
   return await AxiosGet(`/products/${slug}`);
@@ -49,6 +61,7 @@ export {
   getProducts,
   getProductsInCategory,
   getProduct,
+  getOtherProducts,
   getProductBySlug,
   getProductsWithFilter,
   PRODUCT_KEY,
