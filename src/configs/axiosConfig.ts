@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { toast } from "react-toastify";
+import { getRefreshToken } from "~/api-client";
 
 const http = axios.create({
   baseURL: process.env.NEXT_PUBLIC_ENDPOINT_API,
@@ -86,13 +87,13 @@ http.interceptors.response.use(
       if (!isRefresh && !originalRequest._retry) {
         isRefresh = true;
 
-        // const { status } = await getRefreshToken();
-        // if (status === 200) {
-        //   isRefresh = false;
+        const { status } = await getRefreshToken();
+        if (status === 200) {
+          isRefresh = false;
 
-        //   originalRequest._retry = true;
-        //   return Promise.resolve(http(originalRequest));
-        // }
+          originalRequest._retry = true;
+          return Promise.resolve(http(originalRequest));
+        }
       } else {
         // if (router.pathname !== "/login") {
         //   handleLogout();

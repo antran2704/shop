@@ -1,5 +1,6 @@
 import { Provider } from "react-redux";
 import store from "~/store";
+import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/nextjs";
 
 import "swiper/scss";
 import "swiper/scss/navigation";
@@ -12,10 +13,18 @@ import "lightgallery/css/lg-zoom.css";
 import "lightgallery/css/lg-thumbnail.css";
 import "~/styles/globals.scss";
 import { AppPropsWithLayout } from "~/interfaces";
+import Loading from "~/components/Loading";
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
   return (
-    <Provider store={store}>{getLayout(<Component {...pageProps} />)}</Provider>
+    <Provider store={store}>
+      <ClerkProvider>
+        <ClerkLoading>
+          <Loading />
+        </ClerkLoading>
+        <ClerkLoaded>{getLayout(<Component {...pageProps} />)}</ClerkLoaded>
+      </ClerkProvider>
+    </Provider>
   );
 }

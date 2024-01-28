@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState, useEffect, useCallback, FC, Fragment } from "react";
+import { useUser, UserButton, SignInButton } from "@clerk/nextjs";
 import { useSelector, useDispatch } from "react-redux";
 import {
   AiOutlineShoppingCart,
@@ -29,10 +30,12 @@ import ImageCus from "~/components/Image";
 import { LOGO } from "~/configs/images";
 
 import styles from "./Navbar.module.scss";
-import AuthNavbar from "../Auth";
 
 const Navbar: FC = () => {
   const dispatch = useDispatch();
+  const { isSignedIn, user, isLoaded } = useUser();
+
+  console.log(isSignedIn, user);
   const { listCarts, totalCart, totalPrice } = useSelector(
     (state: RootState) => state.data
   );
@@ -182,12 +185,15 @@ const Navbar: FC = () => {
               {totalCart < 100 ? totalCart : "99"}
             </span>
           </div>
-          <button className="px-3 py-1 rounded-md bg-primary text-white lg:text-lg text-base">
-            Login
-          </button>
-          {/* <div>
-            <AuthNavbar />
-          </div> */}
+          {!isSignedIn && !user ? (
+            <SignInButton>
+              <button className="block px-3 py-1 rounded-md bg-primary text-white lg:text-lg text-base">
+                Login
+              </button>
+            </SignInButton>
+          ) : (
+            <UserButton afterSignOutUrl="/" />
+          )}
         </div>
 
         {/* layout close modal */}

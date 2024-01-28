@@ -5,23 +5,27 @@ import { Swiper, SwiperSlide } from "swiper/react";
 
 // Interface
 import { NextPageWithLayout } from "~/interfaces";
+
 import Brands from "~/components/Brands";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import Seo from "~/components/Seo";
 import { useProducts } from "~/hooks/useProducts";
 import ListParentCategories from "~/components/Category/List";
 import ListProducts from "~/components/Product/List";
+import { SignOutButton } from "@clerk/nextjs";
 
 const Layout = DefaultLayout;
 
 const Home: NextPageWithLayout = () => {
   const { products, loadingProducts } = useProducts(1);
+
   return (
     <div>
       <Seo
         title="Shop Antran | Home Page"
         description="Description Shop Antran Home Page"
       />
+      {/* <SignOutButton /> */}
 
       {/* banner */}
       <section
