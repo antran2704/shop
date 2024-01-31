@@ -12,7 +12,6 @@ const ImageCus = (props: Props) => {
   const { title, alt, src = null, className } = props;
 
   const ImageRef = useRef<HTMLImageElement>(null);
-
   const [loading, setLoading] = useState<boolean>(true);
 
   function loadImage(src: string) {

@@ -1,4 +1,5 @@
 import { clerkClient } from "@clerk/nextjs";
+import { getCookies } from "cookies-next";
 import { NextApiRequest, NextApiResponse } from "next";
 import { v4 as uuidv4 } from "uuid";
 
@@ -20,6 +21,18 @@ export default async function handler(
 
     res.status(404).json({ status: 404, message: "new user" });
   } else {
-    res.status(200).json({ status: 200, message: "old user" });
+    const { refreshToken, accessToken, publicKey, apiKey } = getCookies({
+      req,
+      res,
+    });
+    res.status(200).json({
+      status: 200,
+      payload: {
+        refreshToken,
+        accessToken,
+        publicKey,
+        apiKey,
+      },
+    });
   }
 }

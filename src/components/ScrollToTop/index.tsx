@@ -14,7 +14,7 @@ const ScrollToTop = () => {
         top > 150
           ? "opacity-60 hover:opacity-100 bottom-5"
           : "opacity-0 bottom-0 pointer-events-none"
-      } cursor-pointer py-2 px-2 rounded-md bg-dark shadow-lg z-50 transition-all ease-linear duration-150`}
+      } cursor-pointer py-2 px-2 rounded-md bg-dark shadow-lg z-20 transition-all ease-linear duration-150`}
       onClick={onClick}
     >
       <svg

@@ -20,7 +20,7 @@ const getCategory = async (category_id: string) => {
 
 const getParentCategories = async (select?: IQueryParam<Partial<IDataCategory>>) => {
   const parseQuery = qs.stringify(select);
-  return await AxiosGet(`categories/parent?${parseQuery}`);
+  return await AxiosGet(`/categories/parent?${parseQuery}`);
 };
 
 const getAllCategories = async (

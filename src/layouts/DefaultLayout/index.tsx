@@ -1,8 +1,6 @@
 import { useClerk, useUser } from "@clerk/nextjs";
-import axios from "axios";
 import { useRouter } from "next/router";
 import React, { FC, useEffect } from "react";
-import { useDispatch } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { checkUserIsExit, createUser, getUser, login } from "~/api-client";
@@ -10,8 +8,10 @@ import { checkUserIsExit, createUser, getUser, login } from "~/api-client";
 import Footer from "~/components/Footer";
 import Navbar from "~/components/Navbar";
 import ScrollToTop from "~/components/ScrollToTop";
+import { injectRouter } from "~/configs/axiosConfig";
 import { IUserInfor } from "~/interfaces";
-import { GetListCart } from "~/store/actions";
+import { useAppDispatch } from "~/store/hooks";
+import { updateInforUserReducer } from "~/store/slice/user";
 
 interface Props {
   children: JSX.Element;
@@ -19,17 +19,11 @@ interface Props {
 
 const DefaultLayout: FC<Props> = ({ children }: Props) => {
   const router = useRouter();
-  const dispatch = useDispatch();
+
+  const dispatch = useAppDispatch();
+  
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
-
-  const checkAuth = async () => {
-    try {
-      await getUser();
-    } catch (err) {
-      // signOut(() => router.push("/"));
-    }
-  };
 
   const handleLogin = async (email: string) => {
     try {
@@ -58,9 +52,17 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
 
   const handleCheckUserIsExit = async (userId: string) => {
     try {
-      const { status } = await checkUserIsExit(userId);
+      const { status, payload } = await checkUserIsExit(userId);
       if (status === 200) {
-        await checkAuth();
+        if (!payload.refreshToken && !payload.accessToken) {
+          await login(user?.primaryEmailAddress?.emailAddress as string);
+        }
+
+        const userRes = await getUser();
+
+        if(userRes.status === 200) {
+          dispatch(updateInforUserReducer(userRes.payload));
+        }
       }
     } catch (error: any) {
       if (!error.response) {
@@ -78,15 +80,15 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
     }
   };
 
-  // useEffect(() => {
-  //   dispatch(GetListCart());
-  // }, []);
-
   useEffect(() => {
     if (isLoaded && user) {
       handleCheckUserIsExit(user.id);
     }
   }, [user, isLoaded]);
+
+  useEffect(() => {
+    injectRouter(signOut, router);
+  }, []);
 
   return (
     <main className="bg-[#f5f5fa]">

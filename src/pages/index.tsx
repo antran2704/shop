@@ -12,7 +12,6 @@ import Seo from "~/components/Seo";
 import { useProducts } from "~/hooks/useProducts";
 import ListParentCategories from "~/components/Category/List";
 import ListProducts from "~/components/Product/List";
-import { SignOutButton } from "@clerk/nextjs";
 
 const Layout = DefaultLayout;
 
@@ -25,7 +24,6 @@ const Home: NextPageWithLayout = () => {
         title="Shop Antran | Home Page"
         description="Description Shop Antran Home Page"
       />
-      {/* <SignOutButton /> */}
 
       {/* banner */}
       <section

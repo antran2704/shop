@@ -1,6 +1,8 @@
+import { SignOut } from "@clerk/types";
 import axios, { AxiosRequestConfig } from "axios";
+import { NextRouter } from "next/router";
 import { toast } from "react-toastify";
-import { getRefreshToken } from "~/api-client";
+import { getRefreshToken, logout } from "~/api-client";
 
 const http = axios.create({
   baseURL: process.env.NEXT_PUBLIC_ENDPOINT_API,
@@ -41,6 +43,18 @@ const AxiosDelete = async <T>(
 };
 
 let isRefresh = false;
+let router: NextRouter;
+let signOutClerk: SignOut;
+
+const handleLogout = () => {
+  logout();
+  signOutClerk(() => router.push("/"));
+};
+
+export const injectRouter = (_signOutClerk: SignOut, _router: NextRouter) => {
+  signOutClerk = _signOutClerk;
+  router = _router;
+};
 
 http.interceptors.response.use(
   function (response) {
@@ -96,7 +110,7 @@ http.interceptors.response.use(
         }
       } else {
         // if (router.pathname !== "/login") {
-        //   handleLogout();
+        handleLogout();
         // }
         isRefresh = false;
       }

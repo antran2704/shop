@@ -2,7 +2,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState, useEffect, useCallback, FC, Fragment } from "react";
 import { useUser, UserButton, SignInButton } from "@clerk/nextjs";
-import { useSelector, useDispatch } from "react-redux";
 import {
   AiOutlineShoppingCart,
   AiOutlineClose,
@@ -17,9 +16,6 @@ import { initDataNavbar } from "~/data";
 
 import { IProductHome, INavItem } from "~/interfaces";
 
-import { RootState } from "~/store";
-import { GetListCart, handleDeleteProductInCart } from "~/store/actions";
-
 import { searchProductsMenu } from "~/api-client/search";
 
 import useDebounce from "~/hooks/useDebounce";
@@ -30,20 +26,22 @@ import ImageCus from "~/components/Image";
 import { LOGO } from "~/configs/images";
 
 import styles from "./Navbar.module.scss";
+import { useAppSelector } from "~/store/hooks";
+import { useCart } from "~/hooks/useCart";
+import ModalCart from "../Mordal/ModalCart";
 
 const Navbar: FC = () => {
-  const dispatch = useDispatch();
-  const { isSignedIn, user, isLoaded } = useUser();
+  const { infor } = useAppSelector((state) => state.user);
 
-  console.log(isSignedIn, user);
-  const { listCarts, totalCart, totalPrice } = useSelector(
-    (state: RootState) => state.data
-  );
+  const { cart } = useCart(!!infor._id, infor._id as string);
+
+  const { isSignedIn, user } = useUser();
 
   const router = useRouter();
   const [showNavbar, setShow] = useState<boolean>(false);
-  const [showNavbarMobile, setShowNavarMobile] = useState<boolean>(false);
   const [showModalCart, setShowModalCart] = useState<boolean>(false);
+  const [showNavbarMobile, setShowNavarMobile] = useState<boolean>(false);
+
   const [noResult, setNoResult] = useState<boolean>(false);
 
   const [currentNav, setCurrentNav] = useState([initDataNavbar]);
@@ -104,7 +102,6 @@ const Navbar: FC = () => {
 
   useEffect(() => {
     let timmer: ReturnType<typeof setTimeout>;
-    setShowModalCart(false);
 
     if (typeShow) {
       timmer = setTimeout(() => {
@@ -181,9 +178,15 @@ const Navbar: FC = () => {
             onClick={() => setShowModalCart(true)}
           >
             <AiOutlineShoppingCart className="relative lg:text-3xl md:text-2xl text-xl z-0" />
-            <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
-              {totalCart < 100 ? totalCart : "99"}
-            </span>
+            {cart ? (
+              <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
+                {cart.cart_count < 100 ? cart.cart_count : 99}
+              </span>
+            ) : (
+              <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
+                0
+              </span>
+            )}
           </div>
           {!isSignedIn && !user ? (
             <SignInButton>
@@ -192,7 +195,9 @@ const Navbar: FC = () => {
               </button>
             </SignInButton>
           ) : (
-            <UserButton afterSignOutUrl="/" />
+            <div>
+              <UserButton afterSignOutUrl="/" />
+            </div>
           )}
         </div>
 
@@ -417,90 +422,7 @@ const Navbar: FC = () => {
       </div>
 
       {/* modal cart */}
-      <div
-        className={`${styles.modalCart} ${
-          showModalCart ? styles.show : ""
-        } fixed top-0 bottom-0 left-0 right-0 z-30`}
-      >
-        <div
-          className={`${styles.modalCartLayout} abosulte w-full h-full z-10`}
-          style={{ backgroundColor: "rgba(1, 1, 1, 0.6)" }}
-          onClick={() => setShowModalCart(false)}
-        ></div>
-        <div
-          className={`${styles.modalCartContent} absolute flex flex-col items-start h-full top-0 py-6 px-8 sm:w-[400px] w-full bg-white shadow-sm rounded-l-md z-20 gap-5`}
-        >
-          <div className="flex w-full items-center justify-between pb-3 border-b border-borderColor gap-10">
-            <p className="text-base font-medium">Cart</p>
-            <AiOutlineClose
-              className="text-xl ml-auto mb-2 cursor-pointer"
-              onClick={() => setShowModalCart(false)}
-            />
-          </div>
-          <ul className="scrollHidden flex flex-col w-full h-[80vh] pb-3 border-b border-borderColor gap-3 overflow-y-auto ">
-            {listCarts.map((item: any, index: number) => (
-              <li
-                key={index}
-                className="flex items-center pb-3 px-2 border-b border-borderColor gap-4"
-              >
-                <div className="relative h-20">
-                  <ImageCus
-                    src={item.avatarProduct}
-                    className="sm:w-[80px] sm:h-[80px] w-[60px] h-[60px]"
-                    alt="img"
-                    title="img"
-                  />
-                  <AiFillCloseCircle
-                    onClick={() => {
-                      handleDeleteProductInCart(listCarts, index);
-                      dispatch(GetListCart());
-                    }}
-                    className="absolute -top-0.5 -left-1 text-2xl hover:text-primary cursor-pointer"
-                  />
-                </div>
-                <div className="w-8/12">
-                  <Link
-                    href={item.slug}
-                    className="sm:text-base text-sm font-medium hover:text-primary"
-                  >
-                    {item.name}
-                  </Link>
-                  <div className="flex items-center gap-2">
-                    {item.size && (
-                      <span className="sm:text-sm text-xs">
-                        Size: {item.size}
-                      </span>
-                    )}
-                    {item.color && (
-                      <span className="sm:text-sm text-xs">
-                        Color: {item.color}
-                      </span>
-                    )}
-                  </div>
-                  <p className="sm:text-base text-sm mt-2">
-                    {item.count} X ${item.price}.00
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <div className="flex w-full items-center justify-between pb-3 gap-3">
-            <p className="text-lg font-medium">Subtotal:</p>
-            <p className="text-lg text-primary font-medium">${totalPrice}.00</p>
-          </div>
-          <div className="flex sm:flex-nowrap flex-wrap justify-between items-center w-full pb-3 border-b border-borderColor gap-2">
-            <Link
-              href={"/cart"}
-              className="flex items-center justify-center sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap hover:text-dark bg-primary hover:bg-white px-8 py-2 gap-2 border border-primary hover:border-dark transition-all ease-linear duration-100"
-            >
-              View cart
-            </Link>
-            <button className="flex items-center justify-center sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap bg-dark hover:bg-primary px-8 py-2 transition-all ease-linear border border-transparent duration-100 gap-2">
-              Check out
-            </button>
-          </div>
-        </div>
-      </div>
+      <ModalCart show={showModalCart} setShow={setShowModalCart} />
     </header>
   );
 };

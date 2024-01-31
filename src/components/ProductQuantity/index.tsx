@@ -1,6 +1,7 @@
 import {
   FC,
   ChangeEvent,
+  KeyboardEvent,
   Dispatch,
   SetStateAction,
   useState,
@@ -34,11 +35,23 @@ const ProductQuantity: FC<Props> = (props: Props) => {
     const value = total + 1;
 
     if (max && value > max) {
-      setMessage("Not enough inventory");
+      setTotalProduct(max);
       return;
     }
 
     setTotalProduct(value);
+  };
+
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    const keyCode = e.key;
+
+    if (keyCode === "ArrowUp") {
+      onIncrease();
+    }
+
+    if (keyCode === "ArrowDown") {
+      onDecrease();
+    }
   };
 
   const handleChangeCount = (e: ChangeEvent<HTMLInputElement>) => {
@@ -51,7 +64,7 @@ const ProductQuantity: FC<Props> = (props: Props) => {
     }
 
     if (max && value > max) {
-      setMessage("Not enough inventory");
+      setTotalProduct(max);
       return;
     }
 
@@ -66,28 +79,27 @@ const ProductQuantity: FC<Props> = (props: Props) => {
 
   return (
     <div className="w-full">
-      <div className="flex items-center w-full h-14">
+      <div className="flex items-center w-full">
         <button
           onClick={onDecrease}
-          className="flex items-center justify-center text-xl font-medium w-4/12 h-full border border-borderColor"
+          className="flex items-center justify-center text-2xl w-10 h-10 border border-borderColor"
         >
           -
         </button>
         <input
           type="text"
+          onKeyDown={onKeyDown}
           onChange={handleChangeCount}
           value={total}
-          className="flex items-center justify-center text-base text-center font-medium w-4/12 h-full border border-borderColor"
+          className="flex items-center justify-center text-sm text-center w-12 h-10 border border-borderColor"
         />
         <button
           onClick={onIncrease}
-          className="flex items-center justify-center text-xl font-medium w-4/12 h-full border border-borderColor"
+          className="flex items-center justify-center text-2xl w-10 h-10 border border-borderColor"
         >
           +
         </button>
       </div>
-
-      {message && <p className="text-sm font-medium text-primary py-2">{message}</p>}
     </div>
   );
 };

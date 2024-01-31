@@ -3,9 +3,6 @@ import { createAction } from "@reduxjs/toolkit";
 export const GetListCart = createAction<void>("GetListCart");
 export const ClearCarts = createAction<void>("ClearCarts");
 
-// get Categories
-export const GetCategories = createAction<any[]>("GetCategories")
-
 export const handleDeleteProductInCart = (
   listCarts: any[],
   index: number

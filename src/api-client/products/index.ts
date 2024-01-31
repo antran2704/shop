@@ -1,6 +1,7 @@
 import qs from "qs";
 import { IFilter, IProductData, IQueryParam } from "~/interfaces";
 import { AxiosGet } from "~/configs/axiosConfig";
+import axios from "axios";
 
 const PRODUCT_KEY = {
   PRODUCTS_PAGE: "products_page",
@@ -10,7 +11,7 @@ const PRODUCT_KEY = {
 };
 
 const getProducts = async (page: number = 1) => {
-  return await AxiosGet(`/products?page=${page}`);
+  return await axios.get(`http://localhost:3001/api/v1/products?page=${page}`).then(res => res.data);
 };
 
 const getOtherProducts = async (
@@ -43,7 +44,7 @@ const getProduct = async (product_id: string) => {
 };
 
 const getProductBySlug = async (slug: string) => {
-  return await AxiosGet(`/products/${slug}`);
+  return await axios.get(`http://localhost:3001/api/v1/products/${slug}`).then(res => res.data);
 };
 
 const getProductsWithFilter = async (

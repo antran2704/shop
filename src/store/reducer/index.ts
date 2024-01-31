@@ -1,5 +1,5 @@
 import { createReducer } from "@reduxjs/toolkit";
-import { ClearCarts, GetCategories, GetListCart } from "../actions";
+import { ClearCarts,GetListCart } from "../actions";
 
 const initialState: any = {
   listCarts: [],
@@ -33,11 +33,6 @@ const rootReducer = createReducer(initialState, (builder) => {
     state.totalCart = 0;
     state.totalPrice = 0;
   });
-
-  builder.addCase(GetCategories, (state, action) => {
-    const listCategories = action.payload;
-    state.categories = listCategories;
-  })
 });
 
 export default rootReducer;

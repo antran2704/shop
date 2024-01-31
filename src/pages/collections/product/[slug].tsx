@@ -26,6 +26,7 @@ import ImageCus from "~/components/Image";
 import ProductQuantity from "~/components/ProductQuantity";
 import { getProductBySlug, getProducts, getVariations } from "~/api-client";
 import {
+  CartItem,
   IBreadcrumb,
   IDataCategory,
   IOptionProduct,
@@ -35,6 +36,7 @@ import {
   IValueOption,
   IVariantProduct,
   NextPageWithLayout,
+  SendCartItem,
 } from "~/interfaces";
 import { GetStaticProps } from "next";
 import {
@@ -47,6 +49,10 @@ import ListProducts from "~/components/Product/List";
 import { useOtherProducts } from "~/hooks/useProducts";
 import Seo from "~/components/Seo";
 import Loading from "~/components/Loading";
+import { useUser, useClerk } from "@clerk/nextjs";
+import { CART_KEY, updateCart } from "~/api-client/cart";
+import { useAppSelector } from "~/store/hooks";
+import { useSWRConfig } from "swr";
 
 interface Props {
   product: IProductData;
@@ -60,9 +66,14 @@ const Layout = DefaultLayout;
 
 const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
   const { product } = props;
+
   const router = useRouter();
   const { slug } = router.query;
+  const { infor } = useAppSelector((state) => state.user);
 
+  const { mutate } = useSWRConfig();
+  const { user } = useUser();
+  const { openSignIn } = useClerk();
   //   console.log(product)
 
   const [totalProduct, setTotalProduct] = useState<number>(1);
@@ -158,53 +169,49 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     }
   };
 
-  // const hanldeAddCart = () => {
-  //   if (productData.listSizes.length > 0 || productData.listColors.length > 0) {
-  //     if (productData.listSizes.length > 0 && !query.size) {
-  //       setMessage({ ...message, messageSize: "Please choose your size!!!" });
-  //       return;
-  //     }
+  const hanldeAddCart = async () => {
+    if (!user || !infor._id) {
+      openSignIn({ redirectUrl: router.asPath });
+      return;
+    }
 
-  //     if (productData.listColors.length > 0 && !query.color) {
-  //       setMessage({ ...message, messageColor: "Please choose your color!!!" });
-  //       return;
-  //     }
-  //   }
+    const keysSelect = Object.keys(selectOption);
 
-  //   let exitIndex = 0;
-  //   const dataProduct: IOrderProduct = {
-  //     name: productData.name,
-  //     slug: router.asPath,
-  //     count: totalProduct,
-  //     price: productData.promotionPrice
-  //       ? productData.promotionPrice
-  //       : productData.price,
-  //     size: query.size || undefined,
-  //     color: query.color || undefined,
-  //     avatarProduct: listImages[0],
-  //   };
-  //   const listCarted = JSON.parse(localStorage.getItem("listCart") || "[]");
-  //   const exitItem = listCarted.find((item: IOrderProduct, index: number) => {
-  //     if (item.name === dataProduct.name && item.slug === dataProduct.slug) {
-  //       exitIndex = index;
-  //       return item;
-  //     }
-  //   });
+    if (keysSelect.length !== product.options.length) {
+      setMessage("Please select options");
+      return;
+    }
 
-  //   if (exitItem) {
-  //     listCarted[exitIndex] = {
-  //       ...exitItem,
-  //       count: exitItem.count + dataProduct.count,
-  //     };
-  //     localStorage.setItem("listCart", JSON.stringify(listCarted));
-  //     setShow(true);
-  //   } else {
-  //     listCarted.push(dataProduct);
-  //     localStorage.setItem("listCart", JSON.stringify(listCarted));
-  //     setShow(true);
-  //   }
-  //   dispatch(GetListCart());
-  // };
+    let data = {} as SendCartItem;
+
+    // const data: CartItem = {
+    //   product_id: variation?.product_id as string
+    // }
+
+    if (variation) {
+      data = {
+        product_id: variation.product_id as string,
+        variation_id: variation._id,
+        quantity: totalProduct,
+      };
+    } else {
+      data = {
+        product_id: product._id as string,
+        variation_id: null,
+        quantity: totalProduct,
+      };
+    }
+
+    try {
+      const { status, payload } = await updateCart(infor._id as string, data);
+
+      if (status === 201) {
+        mutate(CART_KEY.CART_USER);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     if (product && product._id) {
@@ -332,14 +339,14 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                         <h3 className="lg:text-3xl md:text-2xl text-lg font-medium">
                           {formatBigNumber(product.promotion_price)}
                         </h3>
-                        <span className="md:text-sm text-xs font-medium text-white px-2 py-0.5 bg-primary rounded-md">
+                        <sup className="md:text-sm text-xs font-medium text-white px-2 py-1 bg-primary rounded-md">
                           Save -
                           {getPercentPromotionPrice(
                             product.price,
                             product.promotion_price
                           )}
                           %
-                        </span>
+                        </sup>
                       </Fragment>
                     ) : (
                       <h3 className="lg:text-3xl md:text-2xl text-lg font-medium">
@@ -428,14 +435,14 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                               selectOption[option.code] === value.label
                                 ? "bg-primary text-white"
                                 : ""
-                            } hover:bg-primary border border-borderColor rounded-lg transition-all ease-linear duration-100 cursor-pointer`}
+                            } hover:bg-primary border border-borderColor rounded-md transition-all ease-linear duration-100 cursor-pointer`}
                           >
                             {value.label}
                           </button>
                         ))}
                       </div>
                     </div>
-                    {message && (
+                    {message && !selectOption[option.code] && (
                       <p className="text-base text-red-500">{message}</p>
                     )}
                   </div>
@@ -444,28 +451,35 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
               {product && (
                 <div>
                   {inventory > 0 ? (
-                    <div className="flex flex-wrap items-center gap-3">
-                      <div className="lg:w-3/12 md:w-6/12 w-full my-5">
-                        <ProductQuantity
-                          total={totalProduct}
-                          max={inventory}
-                          setTotalProduct={setTotalProduct}
-                        />
+                    <div>
+                      <div className="flex items-center w-full my-5 gap-5">
+                        <span className="md:text-base text-sm font-medium min-w-[100px]">
+                          Số lượng:
+                        </span>
+                        <div className="flex items-center gap-5">
+                          <ProductQuantity
+                            total={totalProduct}
+                            max={inventory}
+                            setTotalProduct={setTotalProduct}
+                          />
+                          <p className="sm:block hidden text-sm text-nowrap">
+                            {!variation
+                              ? formatBigNumber(product.inventory)
+                              : formatBigNumber(variation.inventory)}{" "}
+                            sản phẩm có sẵn
+                          </p>
+                        </div>
                       </div>
-                      <div className="lg:w-8/12 sm:flex-nowrap flex-wrap w-full flex items-center gap-3">
-                        <button className="sm:w-6/12 w-full h-full">
-                          <p
-                            className="flex items-center justify-center w-full h-14 md:text-base text-sm font-medium text-white hover:text-dark bg-primary hover:bg-white px-4 gap-2 border border-primary hover:border-dark transition-all ease-linear duration-100"
-                            // onClick={hanldeAddCart}
-                          >
-                            <AiOutlineShoppingCart className="lg:text-2xl text-xl" />
-                            Add to cart
-                          </p>
+                      <div className="flex items-center sm:flex-nowrap flex-wrap gap-3">
+                        <button
+                          className="flex items-center justify-center lg:w-fit w-full min-w-[140px] h-12 md:text-base text-sm hover:text-white text-dark px-4 hover:bg-primary bg-white rounded border hover:border-primary border-dark transition-all ease-linear duration-100 gap-2"
+                          onClick={hanldeAddCart}
+                        >
+                          <AiOutlineShoppingCart className="lg:text-2xl text-xl" />
+                          Add to cart
                         </button>
-                        <button className="sm:w-6/12 w-full h-full">
-                          <p className="flex items-center justify-center w-full h-14 md:text-base text-sm font-medium text-white bg-dark hover:bg-primary px-4 transition-all ease-linear duration-100 gap-2">
-                            Buy it now
-                          </p>
+                        <button className="flex items-center justify-center lg:w-fit w-full min-w-[140px] h-12 md:text-base text-sm text-white bg-primary rounded px-4 transition-all ease-linear duration-100 gap-2">
+                          Buy it now
                         </button>
                       </div>
                     </div>

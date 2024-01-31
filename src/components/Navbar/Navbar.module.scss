@@ -90,34 +90,3 @@
     }
   }
 }
-
-.modalCart {
-  opacity: 0;
-  pointer-events: none;
-  transition: all linear 0.2s;
-
-  &.show {
-    opacity: 1;
-    pointer-events: inherit;
-
-    .modalCartContent {
-      right: 0%;
-    }
-
-    .modalCartLayout {
-      opacity: 1;
-      pointer-events: inherit;
-    }
-  }
-
-  .modalCartContent {
-    right: -50%;
-    transition: all linear 0.3s;
-  }
-
-  .modalCartLayout {
-    opacity: 0;
-    pointer-events: none;
-    transition: all linear 0.2s;
-  }
-}
