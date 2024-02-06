@@ -7,9 +7,12 @@ import { RootState } from "~/store";
 import { handleDeleteProductInCart, GetListCart } from "~/store/actions";
 
 import ProductQuantity from "~/components/ProductQuantity";
+import { ICartItem } from "~/interfaces";
+import ImageCus from "~/components/Image";
+import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
 
 interface Props {
-  data: any;
+  data: ICartItem;
   index: number;
 }
 
@@ -19,7 +22,7 @@ const CartItem: FC<Props> = (props: Props) => {
   const dispatch = useDispatch();
   const { listCarts } = useSelector((state: RootState) => state.data);
 
-  const [totalProduct, setTotalProduct] = useState<number>(data.count);
+  const [totalProduct, setTotalProduct] = useState<number>(data.quantity);
 
   const handleDeleteItemCart = () => {
     handleDeleteProductInCart(listCarts, index);
@@ -37,31 +40,70 @@ const CartItem: FC<Props> = (props: Props) => {
   }, [totalProduct]);
   return (
     <li className="flex lg:flex-row flex-col items-center justify-between w-full lg:pb-5 p-5 border border-borderColor gap-5">
-      <Link href={data.slug} className="lg:w-1/12 sm:w-6/12 w-10/12">
-        <img src={data.avatarProduct} alt="image cart" className="w-full" />
+      <Link
+        href={`/collections/product/${data.product.slug}`}
+        className="lg:w-1/12 sm:w-6/12 w-10/12"
+      >
+        <ImageCus
+          src={data.product.thumbnail as string}
+          title={data.product.title as string}
+          alt={data.product.title as string}
+        />
       </Link>
       <div className="lg:w-4/12 w-full lg:text-start text-center">
         <Link
-          href={data.slug}
+          href={`/collections/product/${data.product.slug}`}
           className="text-base font-medium hover:text-primary"
         >
-          {data.name}
+          {data.product.title}
         </Link>
-        <div className="flex items-center lg:justify-start justify-center gap-2">
+        {/* <div className="flex items-center lg:justify-start justify-center gap-2">
           {data.size && <span className="text-sm">Size: {data.size}</span>}
           {data.color && <span className="text-sm">Color: {data.color}</span>}
-        </div>
+        </div> */}
       </div>
-      <p className="lg:w-1/12 w-full text-base text-center">${data.price}.00</p>
+      {!data.variation && (
+        <p className="lg:w-1/12 w-full text-base text-center">
+          {(data.product.promotion_price as number) > 0
+            ? formatBigNumber(data.product.promotion_price as number)
+            : formatBigNumber(data.product.price as number)}
+          {" VND"}
+        </p>
+      )}
+      {data.variation && (
+        <p className="lg:w-1/12 w-full text-base text-center">
+          {(data.variation.promotion_price as number) > 0
+            ? formatBigNumber(data.variation.promotion_price as number)
+            : formatBigNumber(data.variation.price as number)}
+          {" VND"}
+        </p>
+      )}
       <div className="lg:w-2/12 w-full">
         <ProductQuantity
           total={totalProduct}
           setTotalProduct={setTotalProduct}
         />
       </div>
-      <p className="lg:w-1/12 w-full text-base text-center">
-        ${totalProduct * data.price}.00
-      </p>
+      {!data.variation && (
+        <p className="lg:w-1/12 w-full text-base text-center">
+          {(data.product.promotion_price as number) > 0
+            ? formatBigNumber(
+                (data.product.promotion_price as number) * data.quantity
+              )
+            : formatBigNumber((data.product.price as number) * data.quantity)}
+          {" VND"}
+        </p>
+      )}
+      {data.variation && (
+        <p className="lg:w-1/12 w-full text-base text-center">
+          {(data.variation.promotion_price as number) > 0
+            ? formatBigNumber(
+                (data.variation.promotion_price as number) * data.quantity
+              )
+            : formatBigNumber((data.variation.price as number) * data.quantity)}
+          {" VND"}
+        </p>
+      )}
       <div className="flex items-center justify-center lg:w-1/12 w-full">
         <AiOutlineClose
           className="text-xl cursor-pointer"

@@ -5,7 +5,6 @@ import { useUser, UserButton, SignInButton } from "@clerk/nextjs";
 import {
   AiOutlineShoppingCart,
   AiOutlineClose,
-  AiFillCloseCircle,
   AiOutlineSearch,
 } from "react-icons/ai";
 import { BsArrowRightShort, BsArrowLeftShort } from "react-icons/bs";
@@ -28,11 +27,11 @@ import { LOGO } from "~/configs/images";
 import styles from "./Navbar.module.scss";
 import { useAppSelector } from "~/store/hooks";
 import { useCart } from "~/hooks/useCart";
-import ModalCart from "../Mordal/ModalCart";
+import ModalCart from "../Modal/ModalCart";
 
 const Navbar: FC = () => {
   const { infor } = useAppSelector((state) => state.user);
-
+  console.log(infor)
   const { cart } = useCart(!!infor._id, infor._id as string);
 
   const { isSignedIn, user } = useUser();

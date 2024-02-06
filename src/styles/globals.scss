@@ -71,11 +71,13 @@ body::-webkit-scrollbar {
   @include scrollHidden();
 }
 
-input[type="checkbox"]:checked, input[type="radio"]:checked {
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
   background-color: var(--primary-color);
 }
 
-input[type="checkbox"], input[type="radio"] {
+input[type="checkbox"],
+input[type="radio"] {
   cursor: pointer;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -325,8 +327,22 @@ input[type="checkbox"]:checked:after {
   }
 }
 
+.fade_up {
+  opacity: 0;
+  animation: fadeUp linear 0.2s forwards;
+}
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 
 // clerk
-.cl-internal-b3fm6y, .cl-internal-uyu30o {
+.cl-internal-b3fm6y,
+.cl-internal-uyu30o {
   display: none;
 }

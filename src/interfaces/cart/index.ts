@@ -1,6 +1,6 @@
 import { IProductData, IVariantProduct } from "../product";
 
-interface CartItem {
+interface ICartItem {
   product: Partial<IProductData>;
   variation: Partial<IVariantProduct> | null;
   // option: string | null;
@@ -13,12 +13,14 @@ interface SendCartItem {
   quantity: number;
 }
 
+type SendDeleteCartItem = Omit<SendCartItem, 'quantity'>;
+
 interface Cart {
   cart_userId: string;
   cart_status: "active" | "pending" | "failed" | "compeleted";
-  cart_products: CartItem[];
+  cart_products: ICartItem[];
   cart_count: number;
   cart_total: number;
 }
 
-export type { Cart, CartItem, SendCartItem };
+export type { Cart, ICartItem, SendCartItem, SendDeleteCartItem };

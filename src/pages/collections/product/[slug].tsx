@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import {
-  useRef,
   useEffect,
   useState,
   Fragment,
@@ -26,7 +25,6 @@ import ImageCus from "~/components/Image";
 import ProductQuantity from "~/components/ProductQuantity";
 import { getProductBySlug, getProducts, getVariations } from "~/api-client";
 import {
-  CartItem,
   IBreadcrumb,
   IDataCategory,
   IOptionProduct,
@@ -50,9 +48,10 @@ import { useOtherProducts } from "~/hooks/useProducts";
 import Seo from "~/components/Seo";
 import Loading from "~/components/Loading";
 import { useUser, useClerk } from "@clerk/nextjs";
-import { CART_KEY, updateCart } from "~/api-client/cart";
+import { CART_KEY, increaseCart } from "~/api-client/cart";
 import { useAppSelector } from "~/store/hooks";
 import { useSWRConfig } from "swr";
+import { toast } from "react-toastify";
 
 interface Props {
   product: IProductData;
@@ -74,7 +73,6 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
   const { mutate } = useSWRConfig();
   const { user } = useUser();
   const { openSignIn } = useClerk();
-  //   console.log(product)
 
   const [totalProduct, setTotalProduct] = useState<number>(1);
   const [inventory, setInventory] = useState<number>(0);
@@ -184,10 +182,6 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
     let data = {} as SendCartItem;
 
-    // const data: CartItem = {
-    //   product_id: variation?.product_id as string
-    // }
-
     if (variation) {
       data = {
         product_id: variation.product_id as string,
@@ -203,13 +197,29 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     }
 
     try {
-      const { status, payload } = await updateCart(infor._id as string, data);
+      const { status, payload } = await increaseCart(infor._id as string, data);
 
       if (status === 201) {
         mutate(CART_KEY.CART_USER);
+        toast.success("Thêm thành công", {
+          position: toast.POSITION.BOTTOM_RIGHT,
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+
+      if (!error.response) return;
+
+      const res = error.response;
+
+      if (
+        res.status === 400 &&
+        res.data.message === "Quantity order bigger than inventory"
+      ) {
+        toast.warning("Bạn đã có sản phẩm này trong giỏ hàng, không thể thêm số lượng", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      }
     }
   };
 
@@ -330,8 +340,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
                 {!variation && (
                   <div className="flex flex-wrap items-end my-3 gap-3">
-                    {product.promotion_price > 0 &&
-                    product.promotion_price < product.price ? (
+                    {product.promotion_price > 0 ? (
                       <Fragment>
                         <h3 className="lg:text-2xl md:text-xl text-lg font-medium text-[#6a7779] line-through">
                           {formatBigNumber(product.price)}
@@ -358,8 +367,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
                 {variation && (
                   <div className="flex flex-wrap items-end my-3 gap-3">
-                    {variation.promotion_price > 0 &&
-                    variation.promotion_price < variation.price ? (
+                    {variation.promotion_price > 0 ? (
                       <Fragment>
                         <h3 className="lg:text-2xl md:text-xl text-lg font-medium text-[#6a7779] line-through">
                           {formatBigNumber(variation.price)}

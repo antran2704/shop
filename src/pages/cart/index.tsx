@@ -1,37 +1,49 @@
 import Link from "next/link";
-import { FC } from "react";
+import { FC, ReactElement } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 import Header from "~/components/Header";
-import CartItem from "~/components/CartItem";
+// import CartItem from "~/components/CartItem";
 
 import { RootState } from "~/store";
 import { ClearCarts } from "~/store/actions";
+import { ICartItem, NextPageWithLayout } from "~/interfaces";
+import DefaultLayout from "~/layouts/DefaultLayout";
+import { useCart } from "~/hooks/useCart";
+import { useAppSelector } from "~/store/hooks";
+import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
+import CartItem from "~/components/CartItem";
 
-const Cart: FC = () => {
-  const dispatch = useDispatch();
-  const { listCarts, totalPrice } = useSelector(
-    (state: RootState) => state.data
-  );
+const Layout = DefaultLayout;
+
+const Cart: NextPageWithLayout = () => {
+  const { infor } = useAppSelector((state) => state.user);
+  const { cart, loadingCart } = useCart(!!infor._id, infor._id as string);
   return (
     <div>
-      {/* <Header title={"Cart"} listBackLinks={[{ title: "Home", link: "/" }]} /> */}
+      <Header
+        title={"Cart"}
+        breadcrumbs={[
+          { label: "Home", url_path: "/" },
+          { label: "Cart", url_path: "/" },
+        ]}
+      />
 
       <section className="container__cus">
-        {listCarts.length > 0 ? (
+        {cart && cart.cart_products.length > 0 ? (
           <div>
             <ul className="flex flex-col items-start my-10 lg:gap-5 gap-10">
-              {/* {listCarts.map((item: IOrderProduct, index: number) => (
+              {cart.cart_products.map((item: ICartItem, index: number) => (
                 <CartItem data={item} index={index} key={index} />
-              ))} */}
+              ))}
             </ul>
             <div className="flex lg:flex-nowrap flex-wrap items-start justify-between gap-5">
               <div className="lg:w-4/12 w-full">
                 <button
-                  onClick={() => dispatch(ClearCarts())}
+                  // onClick={() => dispatch(ClearCarts())}
                   className="flex items-center justify-center sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap hover:text-dark bg-primary hover:bg-white px-8 py-2 gap-2 border border-primary hover:border-dark transition-all ease-linear duration-100"
                 >
                   Clear cart
@@ -50,7 +62,7 @@ const Cart: FC = () => {
                   <tbody className="w-6/12 md:text-lg text-base">
                     <tr className="block w-full">
                       <td className="block w-full text-start p-4 border border-borderColor">
-                        ${totalPrice}.00
+                        {cart ? formatBigNumber(cart.cart_total) : 0} VND
                       </td>
                     </tr>
                   </tbody>
@@ -300,3 +312,6 @@ const Cart: FC = () => {
 };
 
 export default Cart;
+Cart.getLayout = function getLayout(page: ReactElement) {
+  return <Layout>{page}</Layout>;
+};

@@ -1,5 +1,5 @@
 import { AxiosGet, AxiosPost } from "~/configs/axiosConfig";
-import { CartItem, SendCartItem } from "~/interfaces";
+import { SendCartItem, SendDeleteCartItem } from "~/interfaces";
 
 const CART_KEY = {
   CART_USER: "cart_user",
@@ -13,4 +13,12 @@ const updateCart = async (user_id: string, data: SendCartItem) => {
   return await AxiosPost(`/carts/update/${user_id}`, data);
 };
 
-export { getCart, updateCart, CART_KEY };
+const increaseCart = async (user_id: string, data: SendCartItem) => {
+  return await AxiosPost(`/carts/increase/${user_id}`, data);
+};
+
+const deleteItemCart = async (user_id: string, data: SendDeleteCartItem) => {
+  return await AxiosPost(`/carts/item/${user_id}`, data);
+};
+
+export { getCart, updateCart, increaseCart, deleteItemCart, CART_KEY };

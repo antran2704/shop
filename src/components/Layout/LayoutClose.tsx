@@ -1,21 +1,22 @@
 import { memo, useEffect } from "react";
 
 interface Props {
+  disableScroll?: boolean;
   handleClose: () => void;
 }
 
 const LayoutClose = (props: Props) => {
-  const { handleClose } = props;
+  const { disableScroll = true, handleClose } = props;
 
   useEffect(() => {
     const element = document.getElementById("body");
 
-    if (element) {
+    if (element && disableScroll) {
       element.style.overflowY = "hidden";
     }
 
     return () => {
-      if (element) {
+      if (element && disableScroll) {
         element.style.overflowY = "scroll";
       }
     };
