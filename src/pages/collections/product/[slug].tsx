@@ -5,6 +5,7 @@ import {
   useState,
   Fragment,
   useMemo,
+  useCallback,
   ReactElement,
 } from "react";
 
@@ -52,6 +53,7 @@ import { CART_KEY, increaseCart } from "~/api-client/cart";
 import { useAppSelector } from "~/store/hooks";
 import { useSWRConfig } from "swr";
 import { toast } from "react-toastify";
+import PrimaryButton from "~/components/Button/PrimaryButton";
 
 interface Props {
   product: IProductData;
@@ -62,6 +64,12 @@ interface ISelectOption {
 }
 
 const Layout = DefaultLayout;
+
+const ICON = {
+  AiOutlineShoppingCart: (
+    <AiOutlineShoppingCart className="lg:text-2xl text-xl" />
+  ),
+};
 
 const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
   const { product } = props;
@@ -152,7 +160,6 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
       setTotalProduct(1);
       setInventory(item.inventory);
     }
-    console.log("item:::", item);
   };
 
   const handleGetVariations = async (product_id: string) => {
@@ -167,7 +174,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     }
   };
 
-  const hanldeAddCart = async () => {
+  const hanldeAddCart = useCallback(async () => {
     if (!user || !infor._id) {
       openSignIn({ redirectUrl: router.asPath });
       return;
@@ -216,12 +223,15 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
         res.status === 400 &&
         res.data.message === "Quantity order bigger than inventory"
       ) {
-        toast.warning("Bạn đã có sản phẩm này trong giỏ hàng, không thể thêm số lượng", {
-          position: toast.POSITION.TOP_RIGHT,
-        });
+        toast.warning(
+          "Bạn đã có sản phẩm này trong giỏ hàng, không thể thêm số lượng",
+          {
+            position: toast.POSITION.TOP_RIGHT,
+          }
+        );
       }
     }
-  };
+  }, [selectOption, user, infor, totalProduct]);
 
   useEffect(() => {
     if (product && product._id) {
@@ -479,16 +489,18 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                         </div>
                       </div>
                       <div className="flex items-center sm:flex-nowrap flex-wrap gap-3">
-                        <button
-                          className="flex items-center justify-center lg:w-fit w-full min-w-[140px] h-12 md:text-base text-sm hover:text-white text-dark px-4 hover:bg-primary bg-white rounded border hover:border-primary border-dark transition-all ease-linear duration-100 gap-2"
+                        <PrimaryButton
+                          title="Add to cart"
+                          Icon={ICON.AiOutlineShoppingCart}
                           onClick={hanldeAddCart}
-                        >
-                          <AiOutlineShoppingCart className="lg:text-2xl text-xl" />
-                          Add to cart
-                        </button>
-                        <button className="flex items-center justify-center lg:w-fit w-full min-w-[140px] h-12 md:text-base text-sm text-white bg-primary rounded px-4 transition-all ease-linear duration-100 gap-2">
-                          Buy it now
-                        </button>
+                          className="lg:w-fit w-full min-w-[140px] h-12 md:text-base text-sm hover:text-white text-dark px-4 hover:bg-primary bg-white rounded border hover:border-primary border-dark "
+                          type="BUTTON"
+                        />
+                        <PrimaryButton
+                          title="Buy it now"
+                          className="lg:w-fit w-full min-w-[140px] h-12 md:text-base text-sm text-white bg-primary rounded px-4 gap-2"
+                          type="BUTTON"
+                        />
                       </div>
                     </div>
                   ) : (

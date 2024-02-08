@@ -15,6 +15,8 @@ import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
 import { CART_KEY, deleteItemCart } from "~/api-client/cart";
 import { useSWRConfig } from "swr";
 import ModalConfirm from "../ModalConfirm";
+import ModalCartItem from "./Item";
+import ModalCartItemLoading from "./ItemLoading";
 
 interface Props {
   show: boolean;
@@ -77,63 +79,20 @@ const ModalCart = (props: Props) => {
         </div>
         <ul className="scrollHidden flex flex-col w-full h-[80vh] pb-3 border-b border-borderColor gap-3 overflow-y-auto ">
           {cart &&
+            !loadingCart &&
             cart.cart_products.map((item: ICartItem, index: number) => (
-              <li key={index}>
-                <Link
-                  href={`/collections/product/${item.product.slug}`}
-                  className="relative flex items-center pb-3 px-2 border-b border-borderColor gap-4"
-                >
-                  <div className="h-20">
-                    <ImageCus
-                      src={item.product.thumbnail as string}
-                      className="sm:w-[80px] sm:h-[80px] w-[60px] h-[60px] rounded-lg"
-                      alt="img"
-                      title="img"
-                    />
-                  </div>
-                  <div className="w-6/12">
-                    <p className="sm:text-base text-sm font-medium hover:text-primary line-clamp-2">
-                      {item.variation
-                        ? item.variation.title
-                        : item.product.title}
-                    </p>
-                    {item.variation && (
-                      <div className="flex items-center gap-2">
-                        {item.variation.options?.join("/")}
-                      </div>
-                    )}
-                    {item.variation && (
-                      <p className="sm:text-base text-sm mt-2">
-                        {(item.variation.promotion_price as number) > 0
-                          ? formatBigNumber(
-                              item.variation.promotion_price as number
-                            )
-                          : formatBigNumber(item.variation.price as number)}
-                        {" VND "}X {item.quantity}
-                      </p>
-                    )}
+              <ModalCartItem
+                key={index}
+                data={item}
+                setSelectItem={setSelectItem}
+                showModalConfirm={showModalConfirm}
+                setShowModalConfirm={setShowModalConfirm}
+              />
+            ))}
 
-                    {!item.variation && (
-                      <p className="sm:text-base text-sm mt-2">
-                        {(item.product.promotion_price as number) > 0
-                          ? formatBigNumber(
-                              item.product.promotion_price as number
-                            )
-                          : formatBigNumber(item.product.price as number)}
-                        {" VND"}X {item.quantity}
-                      </p>
-                    )}
-                  </div>
-
-                  <AiFillCloseCircle
-                    onClick={() => {
-                      setSelectItem(item);
-                      setShowModalConfirm(!showModalConfirm);
-                    }}
-                    className="absolute top-0 right-2 text-2xl hover:text-primary cursor-pointer"
-                  />
-                </Link>
-              </li>
+          {!cart &&
+            [...new Array(3)].map((item: ICartItem, index: number) => (
+              <ModalCartItemLoading key={index} />
             ))}
         </ul>
         <div className="flex w-full items-center justify-between pb-3 gap-3">

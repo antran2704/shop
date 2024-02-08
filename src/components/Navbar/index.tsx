@@ -31,7 +31,6 @@ import ModalCart from "../Modal/ModalCart";
 
 const Navbar: FC = () => {
   const { infor } = useAppSelector((state) => state.user);
-  console.log(infor)
   const { cart } = useCart(!!infor._id, infor._id as string);
 
   const { isSignedIn, user } = useUser();
@@ -172,21 +171,23 @@ const Navbar: FC = () => {
             )}
           </div>
 
-          <div
-            className="relative cursor-pointer"
-            onClick={() => setShowModalCart(true)}
-          >
-            <AiOutlineShoppingCart className="relative lg:text-3xl md:text-2xl text-xl z-0" />
-            {cart ? (
-              <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
-                {cart.cart_count < 100 ? cart.cart_count : 99}
-              </span>
-            ) : (
-              <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
-                0
-              </span>
-            )}
-          </div>
+          {isSignedIn && user && (
+            <div
+              className="relative cursor-pointer"
+              onClick={() => setShowModalCart(true)}
+            >
+              <AiOutlineShoppingCart className="relative lg:text-3xl md:text-2xl text-xl z-0" />
+              {cart ? (
+                <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
+                  {cart.cart_count < 100 ? cart.cart_count : 99}
+                </span>
+              ) : (
+                <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
+                  0
+                </span>
+              )}
+            </div>
+          )}
           {!isSignedIn && !user ? (
             <SignInButton>
               <button className="block px-3 py-1 rounded-md bg-primary text-white lg:text-lg text-base">

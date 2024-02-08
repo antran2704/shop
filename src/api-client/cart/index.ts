@@ -21,4 +21,8 @@ const deleteItemCart = async (user_id: string, data: SendDeleteCartItem) => {
   return await AxiosPost(`/carts/item/${user_id}`, data);
 };
 
-export { getCart, updateCart, increaseCart, deleteItemCart, CART_KEY };
+const deleteAllItemsCart = async (user_id: string) => {
+  return await AxiosPost(`/carts/items/${user_id}`, {});
+};
+
+export { getCart, updateCart, increaseCart, deleteItemCart, deleteAllItemsCart, CART_KEY };
