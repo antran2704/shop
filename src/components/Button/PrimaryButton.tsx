@@ -12,7 +12,7 @@ interface Props {
 
 const PrimaryButton = (props: Props) => {
   const { title, type, path = "/", className, Icon, onClick } = props;
-  
+
   switch (type) {
     case "BUTTON":
       return (
@@ -26,13 +26,15 @@ const PrimaryButton = (props: Props) => {
       );
 
     case "LINK":
-      <Link
-        href={path}
-        className={`flex items-center justify-center ${className} transition-all ease-linear duration-100 gap-2`}
-      >
-        {Icon}
-        {title}
-      </Link>;
+      return (
+        <Link
+          href={path}
+          className={`flex items-center justify-center ${className} transition-all ease-linear duration-100 gap-2`}
+        >
+          {Icon}
+          {title}
+        </Link>
+      );
 
     default:
       return <Fragment></Fragment>;

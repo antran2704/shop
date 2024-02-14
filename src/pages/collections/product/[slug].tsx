@@ -165,7 +165,6 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
   const handleGetVariations = async (product_id: string) => {
     try {
       const res = await getVariations(product_id);
-
       if (res.status === 200) {
         setVariations(res.payload);
       }
@@ -231,7 +230,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
         );
       }
     }
-  }, [selectOption, user, infor, totalProduct]);
+  }, [selectOption, user, infor, totalProduct, variation]);
 
   useEffect(() => {
     if (product && product._id) {

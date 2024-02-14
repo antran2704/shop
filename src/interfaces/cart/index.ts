@@ -3,7 +3,6 @@ import { IProductData, IVariantProduct } from "../product";
 interface ICartItem {
   product: Partial<IProductData>;
   variation: Partial<IVariantProduct> | null;
-  // option: string | null;
   quantity: number;
 }
 

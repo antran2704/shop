@@ -1,13 +1,11 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import Link from "next/link";
-import { AiFillCloseCircle, AiOutlineClose } from "react-icons/ai";
+import { AiOutlineClose } from "react-icons/ai";
 
 import { useCart } from "~/hooks/useCart";
 import { useAppSelector } from "~/store/hooks";
 
 import LayoutClose from "~/components/Layout/LayoutClose";
-import ImageCus from "~/components/Image";
 
 import styles from "./ModalCart.module.scss";
 import { ICartItem, SendDeleteCartItem } from "~/interfaces";
@@ -17,6 +15,7 @@ import { useSWRConfig } from "swr";
 import ModalConfirm from "../ModalConfirm";
 import ModalCartItem from "./Item";
 import ModalCartItemLoading from "./ItemLoading";
+import PrimaryButton from "~/components/Button/PrimaryButton";
 
 interface Props {
   show: boolean;
@@ -91,6 +90,7 @@ const ModalCart = (props: Props) => {
             ))}
 
           {!cart &&
+            loadingCart &&
             [...new Array(3)].map((item: ICartItem, index: number) => (
               <ModalCartItemLoading key={index} />
             ))}
@@ -102,15 +102,19 @@ const ModalCart = (props: Props) => {
           </p>
         </div>
         <div className="flex sm:flex-nowrap flex-wrap justify-between items-center w-full gap-2">
-          <Link
-            href={"/cart"}
-            className="flex items-center justify-center sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap hover:text-dark bg-primary hover:bg-white px-8 py-2 gap-2 border border-primary hover:border-dark transition-all ease-linear duration-100"
-          >
-            View cart
-          </Link>
-          <button className="flex items-center justify-center sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap bg-dark hover:bg-primary px-8 py-2 transition-all ease-linear border border-transparent duration-100 gap-2">
-            Check out
-          </button>
+          <PrimaryButton
+            title="View cart"
+            type="LINK"
+            className="sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap hover:text-dark bg-primary hover:bg-white px-8 py-2 gap-2 border border-primary hover:border-dark rounded"
+            path="/cart"
+          />
+
+          <PrimaryButton
+            title="Check out"
+            type="LINK"
+            className="sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap bg-dark hover:bg-primary px-8 py-2 border border-transparent rounded"
+            path="/checkout"
+          />
         </div>
       </div>
 

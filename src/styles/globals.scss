@@ -88,7 +88,12 @@ input[type="radio"] {
   color: white;
 }
 
-input[type="checkbox"]:after {
+input[type="radio"] {
+  border-radius: 50%;
+}
+
+input[type="checkbox"]:after,
+input[type="radio"]:after {
   content: " ";
   position: relative;
   left: 32%;
@@ -101,7 +106,8 @@ input[type="checkbox"]:after {
   display: none;
 }
 
-input[type="checkbox"]:checked:after {
+input[type="checkbox"]:checked:after,
+input[type="radio"]:checked:after {
   display: block;
 }
 

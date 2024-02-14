@@ -8,7 +8,6 @@ const REFESH_TIME = 1000 * 60 * 30;
 const fetcherCart = async (user_id: string) => {
   try {
     const res = await getCart(user_id);
-    console.log(res);
     if (res.status === 200) {
       return res;
     }
