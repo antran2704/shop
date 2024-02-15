@@ -6,14 +6,15 @@ export enum EOrderStatus {
 }
 
 export enum EPaymentStatus {
-  PENDING = "peding",
+  PENDING = "pending",
   CANCLE = "cancle",
   SUCCESS = "success",
 }
 
 export enum EPaymentMethod {
-  VNPAY = "VNPay",
+  VNPAY = "vnpay",
   COD = "cod",
+  BANKING = "banking",
   CASH = "cash",
-  CARD = "cart"
+  CARD = "card"
 }

@@ -1,13 +1,11 @@
 import Link from "next/link";
 import {
   useState,
-  ChangeEvent,
   FormEvent,
   useEffect,
   Fragment,
   ReactElement,
   useMemo,
-  KeyboardEvent,
 } from "react";
 
 import Header from "~/components/Header";
@@ -17,22 +15,27 @@ import {
   ICoupon,
   IInforCheckout,
   IMethodPayment,
-  IUseDiscount,
+  IQueryParam,
   NextPageWithLayout,
 } from "~/interfaces";
 import PrimaryButton from "~/components/Button/PrimaryButton";
 import { useAppSelector } from "~/store/hooks";
 import { useCart } from "~/hooks/useCart";
-import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
+import {
+  formatBigNumber,
+  getValueCoupon,
+} from "~/helpers/number/fomatterCurrency";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import { useRouter } from "next/router";
 import { createPayment, getDiscount } from "~/api-client";
 import { toast } from "react-toastify";
 import { AiFillCloseCircle } from "react-icons/ai";
 import { InputText, InputEmail } from "~/components/InputField";
-import { IOrderCreate, ItemOrder } from "~/interfaces/order";
-import { EPaymentMethod } from "~/enums";
-import { createOrder } from "~/api-client/order";
+import { IOrderCreate, ItemOrder, Order } from "~/interfaces/order";
+import { EPaymentMethod, EPaymentStatus } from "~/enums";
+import { createOrder, updatePaymentStatusOrder } from "~/api-client/order";
+import { CART_KEY } from "~/api-client/cart";
+import paymentMethods from "~/data/paymentMethods";
 
 const initInforCustomer: IInforCheckout = {
   email: "",
@@ -41,38 +44,16 @@ const initInforCustomer: IInforCheckout = {
   address: "",
 };
 
-const paymentMethods: IMethodPayment[] = [
-  {
-    id: 1,
-    title: "Thanh toán khi giao hàng (COD)",
-    icon: "/payments/cod.svg",
-    type: EPaymentMethod.CASH,
-  },
-  {
-    id: 2,
-    title: "Thanh toán Online VNPay",
-    icon: "/payments/vnpay_icon.svg",
-    type: EPaymentMethod.VNPAY,
-  },
-  {
-    id: 3,
-    title: "Chuyển khoản qua ngân hàng",
-    icon: "/payments/banking.svg",
-    type: EPaymentMethod.CARD,
-  },
-];
-
-type IQueryParam<T> = {
-  [key in keyof T]: string;
-};
-
 const Layout = DefaultLayout;
 
 const CheckOut: NextPageWithLayout = () => {
   const router = useRouter();
 
   const { infor } = useAppSelector((state) => state.user);
-  const { cart, loadingCart } = useCart(!!infor._id, infor._id as string);
+  const { cart, loadingCart, mutate } = useCart(
+    !!infor._id,
+    infor._id as string
+  );
 
   const [inforCustomer, setInforCustomer] =
     useState<IInforCheckout>(initInforCustomer);
@@ -121,6 +102,36 @@ const CheckOut: NextPageWithLayout = () => {
     setInforCustomer({ ...inforCustomer, [name]: value });
   };
 
+  const handlePaymentMethod = async (order: Order, method: EPaymentMethod) => {
+    try {
+      switch (method) {
+        case EPaymentMethod.COD:
+          await updatePaymentStatusOrder(order.order_id, {
+            payment_status: EPaymentStatus.SUCCESS,
+          });
+          router.push(`/checkout/${order.order_id}`);
+          break;
+
+        case EPaymentMethod.BANKING:
+          router.push(`/checkout/${order.order_id}`);
+          break;
+
+        case EPaymentMethod.VNPAY:
+          const urlPayment = await createPayment(order);
+
+          // router.push(urlPayment.payload);
+          break;
+
+        default:
+          toast.error("Phương thức thanh toán không hợp lệ", {
+            position: toast.POSITION.TOP_RIGHT,
+          });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -137,6 +148,11 @@ const CheckOut: NextPageWithLayout = () => {
         position: toast.POSITION.TOP_RIGHT,
       });
 
+      return;
+    }
+
+    if (!cart || cart.cart_products.length <= 0) {
+      router.push("/cart");
       return;
     }
 
@@ -171,38 +187,33 @@ const CheckOut: NextPageWithLayout = () => {
       total,
       user_id: infor._id,
       user_infor: inforCustomer,
+      discount: coupon,
+      payment_status: EPaymentStatus.PENDING,
       payment_method: paymentMethod as EPaymentMethod,
     };
 
     try {
       const newOrder = await createOrder(dataOrder);
-
-      if(newOrder.status === 201) {
-        const urlPayment = await createPayment(newOrder.payload);
-
-        console.log(urlPayment.payload)
+      if (newOrder.status === 201) {
+        handlePaymentMethod(newOrder.payload, paymentMethod);
       }
-    } catch (error) {
+    } catch (error: any) {
+      if (!error.response) {
+        toast.error("Lỗi hệ thống, vui lòng thử lại sau", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      }
+
+      const response = error.response;
+
+      if (response.status === 400) {
+        if (response.data.message === "No item") {
+          mutate(CART_KEY.CART_USER);
+          router.push("/cart");
+        }
+      }
+
       console.log(error);
-    }
-  };
-
-  const test = async () => {
-    try {
-      // const res = await createPayment();
-      // console.log(res.payload);
-      // router.replace(res.payload);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const onKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (!couponCode) return;
-
-    const key = e.key;
-    if (key === "Enter") {
-      handleUseCoupon();
     }
   };
 
@@ -250,13 +261,12 @@ const CheckOut: NextPageWithLayout = () => {
     }
 
     if (coupon) {
-      if (coupon.discount_type === "percentage") {
-        result =
-          subTotal - (subTotal * coupon.discount_value) / 100 + shippingCost;
-      } else {
-        result = subTotal - coupon.discount_value + shippingCost;
-      }
-
+      const couponValue = getValueCoupon(
+        subTotal,
+        coupon.discount_value,
+        coupon.discount_type
+      );
+      result = subTotal - couponValue + shippingCost;
       setTotalDiscount(result);
     }
 
@@ -276,7 +286,7 @@ const CheckOut: NextPageWithLayout = () => {
 
   useEffect(() => {
     if (cart && cart.cart_products.length <= 0) {
-      router.push("/");
+      router.push("/cart");
     }
 
     if (cart) {
@@ -290,6 +300,7 @@ const CheckOut: NextPageWithLayout = () => {
         title="Check out"
         breadcrumbs={[
           { label: "Home", url_path: "/" },
+          { label: "Cart", url_path: "/cart" },
           { label: "Check out", url_path: "/checkout" },
         ]}
       />
@@ -300,7 +311,6 @@ const CheckOut: NextPageWithLayout = () => {
             <h3 className="lg:text-2xl md:text-xl text-lg font-medium mb-3">
               Thông tin
             </h3>
-            <button onClick={test}>create payment</button>
             <form
               onSubmit={(e) => handleSubmit(e)}
               className="flex flex-col gap-3"
@@ -585,7 +595,7 @@ const CheckOut: NextPageWithLayout = () => {
                 <div className="flex items-center justify-between mt-5 gap-5">
                   <p className="text-base font-medium">Total:</p>
                   <p className="text-base font-medium">
-                    {formatBigNumber(handleCalTotal)}
+                    {formatBigNumber(handleCalTotal)} VND
                   </p>
                 </div>
               </Fragment>

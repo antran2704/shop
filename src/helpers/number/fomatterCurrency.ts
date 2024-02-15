@@ -18,9 +18,22 @@ const revertPriceToString = (value: string) => {
   return value.split(".").join("");
 };
 
+const getValueCoupon = (
+  subTotal: number,
+  couponValue: number,
+  couponType: string
+) => {
+  if (couponType === "percentage") {
+    return (subTotal * couponValue) / 100;
+  } else {
+    return couponValue;
+  }
+};
+
 export {
   CURRENCY_CHARACTER,
   formatBigNumber,
   revertPriceToString,
   getPercentPromotionPrice,
+  getValueCoupon
 };

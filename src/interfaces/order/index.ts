@@ -1,6 +1,7 @@
 import { EPaymentMethod, EPaymentStatus } from "~/enums";
 import { ICartItem } from "../cart";
 import { IInforCheckout } from "../user";
+import { ICoupon } from "../coupon";
 
 interface ItemOrder extends ICartItem {
   price: number;
@@ -15,6 +16,7 @@ interface Order {
   shipping_cost: number;
   sub_total: number;
   total: number;
+  discount: ICoupon | null;
   payment_method: EPaymentMethod;
   payment_status: EPaymentStatus;
   cancleContent: string | null;
@@ -23,7 +25,7 @@ interface Order {
 
 type IOrderCreate = Omit<
   Order,
-  "order_id" | "payment_status" | "cancleContent" | "note"
+  "order_id" | "cancleContent" | "note"
 >;
 
 export type { Order, ItemOrder, IOrderCreate };
