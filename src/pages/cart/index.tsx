@@ -22,7 +22,11 @@ const Layout = DefaultLayout;
 
 const Cart: NextPageWithLayout = () => {
   const { infor } = useAppSelector((state) => state.user);
-  const { cart, loadingCart } = useCart(!!infor._id, infor._id as string);
+
+  const { cart, loadingCart } = useCart(!!infor._id, infor._id as string, {
+    refreshWhenHidden: true,
+  });
+
   const { mutate } = useSWRConfig();
 
   const [showModalConfirm, setShowModalConfirm] = useState<boolean>(false);

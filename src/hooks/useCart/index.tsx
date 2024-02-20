@@ -2,7 +2,7 @@ import useSWR, { SWRConfiguration } from "swr";
 import { CART_KEY, getCart } from "~/api-client/cart";
 import { Cart } from "~/interfaces";
 
-// refesh 1 hour
+// refesh 30 minute
 const REFESH_TIME = 1000 * 60 * 30;
 
 const fetcherCart = async (user_id: string) => {
@@ -25,11 +25,10 @@ const useCart = (
     isReady ? CART_KEY.CART_USER : null,
     () => fetcherCart(user_id),
     {
-      ...options,
-      revalidateOnFocus: false,
-      dedupingInterval: REFESH_TIME,
+      refreshInterval: REFESH_TIME,
       keepPreviousData: true,
       fallbackData: { payload: null },
+      ...options,
     }
   );
 

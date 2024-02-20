@@ -352,3 +352,8 @@ input[type="radio"]:checked:after {
 .cl-internal-uyu30o {
   display: none;
 }
+
+// payment
+.payment__line {
+  width: calc(100% - 80px);
+}

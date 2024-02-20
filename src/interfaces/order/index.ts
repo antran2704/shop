@@ -8,6 +8,14 @@ interface ItemOrder extends ICartItem {
   promotion_price: number;
 }
 
+interface ItemOrderCreate {
+  product: string;
+  variation: string;
+  price: number;
+  promotion_price: number;
+  quantity: number;
+}
+
 interface Order {
   order_id: string;
   user_id: string;
@@ -26,6 +34,8 @@ interface Order {
 type IOrderCreate = Omit<
   Order,
   "order_id" | "cancleContent" | "note"
->;
+> & {
+  items: ItemOrderCreate[];
+};
 
-export type { Order, ItemOrder, IOrderCreate };
+export type { Order, ItemOrder, IOrderCreate, ItemOrderCreate };

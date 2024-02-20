@@ -22,7 +22,7 @@ const CartItem: FC<Props> = (props: Props) => {
   const { infor } = useAppSelector((state) => state.user);
   const { mutate } = useSWRConfig();
 
-  const [totalProduct, setTotalProduct] = useState<number>(data.quantity);
+  const [totalProduct, setTotalProduct] = useState<number>(0);
   const [inventory] = useState<number>(
     data.variation
       ? (data.variation.inventory as number)
@@ -72,10 +72,14 @@ const CartItem: FC<Props> = (props: Props) => {
   };
 
   useEffect(() => {
-    if (totalProduct !== data.quantity) {
+    if (totalProduct > 0 && totalProduct !== data.quantity) {
       updateCartItem();
     }
   }, [total]);
+
+  useEffect(() => {
+    setTotalProduct(data.quantity);
+  }, [data]);
 
   return (
     <li className="flex md:flex-row flex-col items-center justify-between w-full lg:pb-5 p-5 border-2 border-borderColor rounded-md gap-5">

@@ -6,6 +6,7 @@ import {
   Fragment,
   ReactElement,
   useMemo,
+  useCallback,
 } from "react";
 
 import Header from "~/components/Header";
@@ -31,7 +32,12 @@ import { createPayment, getDiscount } from "~/api-client";
 import { toast } from "react-toastify";
 import { AiFillCloseCircle } from "react-icons/ai";
 import { InputText, InputEmail } from "~/components/InputField";
-import { IOrderCreate, ItemOrder, Order } from "~/interfaces/order";
+import {
+  IOrderCreate,
+  ItemOrder,
+  ItemOrderCreate,
+  Order,
+} from "~/interfaces/order";
 import { EPaymentMethod, EPaymentStatus } from "~/enums";
 import { createOrder, updatePaymentStatusOrder } from "~/api-client/order";
 import { CART_KEY } from "~/api-client/cart";
@@ -119,7 +125,7 @@ const CheckOut: NextPageWithLayout = () => {
         case EPaymentMethod.VNPAY:
           const urlPayment = await createPayment(order);
 
-          // router.push(urlPayment.payload);
+          router.push(urlPayment.payload);
           break;
 
         default:
@@ -167,21 +173,25 @@ const CheckOut: NextPageWithLayout = () => {
     const items = cart.cart_products.map((item: ICartItem) => {
       if (item.variation) {
         return {
-          ...item,
+          product: item.product._id,
+          variation: item.variation._id,
           price: item.variation.price,
           promotion_price: item.variation.promotion_price,
+          quantity: item.quantity
         };
       }
 
       return {
-        ...item,
+        product: item.product._id,
+        variation: null,
         price: item.product.price,
         promotion_price: item.product.promotion_price,
+        quantity: item.quantity
       };
     });
 
     const dataOrder: IOrderCreate = {
-      items: items as ItemOrder[],
+      items: items as ItemOrderCreate[],
       shipping_cost: shippingCost,
       sub_total: subTotal,
       total,
@@ -217,7 +227,7 @@ const CheckOut: NextPageWithLayout = () => {
     }
   };
 
-  const handleUseCoupon = async () => {
+  const handleUseCoupon = useCallback(async () => {
     if (!couponCode || !infor._id) return;
 
     try {
@@ -246,7 +256,7 @@ const CheckOut: NextPageWithLayout = () => {
     }
 
     setCouponCode(null);
-  };
+  }, [couponCode]);
 
   const onRemoveCoupon = () => {
     setCoupon(null);

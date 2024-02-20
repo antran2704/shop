@@ -26,6 +26,7 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
   const [paymentMethod, setPaymentMethod] = useState<IMethodPayment | null>(
     null
   );
+  const [step, setStep] = useState<number>(0);
   console.log(order);
   const handleGetOrder = async (order_id: string) => {
     try {
@@ -35,6 +36,18 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
         const payment = paymentMethods.find(
           (method: IMethodPayment) => method.type === payload.payment_method
         );
+
+        if (payload.status === "pending") {
+          setStep(1);
+        }
+
+        if (payload.status === "processing") {
+          setStep(2);
+        }
+
+        if (payload.status === "delivered") {
+          setStep(3);
+        }
 
         setOrder(payload);
         setPaymentMethod(payment as IMethodPayment);
@@ -75,6 +88,96 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
             <p className="text-base">Mã đơn hàng: #{order_id}</p>
           </div>
         </div>
+
+        {order && order.payment_status !== EPaymentStatus.CANCLE && (
+          <div className="relative flex items-start w-fit my-5 mx-auto gap-20">
+            <div className="relative flex flex-col items-center z-10">
+              <div
+                className={`flex items-center justify-center w-16 h-16 bg-white rounded-full border-4 ${
+                  step >= 0 ? "border-green-400" : "border-[#e0e0e0]"
+                }`}
+              >
+                <ImageCus
+                  alt="payment logo"
+                  title="payment logo"
+                  src="/payments/bill.png"
+                  className={`${
+                    step >= 0 ? "text-green-400" : "text-[#e0e0e0]"
+                  } w-6 h-6`}
+                />
+              </div>
+              <p className="max-w-28 text-base text-center mt-2">
+                Đơn hàng đã đặt
+              </p>
+            </div>
+            <div className="relative flex flex-col items-center z-10">
+              <div
+                className={`flex items-center justify-center w-16 h-16 bg-white rounded-full border-4 ${
+                  step >= 1 ? "border-green-400" : "border-[#e0e0e0]"
+                }`}
+              >
+                <ImageCus
+                  alt="payment logo"
+                  title="payment logo"
+                  src="/payments/bill.png"
+                  className={`${
+                    step >= 1 ? "text-green-400" : "text-[#e0e0e0]"
+                  } w-6 h-6`}
+                />
+              </div>
+              <p className="max-w-28 text-base text-center mt-2">
+                Đơn hàng đang được chuẩn bị
+              </p>
+            </div>
+            <div className="relative flex flex-col items-center z-10">
+              <div
+                className={`flex items-center justify-center w-16 h-16 bg-white rounded-full border-4 ${
+                  step >= 2 ? "border-green-400" : "border-[#e0e0e0]"
+                }`}
+              >
+                <ImageCus
+                  alt="payment logo"
+                  title="payment logo"
+                  src="/payments/bill.png"
+                  className={`${
+                    step >= 2 ? "text-green-400" : "text-[#e0e0e0]"
+                  } w-6 h-6`}
+                />
+              </div>
+              <p className="max-w-28 text-base text-center mt-2">
+                Đơn hàng đang giao
+              </p>
+            </div>
+            <div className="relative flex flex-col items-center z-10">
+              <div
+                className={`flex items-center justify-center w-16 h-16 bg-white rounded-full border-4 ${
+                  step >= 3 ? "border-green-400" : "border-[#e0e0e0]"
+                }`}
+              >
+                <ImageCus
+                  alt="payment logo"
+                  title="payment logo"
+                  src="/payments/bill.png"
+                  className={`${
+                    step >= 3 ? "text-green-400" : "text-[#e0e0e0]"
+                  } w-6 h-6`}
+                />
+              </div>
+              <p className="max-w-28 text-base text-center mt-2">
+                Đơn hàng giao thành công
+              </p>
+            </div>
+
+            <div className="payment__line absolute left-10 top-8 h-1 z-0">
+              <div className="absolute left-0 right-0 h-1 bg-[#e0e0e0]"></div>
+              <div
+                className={`absolute left-0 ${
+                  (step > 0 && step < 3) ? `w-${step}/3` : "w-full"
+                } h-1 bg-green-400`}
+              ></div>
+            </div>
+          </div>
+        )}
 
         <div className="flex lg:flex-row flex-col-reverse items-start justify-between mt-5 gap-10">
           <div className="lg:w-6/12 w-full">

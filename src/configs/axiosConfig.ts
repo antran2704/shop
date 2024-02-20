@@ -47,6 +47,7 @@ let router: NextRouter;
 let signOutClerk: SignOut;
 
 const handleLogout = () => {
+  isRefresh = false;
   logout();
   signOutClerk(() => router.push("/"));
 };
@@ -87,7 +88,8 @@ http.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (response.status === 404 && response.message === "Not found key token") {
+    if (response.status === 404 && response.data.message === "Not found key token") {
+      handleLogout();
       return Promise.reject(error);
     }
 
@@ -109,10 +111,7 @@ http.interceptors.response.use(
           return Promise.resolve(http(originalRequest));
         }
       } else {
-        // if (router.pathname !== "/login") {
         handleLogout();
-        // }
-        isRefresh = false;
       }
     }
 

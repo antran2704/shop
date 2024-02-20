@@ -12,6 +12,7 @@ interface Props {
 
 const PrimaryButton = (props: Props) => {
   const { title, type, path = "/", className, Icon, onClick } = props;
+  console.log("re-render btn", title)
 
   switch (type) {
     case "BUTTON":
