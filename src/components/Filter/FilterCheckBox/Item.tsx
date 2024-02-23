@@ -50,6 +50,7 @@ const FilterCheckBoxItem: FC<Props> = (props: Props) => {
       <input
         ref={inpRef}
         type="checkbox"
+        onClick={onClick}
         name={name.toLowerCase()}
         value={data.name}
         className="min-w-5 w-5 h-5 rounded-md"

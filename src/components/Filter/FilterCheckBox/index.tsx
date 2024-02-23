@@ -2,6 +2,7 @@ import { memo, Fragment } from "react";
 import { IVariant } from "~/interfaces";
 import FilterCheckBoxItem from "./Item";
 import FilterLayout from "../Layout";
+import ShowMore from "~/components/ShowMore";
 
 interface Props {
   name: string;
@@ -13,11 +14,13 @@ const FilterCheckBox = (props: Props) => {
   const { name, title, items } = props;
   return (
     <FilterLayout title={title}>
-      <Fragment>
-        {items.map((item: IVariant) => (
-          <FilterCheckBoxItem key={item._id} data={item} name={name} />
-        ))}
-      </Fragment>
+      <ShowMore maxHeight={120} className="w-full">
+        <Fragment>
+          {items.map((item: IVariant) => (
+            <FilterCheckBoxItem key={item._id} data={item} name={name} />
+          ))}
+        </Fragment>
+      </ShowMore>
     </FilterLayout>
   );
 };

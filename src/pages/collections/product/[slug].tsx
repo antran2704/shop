@@ -19,7 +19,6 @@ import {
   AiOutlineClose,
   AiFillCheckCircle,
 } from "react-icons/ai";
-import { MdOutlineZoomOutMap } from "react-icons/md";
 
 import Header from "~/components/Header";
 import ImageCus from "~/components/Image";
@@ -39,6 +38,7 @@ import {
 } from "~/interfaces";
 import { GetStaticProps } from "next";
 import {
+  CURRENCY_CHARACTER,
   formatBigNumber,
   getPercentPromotionPrice,
 } from "~/helpers/number/fomatterCurrency";
@@ -70,6 +70,8 @@ const ICON = {
     <AiOutlineShoppingCart className="lg:text-2xl text-xl" />
   ),
 };
+
+const REFRESH_TIME = 60; //Refresh in 1 day
 
 const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
   const { product } = props;
@@ -163,15 +165,66 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
   };
 
   const handleGetVariations = async (product_id: string) => {
-    try {
-      const res = await getVariations(product_id);
-      if (res.status === 200) {
-        setVariations(res.payload);
-      }
-    } catch (error) {
-      console.log(error);
+    const res = await getVariations(product_id);
+    if (res.status === 200) {
+      setVariations(res.payload);
     }
   };
+
+  const hanldeBuyNow = useCallback(async () => {
+    if (!user || !infor._id) {
+      openSignIn({ redirectUrl: router.asPath });
+      return;
+    }
+
+    const keysSelect = Object.keys(selectOption);
+
+    if (keysSelect.length !== product.options.length) {
+      setMessage("Please select options");
+      return;
+    }
+
+    let data = {} as SendCartItem;
+
+    if (variation) {
+      data = {
+        product_id: variation.product_id as string,
+        variation_id: variation._id,
+        quantity: totalProduct,
+      };
+    } else {
+      data = {
+        product_id: product._id as string,
+        variation_id: null,
+        quantity: totalProduct,
+      };
+    }
+
+    try {
+      const { status } = await increaseCart(infor._id as string, data);
+
+      if (status === 201) {
+        mutate(CART_KEY.CART_USER);
+        router.push("/cart");
+      }
+    } catch (error: any) {
+      if (!error.response) return;
+
+      const res = error.response;
+
+      if (
+        res.status === 400 &&
+        res.data.message === "Quantity order bigger than inventory"
+      ) {
+        toast.warning(
+          "Bạn đã có sản phẩm này trong giỏ hàng, không thể thêm số lượng",
+          {
+            position: toast.POSITION.TOP_RIGHT,
+          }
+        );
+      }
+    }
+  }, [selectOption, user, infor, totalProduct, variation]);
 
   const hanldeAddCart = useCallback(async () => {
     if (!user || !infor._id) {
@@ -212,8 +265,6 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
         });
       }
     } catch (error: any) {
-      console.log(error);
-
       if (!error.response) return;
 
       const res = error.response;
@@ -276,12 +327,13 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
             <div>
               {/* gallery image */}
               <LightGallery
-                elementClassNames="absolute top-4 left-8 flex items-center w-full mt-4 gap-2"
+                elementClassNames="absolute top-0 left-0 right-0 bottom-0"
                 speed={500}
+                enableSwipe={true}
                 plugins={[lgThumbnail, lgZoom]}
               >
                 <a href={product.gallery[0]} className="w-1/4">
-                  <MdOutlineZoomOutMap className="text-2xl hover:text-primary" />
+                  <button className="absolute top-0 left-0 right-0 bottom-0"></button>
                   <ImageCus
                     className="w-full hidden"
                     src={product.gallery[0]}
@@ -351,11 +403,12 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                   <div className="flex flex-wrap items-end my-3 gap-3">
                     {product.promotion_price > 0 ? (
                       <Fragment>
-                        <h3 className="lg:text-2xl md:text-xl text-lg font-medium text-[#6a7779] line-through">
-                          {formatBigNumber(product.price)}
+                        <h3 className="md:text-xl text-lg font-medium text-[#6a7779] line-through">
+                          {formatBigNumber(product.price)} {CURRENCY_CHARACTER}
                         </h3>
-                        <h3 className="lg:text-3xl md:text-2xl text-lg font-medium">
-                          {formatBigNumber(product.promotion_price)}
+                        <h3 className="md:text-2xl text-lg font-medium">
+                          {formatBigNumber(product.promotion_price)}{" "}
+                          {CURRENCY_CHARACTER}
                         </h3>
                         <sup className="md:text-sm text-xs font-medium text-white px-2 py-1 bg-primary rounded-md">
                           Save -
@@ -367,8 +420,8 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                         </sup>
                       </Fragment>
                     ) : (
-                      <h3 className="lg:text-3xl md:text-2xl text-lg font-medium">
-                        {formatBigNumber(product.price)}
+                      <h3 className="md:text-2xl text-lg font-medium">
+                        {formatBigNumber(product.price)} {CURRENCY_CHARACTER}
                       </h3>
                     )}
                   </div>
@@ -499,6 +552,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                           title="Buy it now"
                           className="lg:w-fit w-full min-w-[140px] h-12 md:text-base text-sm text-white bg-primary rounded px-4 gap-2"
                           type="BUTTON"
+                          onClick={hanldeBuyNow}
                         />
                       </div>
                     </div>
@@ -628,13 +682,12 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
     return {
       props: { product },
-      revalidate: 10,
+      revalidate: REFRESH_TIME,
     };
   } catch (error: any) {
-    // console.log(error.response.data);
     return {
       props: { product: null },
-      revalidate: 10,
+      revalidate: REFRESH_TIME,
       notFound: true,
     };
   }

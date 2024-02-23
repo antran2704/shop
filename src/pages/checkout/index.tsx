@@ -124,7 +124,6 @@ const CheckOut: NextPageWithLayout = () => {
 
         case EPaymentMethod.VNPAY:
           const urlPayment = await createPayment(order);
-
           router.push(urlPayment.payload);
           break;
 
@@ -177,7 +176,7 @@ const CheckOut: NextPageWithLayout = () => {
           variation: item.variation._id,
           price: item.variation.price,
           promotion_price: item.variation.promotion_price,
-          quantity: item.quantity
+          quantity: item.quantity,
         };
       }
 
@@ -186,7 +185,7 @@ const CheckOut: NextPageWithLayout = () => {
         variation: null,
         price: item.product.price,
         promotion_price: item.product.promotion_price,
-        quantity: item.quantity
+        quantity: item.quantity,
       };
     });
 

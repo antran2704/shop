@@ -21,7 +21,7 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
   const router = useRouter();
 
   const dispatch = useAppDispatch();
-  
+
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
 
@@ -45,8 +45,20 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
       if (status === 201) {
         await handleLogin(inforUser.email as string);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+
+      if (!error.response) {
+        toast.error("Error in server, please try again", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+
+        return;
+      }
+      const response = error.response.data;
+      if(response.status === 400 && response.message === "Email is used") {
+        signOut();
+      }
     }
   };
 
@@ -60,7 +72,7 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
 
         const userRes = await getUser();
 
-        if(userRes.status === 200) {
+        if (userRes.status === 200) {
           dispatch(updateInforUserReducer(userRes.payload));
         }
       }
@@ -76,6 +88,7 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
       if (response.status === 404) {
         await handleCreateUser();
       }
+      
       console.log(error);
     }
   };

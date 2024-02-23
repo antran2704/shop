@@ -18,6 +18,8 @@ import DefaultLayout from "~/layouts/DefaultLayout";
 
 const Layout = DefaultLayout;
 
+const stepWidth = ["w-0", "w-1/3", "w-2/3", "w-full"];
+
 const CheckoutOrderIdPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { order_id } = router.query;
@@ -171,9 +173,7 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
             <div className="payment__line absolute left-10 top-8 h-1 z-0">
               <div className="absolute left-0 right-0 h-1 bg-[#e0e0e0]"></div>
               <div
-                className={`absolute left-0 ${
-                  (step > 0 && step < 3) ? `w-${step}/3` : "w-full"
-                } h-1 bg-green-400`}
+                className={`absolute left-0 ${stepWidth[step]} h-1 bg-green-400`}
               ></div>
             </div>
           </div>

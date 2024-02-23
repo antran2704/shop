@@ -47,6 +47,7 @@ const FilterPriceItem: FC<Props> = (props: Props) => {
         id={data.value}
         type="radio"
         name={name.toLowerCase()}
+        onClick={onClick}
         value={data.value}
         className="min-w-3 w-3 h-3 rounded-md"
       />

@@ -42,6 +42,18 @@ const filterPrice: IVariant[] = [
     value: "1000000.1500000",
     public: true,
   },
+  {
+    _id: "4",
+    name: "1.500.000VND - 2.000.000VND",
+    value: "1500000.2000000",
+    public: true,
+  },
+  {
+    _id: "5",
+    name: "Trên 2.000.000VND",
+    value: "2000000.1000000000",
+    public: true,
+  },
 ];
 
 const CollectionItem: NextPageWithLayout = () => {
@@ -146,16 +158,15 @@ const CollectionItem: NextPageWithLayout = () => {
           </div>
           <div className="lg:w-10/12 w-full bg-white p-5 rounded-lg">
             <div className="flex items-center lg:justify-end justify-between gap-5">
+              <div
+                onClick={handleShowFilter}
+                className="lg:hidden flex items-center hover:text-primary cursor-pointer"
+              >
+                <FaFilter className="text-lg min-w-10 w-10" />
+                <p className="text-sm font-medium">Filter</p>
+              </div>
               {products.length > 0 && (
                 <Fragment>
-                  <div
-                    onClick={handleShowFilter}
-                    className="lg:hidden flex items-center hover:text-primary cursor-pointer"
-                  >
-                    <FaFilter className="text-lg min-w-10 w-10" />
-                    <p className="text-sm font-medium">Filter</p>
-                  </div>
-
                   <p className="flex items-center justify-end lg:text-base md:text-sm text-xs text-right font-medium gap-1">
                     <span>Showing</span>
                     {pagination.currentPage === 1
