@@ -353,6 +353,10 @@ input[type="radio"]:checked:after {
   display: none;
 }
 
+.cl-internal-phfxlr {
+  height: 90vh;
+}
+
 // payment
 .payment__line {
   width: calc(100% - 80px);

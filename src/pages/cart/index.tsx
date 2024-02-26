@@ -1,9 +1,4 @@
-import Link from "next/link";
-import { ReactElement, useState } from "react";
-import { Navigation } from "swiper";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
-
+import { ReactElement, useEffect, useState } from "react";
 import Header from "~/components/Header";
 
 import { ICartItem, NextPageWithLayout } from "~/interfaces";
@@ -13,16 +8,24 @@ import { useAppSelector } from "~/store/hooks";
 import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
 import CartItem from "~/components/Cart/CartItem";
 import CartItemLoading from "~/components/Cart/CartItemLoading";
-import { CART_KEY, deleteAllItemsCart } from "~/api-client/cart";
+import {
+  CART_KEY,
+  checkInventoryItems,
+  deleteAllItemsCart,
+} from "~/api-client/cart";
 import { useSWRConfig } from "swr";
 import { toast } from "react-toastify";
 import ModalConfirm from "~/components/Modal/ModalConfirm";
 import ListProducts from "~/components/Product/List";
 import { useProducts } from "~/hooks/useProducts";
+import { useRouter } from "next/router";
+import PrimaryButton from "~/components/Button/PrimaryButton";
 
 const Layout = DefaultLayout;
 
 const Cart: NextPageWithLayout = () => {
+  const router = useRouter();
+
   const { infor } = useAppSelector((state) => state.user);
 
   const { cart, loadingCart } = useCart(!!infor._id, infor._id as string, {
@@ -34,6 +37,53 @@ const Cart: NextPageWithLayout = () => {
   const { mutate } = useSWRConfig();
 
   const [showModalConfirm, setShowModalConfirm] = useState<boolean>(false);
+
+  const onCheckout = async () => {
+    try {
+      const res = await checkInventoryItems(cart.cart_userId as string, cart);
+      if (res.status === 200) {
+        router.push("/checkout");
+      }
+    } catch (error: any) {
+      if (!error.response) {
+        toast.error("Lỗi hệ thống, vui lòng thử lại sau", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      }
+
+      const response = error.response;
+
+      if (response.status === 400 && response.data.message === "Out of stock") {
+        toast.warn("Một vài sản phẩm có sự thay đổi hoặc hết hàng", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      }
+
+      console.log(error);
+    }
+  };
+
+  const handleCheckInventoryItems = async () => {
+    try {
+      await checkInventoryItems(cart.cart_userId as string, cart);
+    } catch (error: any) {
+      if (!error.response) {
+        toast.error("Lỗi hệ thống, vui lòng thử lại sau", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      }
+
+      const response = error.response;
+
+      if (response.status === 400 && response.data.message === "Out of stock") {
+        toast.warn("Một vài sản phẩm có sự thay đổi hoặc hết hàng", {
+          position: toast.POSITION.TOP_RIGHT,
+        });
+      }
+
+      console.log(error);
+    }
+  };
 
   const handleClearCart = async () => {
     if (!infor._id) return;
@@ -48,6 +98,12 @@ const Cart: NextPageWithLayout = () => {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (cart && cart.cart_userId && cart.cart_products.length > 0) {
+      handleCheckInventoryItems();
+    }
+  }, [cart]);
 
   return (
     <div>
@@ -69,12 +125,12 @@ const Cart: NextPageWithLayout = () => {
             </ul>
             <div className="flex lg:flex-nowrap flex-wrap items-start justify-between gap-5">
               <div className="lg:w-4/12 w-full">
-                <button
+                <PrimaryButton
+                  title="Clear cart"
+                  type="BUTTON"
                   onClick={() => setShowModalConfirm(!showModalConfirm)}
-                  className="flex items-center justify-center sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap hover:text-dark bg-primary hover:bg-white px-8 py-2 gap-2 border border-primary hover:border-dark transition-all ease-linear duration-100"
-                >
-                  Clear cart
-                </button>
+                  className="sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap hover:text-dark bg-primary hover:bg-white px-8 py-2 gap-2 border border-primary hover:border-dark rounded"
+                />
               </div>
               <div className="lg:w-6/12 w-full sm:mt-0 mt-8">
                 <h3 className="text-xl font-medium mb-5">Cart Totals</h3>
@@ -94,12 +150,12 @@ const Cart: NextPageWithLayout = () => {
                     </tr>
                   </tbody>
                 </table>
-                <Link
-                  href={"/checkout"}
-                  className="flex items-center justify-center w-full text-lg font-medium text-white whitespace-nowrap hover:text-dark bg-primary hover:bg-white px-8 py-3 mt-4 gap-2 border border-primary hover:border-dark transition-all ease-linear duration-100"
-                >
-                  Proceed to Checkout
-                </Link>
+                <PrimaryButton
+                  title="Proceed to Checkout"
+                  type="BUTTON"
+                  onClick={onCheckout}
+                  className="w-full text-lg font-medium text-white whitespace-nowrap hover:text-dark bg-primary hover:bg-white px-8 py-3 mt-4 gap-2 border border-primary hover:border-dark rounded transition-all ease-linear duration-100"
+                />
               </div>
             </div>
           </div>

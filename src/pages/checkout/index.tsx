@@ -40,7 +40,7 @@ import {
 } from "~/interfaces/order";
 import { EPaymentMethod, EPaymentStatus } from "~/enums";
 import { createOrder, updatePaymentStatusOrder } from "~/api-client/order";
-import { CART_KEY } from "~/api-client/cart";
+import { CART_KEY, checkInventoryItems } from "~/api-client/cart";
 import paymentMethods from "~/data/paymentMethods";
 
 const initInforCustomer: IInforCheckout = {
@@ -97,6 +97,15 @@ const CheckOut: NextPageWithLayout = () => {
     }
 
     return invalids;
+  };
+
+  const handleCheckInventoryItems = async () => {
+    try {
+      await checkInventoryItems(cart.cart_userId as string, cart);
+    } catch (error) {
+      router.push("/cart");
+      console.log(error);
+    }
   };
 
   const handleChangeInforCus = (name: string, value: string): void => {
@@ -302,6 +311,12 @@ const CheckOut: NextPageWithLayout = () => {
       setSubTotal(cart.cart_total);
     }
   }, [infor, cart]);
+
+  useEffect(() => {
+    if (cart && cart.cart_userId && cart.cart_products.length > 0) {
+      handleCheckInventoryItems();
+    }
+  }, [cart]);
 
   return (
     <div>

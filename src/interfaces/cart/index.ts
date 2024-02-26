@@ -15,6 +15,7 @@ interface SendCartItem {
 type SendDeleteCartItem = Omit<SendCartItem, 'quantity'>;
 
 interface Cart {
+  _id: string;
   cart_userId: string;
   cart_status: "active" | "pending" | "failed" | "compeleted";
   cart_products: ICartItem[];

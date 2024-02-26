@@ -82,7 +82,7 @@ const CartItem: FC<Props> = (props: Props) => {
   }, [data]);
 
   return (
-    <li className="flex md:flex-row flex-col items-center justify-between w-full lg:pb-5 p-5 border-2 border-borderColor rounded-md gap-5">
+    <li className="flex md:flex-row flex-col items-center justify-between w-full lg:pb-5 p-5 bg-white rounded-md gap-5">
       <div
         className={`flex md:flex-row flex-col items-center ${
           inventory <= 0 ? "opacity-80" : ""

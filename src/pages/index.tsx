@@ -51,11 +51,8 @@ const Home: NextPageWithLayout = () => {
           pagination={{ clickable: true }}
           className="w-full h-full"
         >
-          <SwiperSlide
-            className="relative flex items-center sm:justify-start justify-center w-full h-full bg-cover bg-center md:pl-24 px-5"
-            style={{ backgroundImage: "url(/images/banner1.webp)" }}
-          >
-            <div className="lg:w-6/12 sm:w-8/12 w-full">
+          <SwiperSlide>
+            {/* <div className="lg:w-6/12 sm:w-8/12 w-full">
               <p className="banner__subtitle text-xl text-normal text-[#1e1e1e]">
                 Best Wooden Products
               </p>
@@ -70,7 +67,23 @@ const Home: NextPageWithLayout = () => {
                   Shop Now
                 </Link>
               </button>
-            </div>
+            </div> */}
+            <div
+              className="relative flex items-center sm:justify-start justify-center w-full h-full bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "url(https://theme.hstatic.net/1000197303/1001046599/14/collection_banner.jpg?v=8191)",
+              }}
+            ></div>
+          </SwiperSlide>
+          <SwiperSlide>
+            <div
+              className="relative flex items-center sm:justify-start justify-center w-full h-full bg-cover bg-center"
+              style={{
+                backgroundImage:
+                  "url(https://theme.hstatic.net/1000197303/1001046599/14/slideshow_2.jpg?v=8191)",
+              }}
+            ></div>
           </SwiperSlide>
           <SwiperSlide
             className="relative flex items-center sm:justify-start justify-center w-full h-full bg-cover bg-center md:pl-24 px-5"

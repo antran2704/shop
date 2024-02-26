@@ -12,7 +12,7 @@ interface Props {
 
 const ModalConfirm = (props: Props) => {
   const { title, show, children, onClose, onClick } = props;
-  console.log("confirm")
+
   return (
     <div className="fade_up fixed top-0 left-0 right-0 bottom-0 z-[9999]">
       <div className="scroll absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:w-1/2 w-full max-h-[600px] bg-white p-5 rounded-lg overflow-y-auto z-40">

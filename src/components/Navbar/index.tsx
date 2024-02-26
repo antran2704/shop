@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState, useEffect, useCallback, FC, Fragment } from "react";
-import { useUser, UserButton, SignInButton } from "@clerk/nextjs";
+import { useUser, SignInButton, useClerk } from "@clerk/nextjs";
 import {
   AiOutlineShoppingCart,
   AiOutlineClose,
@@ -28,13 +28,14 @@ import styles from "./Navbar.module.scss";
 import { useAppSelector } from "~/store/hooks";
 import { useCart } from "~/hooks/useCart";
 import ModalCart from "../Modal/ModalCart";
+import { logout } from "~/api-client";
 
 const Navbar: FC = () => {
   const { infor } = useAppSelector((state) => state.user);
   const { cart } = useCart(!!infor._id, infor._id as string);
 
+  const { signOut } = useClerk();
   const { isSignedIn, user } = useUser();
-
   const router = useRouter();
   const [showNavbar, setShow] = useState<boolean>(false);
   const [showModalCart, setShowModalCart] = useState<boolean>(false);
@@ -63,6 +64,11 @@ const Navbar: FC = () => {
     },
     [searchText, noResult]
   );
+
+  const onLogout = () => {
+    logout();
+    signOut();
+  };
 
   const handleShowModal = (): void => {
     if (showNavbar) {
@@ -195,8 +201,33 @@ const Navbar: FC = () => {
               </button>
             </SignInButton>
           ) : (
-            <div>
-              <UserButton afterSignOutUrl="/" />
+            <div className="relative group">
+              {/* <UserButton afterSignOutUrl="/" /> */}
+
+              <div className="cursor-pointer">
+                <ImageCus
+                  alt="avartar"
+                  title="avartar"
+                  className="w-8 min-w-8 h-8 rounded-full"
+                  src={user.imageUrl as string}
+                />
+              </div>
+
+              <ul className="absolute group-hover:top-[110%] top-[120%] bg-white min-w-[160px] right-0 text-base border rounded-md group-hover:opacity-100 opacity-0 pointer-events-none group-hover:pointer-events-auto shadow-lg ease-linear duration-100">
+                <div className="absolute left-0 right-0 -top-3 h-3 bg-transparent"></div>
+                <li>
+                  <Link href="/account" className="block px-4 py-2 cursor-pointer hover:text-primary">Tài khoản</Link>
+                </li>
+                <li className="px-4 py-2 cursor-pointer hover:text-primary">
+                  Đơn hàng
+                </li>
+                <li
+                  onClick={onLogout}
+                  className="px-4 py-2 cursor-pointer hover:text-primary border-t"
+                >
+                  Đăng xuất
+                </li>
+              </ul>
             </div>
           )}
         </div>
