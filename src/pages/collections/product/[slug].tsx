@@ -47,7 +47,7 @@ import ShowMore from "~/components/ShowMore";
 import ListProducts from "~/components/Product/List";
 import { useOtherProducts } from "~/hooks/useProducts";
 import Seo from "~/components/Seo";
-import Loading from "~/components/Loading";
+import { PrimaryLoading } from "~/components/Loading";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { CART_KEY, increaseCart } from "~/api-client/cart";
 import { useAppSelector } from "~/store/hooks";
@@ -298,7 +298,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
   }, [selectOption]);
 
   if (router.isFallback && !product) {
-    return <Loading />;
+    return <PrimaryLoading />;
   }
 
   return (

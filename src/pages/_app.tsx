@@ -13,7 +13,7 @@ import "lightgallery/css/lg-zoom.css";
 import "lightgallery/css/lg-thumbnail.css";
 import "~/styles/globals.scss";
 import { AppPropsWithLayout } from "~/interfaces";
-import Loading from "~/components/Loading";
+import { PrimaryLoading } from "~/components/Loading";
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
@@ -21,7 +21,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     <Provider store={store}>
       <ClerkProvider>
         <ClerkLoading>
-          <Loading />
+          <PrimaryLoading  />
         </ClerkLoading>
         <ClerkLoaded>{getLayout(<Component {...pageProps} />)}</ClerkLoaded>
       </ClerkProvider>

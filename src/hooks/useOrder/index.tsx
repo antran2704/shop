@@ -37,12 +37,12 @@ const useOrders = (
       ...options,
       revalidateOnFocus: false,
       dedupingInterval: REFESH_TIME,
-      fallbackData: { payload: [], pagination: initPagination },
+      fallbackData: { pagination: initPagination },
     }
   );
 
   return {
-    orders: data.payload as Order[],
+    orders: data.payload as Order[] || null,
     pagination: data.pagination as IPagination,
     loadingOrders: isLoading,
     error,

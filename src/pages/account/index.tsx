@@ -8,14 +8,12 @@ import LayoutClose from "~/components/Layout/LayoutClose";
 import { AiOutlineClose } from "react-icons/ai";
 import { logout } from "~/api-client";
 import { Order, TypeShowOrder } from "~/interfaces/order";
-import { EOrderStatus, ESelectOrderStatus } from "~/enums";
-import Link from "next/link";
-import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
-import PrimaryButton from "~/components/Button/PrimaryButton";
-import { getOrdersByUserId } from "~/api-client/order";
+import { ESelectOrderStatus } from "~/enums";
 import { useAppSelector } from "~/store/hooks";
 import { useOrders } from "~/hooks/useOrder";
 import OrderItem from "~/components/Order/OrderItem";
+import Pagination from "rc-pagination";
+import { SpinLoading } from "~/components/Loading";
 
 const Layout = DefaultLayout;
 
@@ -45,28 +43,26 @@ const typeList: TypeShowOrder[] = [
 const AccountPage: NextPageWithLayout = () => {
   const router = useRouter();
   const { page } = router.query;
-  const currentPage = page ? Number(page) : 1;
-
+  const [currentPage, setCurrentPage] = useState<number>(
+    page ? Number(page) : 1
+  );
+  // const currentPage = page ? Number(page) : 1;
+  console.log(currentPage);
   const { signOut } = useClerk();
   const { isSignedIn, user } = useUser();
   const { infor } = useAppSelector((state) => state.user);
 
-  // const [orders, setOrders] = useState<Order[]>([]);
-
   const [showClerk, setShowClerk] = useState<boolean>(false);
-  const [showType, setShowType] = useState<TypeShowOrder[]>(typeList);
   const [selectShowType, setSelectShowType] = useState<TypeShowOrder>(
     typeList[0]
   );
 
-  const { orders, loadingOrders, mutate, pagination } = useOrders(
+  const { orders, loadingOrders, pagination } = useOrders(
     !!infor._id,
     infor._id as string,
     selectShowType.type,
     currentPage
   );
-
-  // console.log(orders, loadingOrders, pagination);
 
   const onShowClerk = () => {
     setShowClerk(!showClerk);
@@ -74,6 +70,8 @@ const AccountPage: NextPageWithLayout = () => {
 
   const onSelectShowType = async (item: TypeShowOrder) => {
     setSelectShowType(item);
+    router.replace({ query: {} });
+    setCurrentPage(1)
   };
 
   const onLogout = () => {
@@ -90,8 +88,8 @@ const AccountPage: NextPageWithLayout = () => {
   return (
     <div className="relative mt-10">
       {user && (
-        <div className="container__cus bg-white">
-          <div className="flex items-center py-10 gap-5">
+        <div className="container__cus">
+          <div className="flex items-center py-10 px-5 bg-white gap-5">
             <ImageCus
               alt="avartar"
               title="avartar"
@@ -119,12 +117,12 @@ const AccountPage: NextPageWithLayout = () => {
       )}
 
       <div className="container__cus">
-        <ul className="scrollHidden flex items-center w-fit text-base mt-10 bg-white mx-auto rounded-md overflow-x-auto">
-          {showType.map((item: TypeShowOrder, index: number) => (
+        <ul className="scrollHidden flex items-center w-fit text-base mt-5 bg-white mx-auto rounded-md overflow-x-auto">
+          {typeList.map((item: TypeShowOrder, index: number) => (
             <li
               key={index}
               onClick={() => onSelectShowType(item)}
-              className={`min-w-fit px-10 py-4 border-b-2 hover:text-primary ${
+              className={`min-w-fit md:px-10 px-5 py-4 border-b-2 hover:text-primary ${
                 selectShowType.type === item.type
                   ? "text-primary border-b-primary"
                   : "border-b-transparent"
@@ -137,11 +135,46 @@ const AccountPage: NextPageWithLayout = () => {
       </div>
 
       <div className="container__cus">
-        <div className="flex flex-col mt-5 gap-8">
-          {orders.map((order: Order) => (
-            <OrderItem key={order.order_id} order={order} />
-          ))}
-        </div>
+        {!loadingOrders && orders && (
+          <div className="flex flex-col mt-5 gap-8">
+            {orders.map((order: Order) => (
+              <OrderItem key={order.order_id} order={order} />
+            ))}
+          </div>
+        )}
+
+        {!loadingOrders && pagination.totalItems > pagination.pageSize && (
+          <Pagination
+            current={currentPage}
+            className="pagination"
+            onChange={(page) => {
+              router.replace({ query: { ...router.query, page } });
+              setCurrentPage(page);
+            }}
+            total={pagination.totalItems}
+            pageSize={pagination.pageSize}
+          />
+        )}
+
+        {(loadingOrders || !orders) && (
+          <div className="w-full h-[120px] flex items-center justify-center bg-white mt-4">
+            <SpinLoading className="h-8 w-8" />
+          </div>
+        )}
+
+        {!loadingOrders && orders && orders.length === 0 && (
+          <div className="w-full min-h-[120px] flex flex-col items-center justify-center bg-white mt-4 p-5">
+            <div className="w-28 h-28">
+              <img
+                title="Image"
+                alt="Image"
+                src="/images/order/no_order.png"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <p className="text-base font-medium mt-2">Không có đơn hàng</p>
+          </div>
+        )}
       </div>
 
       {showClerk && (
