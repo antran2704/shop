@@ -167,7 +167,7 @@ const Navbar: FC = () => {
           />
         </div>
 
-        <div className="flex items-center justify-end w-3/12 md:gap-4 gap-3">
+        <div className="flex items-center justify-end lg:w-3/12 md:gap-4 gap-3">
           <div>
             {!showNavbarMobile && (
               <AiOutlineSearch
@@ -202,16 +202,14 @@ const Navbar: FC = () => {
             </SignInButton>
           ) : (
             <div className="relative group">
-              {/* <UserButton afterSignOutUrl="/" /> */}
-
-              <div className="cursor-pointer">
+              <Link href="/account">
                 <ImageCus
                   alt="avartar"
                   title="avartar"
                   className="w-8 min-w-8 h-8 rounded-full"
                   src={user.imageUrl as string}
                 />
-              </div>
+              </Link>
 
               <ul className="absolute group-hover:top-[110%] top-[120%] bg-white min-w-[160px] right-0 text-base border rounded-md group-hover:opacity-100 opacity-0 pointer-events-none group-hover:pointer-events-auto shadow-lg ease-linear duration-100">
                 <div className="absolute left-0 right-0 -top-3 h-3 bg-transparent"></div>

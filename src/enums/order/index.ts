@@ -1,5 +1,13 @@
 export enum EOrderStatus {
-  PENDING = "peding",
+  PENDING = "pending",
+  CANCLE = "cancle",
+  PROCESSING = "processing",
+  DELIVERED = "delivered",
+}
+
+export enum ESelectOrderStatus {
+  ALL = "all",
+  PENDING = "pending",
   CANCLE = "cancle",
   PROCESSING = "processing",
   DELIVERED = "delivered",

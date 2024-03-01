@@ -7,52 +7,72 @@ import { useRouter } from "next/router";
 import LayoutClose from "~/components/Layout/LayoutClose";
 import { AiOutlineClose } from "react-icons/ai";
 import { logout } from "~/api-client";
-import { TypeShowOrder } from "~/interfaces/order";
-import { EOrderStatus } from "~/enums";
+import { Order, TypeShowOrder } from "~/interfaces/order";
+import { EOrderStatus, ESelectOrderStatus } from "~/enums";
 import Link from "next/link";
 import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
 import PrimaryButton from "~/components/Button/PrimaryButton";
+import { getOrdersByUserId } from "~/api-client/order";
+import { useAppSelector } from "~/store/hooks";
+import { useOrders } from "~/hooks/useOrder";
+import OrderItem from "~/components/Order/OrderItem";
 
 const Layout = DefaultLayout;
 
 const typeList: TypeShowOrder[] = [
   {
     title: "Tất cả",
-    type: "all",
+    type: ESelectOrderStatus.ALL,
   },
   {
     title: "Đang chờ xác nhận",
-    type: EOrderStatus.PENDING,
+    type: ESelectOrderStatus.PENDING,
   },
   {
     title: "Đang chuẩn bị hàng",
-    type: EOrderStatus.PROCESSING,
+    type: ESelectOrderStatus.PROCESSING,
   },
   {
     title: "Giao thành công",
-    type: EOrderStatus.DELIVERED,
+    type: ESelectOrderStatus.DELIVERED,
   },
   {
     title: "Đã hủy",
-    type: EOrderStatus.CANCLE,
+    type: ESelectOrderStatus.CANCLE,
   },
 ];
 
 const AccountPage: NextPageWithLayout = () => {
   const router = useRouter();
+  const { page } = router.query;
+  const currentPage = page ? Number(page) : 1;
+
   const { signOut } = useClerk();
   const { isSignedIn, user } = useUser();
+  const { infor } = useAppSelector((state) => state.user);
+
+  // const [orders, setOrders] = useState<Order[]>([]);
 
   const [showClerk, setShowClerk] = useState<boolean>(false);
   const [showType, setShowType] = useState<TypeShowOrder[]>(typeList);
   const [selectShowType, setSelectShowType] = useState<TypeShowOrder>(
     typeList[0]
   );
+
+  const { orders, loadingOrders, mutate, pagination } = useOrders(
+    !!infor._id,
+    infor._id as string,
+    selectShowType.type,
+    currentPage
+  );
+
+  // console.log(orders, loadingOrders, pagination);
+
   const onShowClerk = () => {
     setShowClerk(!showClerk);
   };
 
-  const onSelectShowType = (item: TypeShowOrder) => {
+  const onSelectShowType = async (item: TypeShowOrder) => {
     setSelectShowType(item);
   };
 
@@ -70,8 +90,8 @@ const AccountPage: NextPageWithLayout = () => {
   return (
     <div className="relative mt-10">
       {user && (
-        <div className="container__cus">
-          <div className="flex items-center gap-5">
+        <div className="container__cus bg-white">
+          <div className="flex items-center py-10 gap-5">
             <ImageCus
               alt="avartar"
               title="avartar"
@@ -117,162 +137,10 @@ const AccountPage: NextPageWithLayout = () => {
       </div>
 
       <div className="container__cus">
-        <div className="mt-5">
-          <ul className="flex flex-col gap-5">
-            <li className="w-full bg-white rounded-md gap-5">
-              <div className="flex md:flex-row flex-col items-center justify-between lg:pb-5 p-5">
-                <div className={`flex md:flex-row flex-col items-center gap-5`}>
-                  <Link
-                    href={`/collections/product`}
-                    className="md:w-[100px] md:h-[100px] md:min-w-[100px] md:min-h-[100px] w-[120px] h-[120px] min-w-[120px] min-h-[120px]"
-                  >
-                    <ImageCus
-                      src={
-                        "https://down-vn.img.susercontent.com/file/0f00b06285ba84d5499fc5c9fc249c03_tn"
-                      }
-                      title={"order"}
-                      alt={"order"}
-                      className="w-full h-full object-fill object-center rounded-md"
-                    />
-                  </Link>
-
-                  <div>
-                    <Link
-                      href={`/collections/product`}
-                      className="md:text-base text-sm hover:text-primary md:text-start text-center line-clamp-2"
-                    >
-                      product
-                    </Link>
-                    <p className="w-full text-sm md:text-start text-center">
-                      Red
-                    </p>
-                  </div>
-                </div>
-
-                <p className="lg:text-base md:text-sm md:text-start text-center">
-                  X 1
-                </p>
-                <p className="lg:text-base md:text-sm md:text-start text-center">
-                  Đang chờ lấy hàng
-                </p>
-                <p className="lg:text-base md:text-sm md:text-start text-center">
-                  {formatBigNumber(1230000 as number)}
-                  {" VND"}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end mt-5 p-5 border-t">
-                <PrimaryButton
-                  title="Mua lại"
-                  type="LINK"
-                  className="w-fit text-sm font-medium text-white whitespace-nowrap bg-primary px-5 py-2 border border-primary rounded"
-                  path="/cart"
-                />
-              </div>
-            </li>
-            <li className="w-full bg-white rounded-md gap-5">
-              <div className="flex md:flex-row flex-col items-center justify-between lg:pb-5 p-5">
-                <div className={`flex md:flex-row flex-col items-center gap-5`}>
-                  <Link
-                    href={`/collections/product`}
-                    className="md:w-[100px] md:h-[100px] md:min-w-[100px] md:min-h-[100px] w-[120px] h-[120px] min-w-[120px] min-h-[120px]"
-                  >
-                    <ImageCus
-                      src={
-                        "https://down-vn.img.susercontent.com/file/0f00b06285ba84d5499fc5c9fc249c03_tn"
-                      }
-                      title={"order"}
-                      alt={"order"}
-                      className="w-full h-full object-fill object-center rounded-md"
-                    />
-                  </Link>
-
-                  <div>
-                    <Link
-                      href={`/collections/product`}
-                      className="md:text-base text-sm hover:text-primary md:text-start text-center line-clamp-2"
-                    >
-                      product
-                    </Link>
-                    <p className="w-full text-sm md:text-start text-center">
-                      Red
-                    </p>
-                  </div>
-                </div>
-
-                <p className="lg:text-base md:text-sm md:text-start text-center">
-                  X 1
-                </p>
-                <p className="lg:text-base md:text-sm md:text-start text-center">
-                  Đang chờ lấy hàng
-                </p>
-                <p className="lg:text-base md:text-sm md:text-start text-center">
-                  {formatBigNumber(1230000 as number)}
-                  {" VND"}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end mt-5 p-5 border-t">
-                <PrimaryButton
-                  title="Mua lại"
-                  type="LINK"
-                  className="w-fit text-sm font-medium text-white whitespace-nowrap bg-primary px-5 py-2 border border-primary rounded"
-                  path="/cart"
-                />
-              </div>
-            </li>
-            <li className="w-full bg-white rounded-md gap-5">
-              <div className="flex md:flex-row flex-col items-center justify-between lg:pb-5 p-5">
-                <div className={`flex md:flex-row flex-col items-center gap-5`}>
-                  <Link
-                    href={`/collections/product`}
-                    className="md:w-[100px] md:h-[100px] md:min-w-[100px] md:min-h-[100px] w-[120px] h-[120px] min-w-[120px] min-h-[120px]"
-                  >
-                    <ImageCus
-                      src={
-                        "https://down-vn.img.susercontent.com/file/0f00b06285ba84d5499fc5c9fc249c03_tn"
-                      }
-                      title={"order"}
-                      alt={"order"}
-                      className="w-full h-full object-fill object-center rounded-md"
-                    />
-                  </Link>
-
-                  <div>
-                    <Link
-                      href={`/collections/product`}
-                      className="md:text-base text-sm hover:text-primary md:text-start text-center line-clamp-2"
-                    >
-                      product
-                    </Link>
-                    <p className="w-full text-sm md:text-start text-center">
-                      Red
-                    </p>
-                  </div>
-                </div>
-
-                <p className="lg:text-base md:text-sm md:text-start text-center">
-                  X 1
-                </p>
-                <p className="lg:text-base md:text-sm md:text-start text-center">
-                  Đang chờ lấy hàng
-                </p>
-                <p className="lg:text-base md:text-sm md:text-start text-center">
-                  {formatBigNumber(1230000 as number)}
-                  {" VND"}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end mt-5 p-5 border-t">
-                <PrimaryButton
-                  title="Mua lại"
-                  type="LINK"
-                  className="w-fit text-sm font-medium text-white whitespace-nowrap bg-primary px-5 py-2 border border-primary rounded"
-                  path="/cart"
-                />
-              </div>
-            </li>
-          </ul>
+        <div className="flex flex-col mt-5 gap-8">
+          {orders.map((order: Order) => (
+            <OrderItem key={order.order_id} order={order} />
+          ))}
         </div>
       </div>
 

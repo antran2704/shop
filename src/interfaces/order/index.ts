@@ -1,4 +1,4 @@
-import { EOrderStatus, EPaymentMethod, EPaymentStatus } from "~/enums";
+import { EOrderStatus, EPaymentMethod, EPaymentStatus, ESelectOrderStatus } from "~/enums";
 import { ICartItem } from "../cart";
 import { IInforCheckout } from "../user";
 import { ICoupon } from "../coupon";
@@ -25,6 +25,7 @@ interface Order {
   sub_total: number;
   total: number;
   discount: ICoupon | null;
+  status: EOrderStatus;
   payment_method: EPaymentMethod;
   payment_status: EPaymentStatus;
   cancleContent: string | null;
@@ -37,7 +38,7 @@ type IOrderCreate = Omit<Order, "order_id" | "cancleContent" | "note"> & {
 
 interface TypeShowOrder {
   title: string;
-  type: EOrderStatus | "all";
+  type: ESelectOrderStatus;
 }
 
 export type { Order, ItemOrder, IOrderCreate, ItemOrderCreate, TypeShowOrder };
