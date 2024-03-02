@@ -12,16 +12,16 @@ const getOrder = async (order_id: string) => {
 
 const getOrdersByUserId = async (
   user_id: string,
-  status: ESelectOrderStatus,
+  // status: ESelectOrderStatus,
+  payload: Partial<Pick<Order, "order_id"> & {status: ESelectOrderStatus}>,
   page: number = 1
 ) => {
-  let sendDatat: any = {};
 
-  if (status !== ESelectOrderStatus.ALL) {
-    sendDatat.status = status;
+  if (payload.status === ESelectOrderStatus.ALL) {
+    delete payload.status
   }
 
-  return await AxiosPost(`/orders/user/${user_id}?page=${page}`, sendDatat);
+  return await AxiosPost(`/orders/user/${user_id}?page=${page}`, payload);
 };
 
 const createOrder = async (data: IOrderCreate) => {

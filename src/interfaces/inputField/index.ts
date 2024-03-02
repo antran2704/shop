@@ -10,8 +10,10 @@ interface IInput {
     error?: boolean;
     readonly?: boolean;
     enableEnter?: boolean;
+    enableClearAll?: boolean;
     required?: boolean;
     infor?: string | null;
+    onClear?: () => void;
     onEnter?: () => void;
   }
   

@@ -10,11 +10,11 @@ const REFESH_TIME = 1000 * 60 * 30;
 
 const fetcherOrder = async (
   user_id: string,
-  status_order: ESelectOrderStatus,
+  payload: Partial<Pick<Order, "order_id"> & {status: ESelectOrderStatus}>,
   page: number = 1
 ) => {
   try {
-    const res = await getOrdersByUserId(user_id, status_order, page);
+    const res = await getOrdersByUserId(user_id, payload, page);
     if (res.status === 200) {
       return res;
     }
@@ -26,13 +26,14 @@ const fetcherOrder = async (
 const useOrders = (
   isReady: boolean,
   user_id: string,
-  status_order: ESelectOrderStatus,
+  // status_order: ESelectOrderStatus,
+  payload: Partial<Pick<Order, "order_id"> & {status: ESelectOrderStatus}>,
   page: number = 1,
   options?: Partial<SWRConfiguration>
 ) => {
   const { data, isLoading, mutate, error } = useSWR(
-    isReady ? [ORDER_KEY.ORDERS_USER, status_order, page] : null,
-    () => fetcherOrder(user_id, status_order, page),
+    isReady ? [ORDER_KEY.ORDERS_USER, payload, page] : null,
+    () => fetcherOrder(user_id, payload, page),
     {
       ...options,
       revalidateOnFocus: false,

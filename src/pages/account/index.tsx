@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 import { NextPageWithLayout } from "~/interfaces";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import ImageCus from "~/components/Image";
@@ -14,6 +14,7 @@ import { useOrders } from "~/hooks/useOrder";
 import OrderItem from "~/components/Order/OrderItem";
 import Pagination from "rc-pagination";
 import { SpinLoading } from "~/components/Loading";
+import { InputText } from "~/components/InputField";
 
 const Layout = DefaultLayout;
 
@@ -46,8 +47,7 @@ const AccountPage: NextPageWithLayout = () => {
   const [currentPage, setCurrentPage] = useState<number>(
     page ? Number(page) : 1
   );
-  // const currentPage = page ? Number(page) : 1;
-  console.log(currentPage);
+
   const { signOut } = useClerk();
   const { isSignedIn, user } = useUser();
   const { infor } = useAppSelector((state) => state.user);
@@ -57,10 +57,15 @@ const AccountPage: NextPageWithLayout = () => {
     typeList[0]
   );
 
+  const [filter, setFilter] = useState<
+    Partial<Pick<Order, "order_id"> & { status: ESelectOrderStatus }>
+  >({ status: selectShowType.type });
+  const [orderId, setOrderId] = useState<string | null>(null);
+
   const { orders, loadingOrders, pagination } = useOrders(
     !!infor._id,
     infor._id as string,
-    selectShowType.type,
+    filter,
     currentPage
   );
 
@@ -68,10 +73,37 @@ const AccountPage: NextPageWithLayout = () => {
     setShowClerk(!showClerk);
   };
 
+  const onSearch = useCallback(
+    (name: string, value: string) => {
+      if (!value) {
+        setFilter({ status: ESelectOrderStatus.ALL });
+        setOrderId(null);
+      } else {
+        setOrderId(value);
+      }
+
+      if (router.query.page && router.query.page !== "1") {
+        router.replace({ query: {} });
+        setCurrentPage(1);
+      }
+    },
+    [orderId]
+  );
+
+  const handleSearch = useCallback(() => {
+    if (!orderId) return;
+
+    setFilter({ status: ESelectOrderStatus.ALL, order_id: orderId });
+  }, [orderId, filter]);
+
   const onSelectShowType = async (item: TypeShowOrder) => {
     setSelectShowType(item);
-    router.replace({ query: {} });
-    setCurrentPage(1)
+    setFilter({ ...filter, status: item.type });
+
+    if (router.query.page && router.query.page !== "1") {
+      router.replace({ query: {} });
+      setCurrentPage(1);
+    }
   };
 
   const onLogout = () => {
@@ -117,21 +149,37 @@ const AccountPage: NextPageWithLayout = () => {
       )}
 
       <div className="container__cus">
-        <ul className="scrollHidden flex items-center w-fit text-base mt-5 bg-white mx-auto rounded-md overflow-x-auto">
-          {typeList.map((item: TypeShowOrder, index: number) => (
-            <li
-              key={index}
-              onClick={() => onSelectShowType(item)}
-              className={`min-w-fit md:px-10 px-5 py-4 border-b-2 hover:text-primary ${
-                selectShowType.type === item.type
-                  ? "text-primary border-b-primary"
-                  : "border-b-transparent"
-              } cursor-pointer`}
-            >
-              {item.title}
-            </li>
-          ))}
-        </ul>
+        <div className="w-fit mx-auto">
+          <ul className="scrollHidden flex items-center text-base mt-5 bg-white mx-auto rounded-md overflow-x-auto">
+            {typeList.map((item: TypeShowOrder, index: number) => (
+              <li
+                key={index}
+                onClick={() => onSelectShowType(item)}
+                className={`min-w-fit md:px-10 px-5 py-4 border-b-2 hover:text-primary ${
+                  selectShowType.type === item.type
+                    ? "text-primary border-b-primary"
+                    : "border-b-transparent"
+                } cursor-pointer`}
+              >
+                {item.title}
+              </li>
+            ))}
+          </ul>
+          {selectShowType.type === ESelectOrderStatus.ALL && (
+            <div className="mt-2">
+              <InputText
+                name="order_id"
+                placeholder="Tìm kiếm với ID đơn hàng..."
+                className="pl-5 pr-10 py-2 outline-none border rounded-md"
+                enableEnter={true}
+                enableClearAll={orderId ? true : false}
+                getValue={onSearch}
+                value={orderId || ""}
+                onEnter={handleSearch}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="container__cus">
