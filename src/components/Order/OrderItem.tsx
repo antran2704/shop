@@ -63,6 +63,10 @@ const OrderItem = (props: Props) => {
           mutate(CART_KEY.CART_USER);
         }
       }
+
+      toast.success(`Thêm sản phẩm thành công`, {
+        position: toast.POSITION.TOP_RIGHT,
+      });
     } catch (error: any) {
       if (!error.response) return;
 
@@ -150,7 +154,8 @@ const OrderItem = (props: Props) => {
           {CURRENCY_CHARACTER}
         </p>
 
-        {(order.status === EOrderStatus.DELIVERED || order.status === EOrderStatus.CANCLE) && (
+        {(order.status === EOrderStatus.DELIVERED ||
+          order.status === EOrderStatus.CANCLE) && (
           <PrimaryButton
             title="Mua lại"
             type="BUTTON"

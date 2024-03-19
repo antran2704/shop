@@ -101,12 +101,26 @@ const CartItem: FC<Props> = (props: Props) => {
         </Link>
 
         <div>
-          <Link
+          {!data.variation && <Link
             href={`/collections/product/${data.product.slug}`}
             className="md:text-base text-sm hover:text-primary md:text-start text-center line-clamp-2"
           >
             {data.product.title}
-          </Link>
+          </Link>}
+
+          {data.variation && <Link
+            href={`/collections/product/${data.product.slug}`}
+            className="md:text-base text-sm hover:text-primary md:text-start text-center line-clamp-2"
+          >
+            {data.variation.title}
+          </Link>}
+
+          {data.variation && <Link
+            href={`/collections/product/${data.product.slug}`}
+            className="md:text-base text-sm hover:text-primary md:text-start text-center line-clamp-2"
+          >
+            {data.variation.options?.join(" / ")}
+          </Link>}
 
           {!data.variation && (
             <p className="w-full lg:text-base md:text-sm md:text-start text-center">

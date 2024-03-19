@@ -7,6 +7,7 @@ import { checkUserIsExit, createUser, getUser, login } from "~/api-client";
 
 import Footer from "~/components/Footer";
 import Navbar from "~/components/Navbar";
+import NewFeed from "~/components/NewFeed";
 import ScrollToTop from "~/components/ScrollToTop";
 import { injectRouter } from "~/configs/axiosConfig";
 import { IUserInfor } from "~/interfaces";
@@ -24,7 +25,7 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
 
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
-
+  
   const handleLogin = async (email: string) => {
     try {
       await login(email);
@@ -136,6 +137,7 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
         </div>
       </section>
       <Footer />
+      {/* <NewFeed /> */}
       <ScrollToTop />
       <ToastContainer
         autoClose={5000}

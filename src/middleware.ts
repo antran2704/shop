@@ -11,14 +11,14 @@ export default authMiddleware({
     "/collections/(.*)",
   ],
   ignoredRoutes: [
-    "/api/users/(.*)",
-    "/api/products",
-    "/api/products/(.*)",
-    "/api/attributes",
-    "/api/attributes/(.*)",
-    "/api/variations",
-    "/api/variations/(.*)",
-    "/api/categories/(.*)",
+    "/api/(.*)",
+    // "/api/products",
+    // "/api/products/(.*)",
+    // "/api/attributes",
+    // "/api/attributes/(.*)",
+    // "/api/variations",
+    // "/api/variations/(.*)",
+    // "/api/categories/(.*)",
   ],
   async afterAuth(auth, req, evt) {
     if (!auth.userId && !auth.isPublicRoute) {

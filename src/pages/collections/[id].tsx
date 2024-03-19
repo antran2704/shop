@@ -13,6 +13,7 @@ import ProductLoading from "~/components/Product/Loading";
 import { useCategory } from "~/hooks/useCategories";
 import {
   IAttribute,
+  IBreadcrumb,
   IFilter,
   IProductData,
   IVariant,
@@ -63,6 +64,7 @@ const CollectionItem: NextPageWithLayout = () => {
 
   const btnSubmitFilterRef = useRef<HTMLButtonElement>(null);
   const [showFilter, setShowFilter] = useState<boolean>(false);
+  const [breadcrumbs, setBreadcrumbs] = useState<IBreadcrumb[]>([]);
 
   const category_id =
     router.isReady && id ? (id as string).split(".")[1] : null;
@@ -88,18 +90,26 @@ const CollectionItem: NextPageWithLayout = () => {
     }
   }, [router.query]);
 
+  useEffect(() => {
+    if (category && category._id) {
+      const items: IBreadcrumb[] = category.breadcrumbs.map((item: any) => ({
+        label: item.title,
+        url_path: `/collections/${item.slug}.${item._id}`,
+      }));
+
+      setBreadcrumbs([
+        { label: "Home", url_path: `/` },
+        ...items,
+        { label: category.title, url_path: `/collections/${category.slug}.${category._id}` },
+      ]);
+    }
+  }, [category]);
+
   return (
     <div>
       <Header
         title={category?._id ? category.title : ""}
-        breadcrumbs={
-          category?._id
-            ? [
-                { label: "Home", url_path: "/" },
-                { label: category.title, url_path: `/${category.slug}` },
-              ]
-            : []
-        }
+        breadcrumbs={breadcrumbs}
       />
 
       <div className="container__cus">
