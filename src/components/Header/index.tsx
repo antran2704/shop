@@ -16,31 +16,33 @@ const Header = (props: Props) => {
       }}
     >
       <div className="container__cus w-full px-5">
-        <h1 className="sm:block hidden lg:text-4xl md:text-2xl text-xl font-medium mb-2 capitalize">
-          {title}
-        </h1>
-        <div className="flex flex-wrap items-center text-lg gap-2">
-          {breadcrumbs.map((item: IBreadcrumb, index: number) => {
-            if (breadcrumbs.length - 1 !== index) {
-              return (
-                <div className="flex items-center gap-2" key={index}>
-                  <Link
-                    href={`${item.url_path}`}
-                    className="hover:text-primary capitalize"
-                  >
+        <div className="md:w-2/3 w-full">
+          <h1 className="lg:text-3xl md:text-2xl text-xl font-medium mb-2 capitalize line-clamp-2">
+            {title}
+          </h1>
+          <div className="flex flex-wrap items-center text-lg gap-2">
+            {breadcrumbs.map((item: IBreadcrumb, index: number) => {
+              if (breadcrumbs.length - 1 !== index) {
+                return (
+                  <div className="flex items-center gap-2" key={index}>
+                    <Link
+                      href={`${item.url_path}`}
+                      className="hover:text-primary md:text-base text-sm capitalize line-clamp-1"
+                    >
+                      {item.label}
+                    </Link>
+                    <span>|</span>
+                  </div>
+                );
+              } else {
+                return (
+                  <span className="text-primary md:text-base text-sm capitalize line-clamp-1" key={index}>
                     {item.label}
-                  </Link>
-                  <span>|</span>
-                </div>
-              );
-            } else {
-              return (
-                <span className="text-primary capitalize" key={index}>
-                  {item.label}
-                </span>
-              );
-            }
-          })}
+                  </span>
+                );
+              }
+            })}
+          </div>
         </div>
       </div>
     </header>

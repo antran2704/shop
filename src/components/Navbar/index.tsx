@@ -29,6 +29,7 @@ import { useAppSelector } from "~/store/hooks";
 import { useCart } from "~/hooks/useCart";
 import ModalCart from "../Modal/ModalCart";
 import { logout } from "~/api-client";
+import useClientY from "~/hooks/useClientY";
 
 const Navbar: FC = () => {
   const { infor } = useAppSelector((state) => state.user);
@@ -37,10 +38,11 @@ const Navbar: FC = () => {
   const { signOut } = useClerk();
   const { isSignedIn, user } = useUser();
   const router = useRouter();
+  const top = useClientY();
+
   const [showNavbar, setShow] = useState<boolean>(false);
   const [showModalCart, setShowModalCart] = useState<boolean>(false);
   const [showNavbarMobile, setShowNavarMobile] = useState<boolean>(false);
-
   const [noResult, setNoResult] = useState<boolean>(false);
 
   const [currentNav, setCurrentNav] = useState([initDataNavbar]);
@@ -135,168 +137,174 @@ const Navbar: FC = () => {
   }, [router.pathname]);
 
   return (
-    <header className="sticky top-0 left-0 right-0 bg-white z-30">
-      <div className="container__cus">
-        <nav className={`flex items-center justify-between py-3`}>
-          <div className="flex items-center w-3/12 gap-3">
-            <HiMenu
-              className="xl:hidden block text-3xl cursor-pointer"
-              onClick={handleShowModal}
-            />
-            <Link href="/" className="lg:w-[200px] md:w-[160px] w-[100px]">
-              <img
-                src={LOGO}
-                alt="Logo"
-                title="Logo"
-                className="w-100"
-                width="auto"
-                height="auto"
-                loading="lazy"
+    <header className="sticky top-0 left-0 right-0 z-30">
+      <div className="relative w-full bg-white z-10">
+        <div className="container__cus">
+          <nav className={`flex items-center justify-between py-3`}>
+            <div className="flex items-center w-3/12 gap-3">
+              <HiMenu
+                className="xl:hidden block text-3xl cursor-pointer"
+                onClick={handleShowModal}
               />
-            </Link>
-          </div>
-
-          <div className="lg:w-6/12 w-5/12 sm:block hidden">
-            <Search
-              searchText={searchText}
-              onChange={onChangeValue}
-              onClearText={onClearSearchText}
-              listItem={listSearch}
-              noResult={noResult}
-            />
-          </div>
-
-          <div className="flex items-center justify-end lg:w-3/12 md:gap-4 gap-3">
-            <div>
-              {!showNavbarMobile && (
-                <AiOutlineSearch
-                  onClick={() => setShowNavarMobile(!showNavbarMobile)}
-                  className="sm:hidden block md:text-2xl text-xl cursor-pointer"
+              <Link href="/" className="lg:w-[200px] md:w-[160px] w-[100px]">
+                <img
+                  src={LOGO}
+                  alt="Logo"
+                  title="Logo"
+                  className="w-100"
+                  width="auto"
+                  height="auto"
+                  loading="lazy"
+                />
+              </Link>
+            </div>
+  
+            <div className="lg:w-6/12 w-5/12 sm:block hidden">
+              <Search
+                searchText={searchText}
+                onChange={onChangeValue}
+                onClearText={onClearSearchText}
+                listItem={listSearch}
+                noResult={noResult}
+              />
+            </div>
+  
+            <div className="flex items-center justify-end lg:w-3/12 md:gap-4 gap-3">
+              <div>
+                {!showNavbarMobile && (
+                  <AiOutlineSearch
+                    onClick={() => setShowNavarMobile(!showNavbarMobile)}
+                    className="sm:hidden block md:text-2xl text-xl cursor-pointer"
+                  />
+                )}
+              </div>
+  
+              {isSignedIn && user && (
+                <div
+                  className="relative cursor-pointer"
+                  onClick={() => setShowModalCart(true)}
+                >
+                  <AiOutlineShoppingCart className="relative lg:text-3xl md:text-2xl text-xl z-0" />
+                  {cart ? (
+                    <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
+                      {cart.cart_count < 100 ? cart.cart_count : 99}
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
+                      0
+                    </span>
+                  )}
+                </div>
+              )}
+              {!isSignedIn && !user ? (
+                <SignInButton>
+                  <button className="block px-3 py-1 rounded-md bg-primary text-white lg:text-lg text-base">
+                    Login
+                  </button>
+                </SignInButton>
+              ) : (
+                <div className="relative group z-10">
+                  <Link href="/account">
+                    <ImageCus
+                      alt="avartar"
+                      title="avartar"
+                      className="w-8 min-w-8 h-8 rounded-full"
+                      src={user.imageUrl as string}
+                    />
+                  </Link>
+  
+                  <ul className="absolute group-hover:top-[110%] top-[120%] bg-white min-w-[160px] right-0 text-base border rounded-md group-hover:opacity-100 opacity-0 pointer-events-none group-hover:pointer-events-auto shadow-lg ease-linear duration-100">
+                    <div className="absolute left-0 right-0 -top-3 h-3 bg-transparent"></div>
+                    <li>
+                      <Link
+                        href="/account"
+                        className="block px-4 py-2 cursor-pointer hover:text-primary"
+                      >
+                        Tài khoản
+                      </Link>
+                    </li>
+                    <li className="px-4 py-2 cursor-pointer hover:text-primary">
+                      Đơn hàng
+                    </li>
+                    <li
+                      onClick={onLogout}
+                      className="px-4 py-2 cursor-pointer hover:text-primary border-t"
+                    >
+                      Đăng xuất
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+  
+            {/* layout close modal */}
+            {showNavbar && <LayoutClose handleClose={handleShowModal} />}
+          </nav>
+  
+          {/* navbar Tablet & Mobile */}
+          <div
+            className={`${styles.navbarMobile} ${
+              typeShow ? styles[typeShow] : ""
+            } ${
+              showNavbar ? styles.show : ""
+            } xl:hidden block fixed top-0 bottom-0 left-0 px-6 py-4 md:w-1/2 w-2/3 bg-white shadow-lg overflow-hidden z-40`}
+          >
+            <div className="w-full mb-3">
+              {currentNav.length > 1 ? (
+                <BsArrowLeftShort
+                  className="text-3xl cursor-pointer"
+                  onClick={handleBack}
+                />
+              ) : (
+                <AiOutlineClose
+                  className="text-2xl ml-auto cursor-pointer"
+                  onClick={handleShowModal}
                 />
               )}
             </div>
-
-            {isSignedIn && user && (
-              <div
-                className="relative cursor-pointer"
-                onClick={() => setShowModalCart(true)}
-              >
-                <AiOutlineShoppingCart className="relative lg:text-3xl md:text-2xl text-xl z-0" />
-                {cart ? (
-                  <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
-                    {cart.cart_count < 100 ? cart.cart_count : 99}
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center absolute -top-1 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
-                    0
-                  </span>
-                )}
-              </div>
-            )}
-            {!isSignedIn && !user ? (
-              <SignInButton>
-                <button className="block px-3 py-1 rounded-md bg-primary text-white lg:text-lg text-base">
-                  Login
-                </button>
-              </SignInButton>
-            ) : (
-              <div className="relative group z-10">
-                <Link href="/account">
-                  <ImageCus
-                    alt="avartar"
-                    title="avartar"
-                    className="w-8 min-w-8 h-8 rounded-full"
-                    src={user.imageUrl as string}
-                  />
-                </Link>
-
-                <ul className="absolute group-hover:top-[110%] top-[120%] bg-white min-w-[160px] right-0 text-base border rounded-md group-hover:opacity-100 opacity-0 pointer-events-none group-hover:pointer-events-auto shadow-lg ease-linear duration-100">
-                  <div className="absolute left-0 right-0 -top-3 h-3 bg-transparent"></div>
-                  <li>
-                    <Link
-                      href="/account"
-                      className="block px-4 py-2 cursor-pointer hover:text-primary"
-                    >
-                      Tài khoản
-                    </Link>
+            <ul>
+              {currentNav[currentNav.length - 1].map(
+                (item: INavItem, index: number) => (
+                  <li key={index} className={`${styles.navbarItem} w-full`}>
+                    {!item.children && (
+                      <Link
+                        href={item.path || "/"}
+                        onClick={handleShowModal}
+                        className={`block w-full text-lg font-medium py-2 text-[#1e1e1e] ${
+                          router.pathname === item.path ? "text-primary" : ""
+                        } hover:text-primary transition-all ease-linear duration-100`}
+                      >
+                        {item.name}
+                      </Link>
+                    )}
+  
+                    {item.children && (
+                      <p
+                        onClick={() => handleAddItem(item.children as INavItem[])}
+                        className={`flex items-center justify-between text-lg font-medium py-2 text-[#1e1e1e] ${
+                          router.pathname === item.path ? "text-primary" : ""
+                        } hover:text-primary transition-all ease-linear duration-100  cursor-pointer`}
+                      >
+                        {item.name}
+  
+                        <BsArrowRightShort className="text-3xl" />
+                      </p>
+                    )}
                   </li>
-                  <li className="px-4 py-2 cursor-pointer hover:text-primary">
-                    Đơn hàng
-                  </li>
-                  <li
-                    onClick={onLogout}
-                    className="px-4 py-2 cursor-pointer hover:text-primary border-t"
-                  >
-                    Đăng xuất
-                  </li>
-                </ul>
-              </div>
-            )}
+                )
+              )}
+            </ul>
           </div>
-
-          {/* layout close modal */}
-          {showNavbar && <LayoutClose handleClose={handleShowModal} />}
-        </nav>
-
-        {/* navbar Tablet & Mobile */}
-        <div
-          className={`${styles.navbarMobile} ${
-            typeShow ? styles[typeShow] : ""
-          } ${
-            showNavbar ? styles.show : ""
-          } xl:hidden block fixed top-0 bottom-0 left-0 px-6 py-4 md:w-1/2 w-full bg-white shadow-lg overflow-hidden z-40`}
-        >
-          <div className="w-full mb-3">
-            {currentNav.length > 1 ? (
-              <BsArrowLeftShort
-                className="text-3xl cursor-pointer"
-                onClick={handleBack}
-              />
-            ) : (
-              <AiOutlineClose
-                className="text-2xl ml-auto cursor-pointer"
-                onClick={handleShowModal}
-              />
-            )}
-          </div>
-          <ul>
-            {currentNav[currentNav.length - 1].map(
-              (item: INavItem, index: number) => (
-                <li key={index} className={`${styles.navbarItem} w-full`}>
-                  {!item.children && (
-                    <Link
-                      href={item.path || "/"}
-                      onClick={handleShowModal}
-                      className={`block w-full text-lg font-medium py-2 text-[#1e1e1e] ${
-                        router.pathname === item.path ? "text-primary" : ""
-                      } hover:text-primary transition-all ease-linear duration-100`}
-                    >
-                      {item.name}
-                    </Link>
-                  )}
-
-                  {item.children && (
-                    <p
-                      onClick={() => handleAddItem(item.children as INavItem[])}
-                      className={`flex items-center justify-between text-lg font-medium py-2 text-[#1e1e1e] ${
-                        router.pathname === item.path ? "text-primary" : ""
-                      } hover:text-primary transition-all ease-linear duration-100  cursor-pointer`}
-                    >
-                      {item.name}
-
-                      <BsArrowRightShort className="text-3xl" />
-                    </p>
-                  )}
-                </li>
-              )
-            )}
-          </ul>
         </div>
       </div>
 
       {/* navbar content on PC */}
-      <div className="bg-white border shadow-md">
-        <ul className="container__cus xl:flex hidden w-full items-center justify-center px-5 py-5 gap-6">
+      <div
+        className={`relative lg:block hidden bg-white border ${
+          top > 300 ? "-translate-y-16 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
+        } shadow-md transition-all ease-linear duration-100 z-0`}
+      >
+        <ul className="container__cus xl:flex hidden w-full items-center justify-center px-5 py-4 transition-all ease-linear duration-100 gap-6">
           {initDataNavbar.map((item: INavItem, index: number) => (
             <li key={index} className={`${styles.navbarItem}`}>
               {item.path ? (
@@ -317,7 +325,7 @@ const Navbar: FC = () => {
                   {item.name}
                 </p>
               )}
-  
+
               {item?.children && (
                 <ul
                   className={`${styles.navbarMega} absolute left-0 right-0 flex items-start justify-center bg-white shadow-lg px-5 pb-10 pt-5 gap-10 z-10`}
@@ -348,7 +356,7 @@ const Navbar: FC = () => {
                                         {item.name}
                                       </Link>
                                     )}
-  
+
                                     {!item.path && (
                                       <p
                                         className={`block w-full text-base font-normal text-[#1e1e1e] whitespace-nowrap ${
@@ -369,7 +377,7 @@ const Navbar: FC = () => {
                         ))}
                     </div>
                   )}
-  
+
                   {item.images && item.images?.length > 0 && (
                     <Fragment>
                       <div className="w-1/2 grid grid-cols-2 items-start gap-10">
@@ -383,7 +391,7 @@ const Navbar: FC = () => {
                           />
                         ))}
                       </div>
-  
+
                       <div className="w-1/2 grid grid-cols-2 items-start gap-10">
                         {item.children &&
                           item.children.length > 0 &&
@@ -409,7 +417,7 @@ const Navbar: FC = () => {
                                           {item.name}
                                         </Link>
                                       )}
-  
+
                                       {!item.path && (
                                         <p
                                           className={`block w-full text-base font-normal text-[#1e1e1e] whitespace-nowrap ${

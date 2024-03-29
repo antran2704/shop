@@ -9,7 +9,7 @@ const getPercentPromotionPrice = (price: number, promotion_price: number) => {
     return 0;
   }
 
-  return Math.ceil((promotion_price / price) * 100);
+  return 100 - Math.ceil((promotion_price / price) * 100);
 };
 
 const revertPriceToString = (value: string) => {

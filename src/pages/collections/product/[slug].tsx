@@ -315,7 +315,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
       <section className="container__cus">
         <div className="flex lg:flex-nowrap flex-wrap items-start lg:justify-between justify-center my-14 gap-10">
-          <div className="lg:sticky relative lg:top-32 lg:w-5/12 sm:w-10/12 w-full bg-white p-5 rounded-md select-none overflow-hidden">
+          <div className="lg:sticky relative lg:top-20 lg:w-5/12 sm:w-10/12 w-full bg-white p-5 rounded-md select-none overflow-hidden">
             <div className="w-full lg:h-[500px] h-[400px] rounded-md overflow-hidden">
               <ImageCus
                 title={product.title}
@@ -411,7 +411,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                           {CURRENCY_CHARACTER}
                         </h3>
                         <sup className="md:text-sm text-xs font-medium text-white px-2 py-1 bg-primary rounded-md">
-                          Save -
+                          Save {" "}
                           {getPercentPromotionPrice(
                             product.price,
                             product.promotion_price
@@ -432,13 +432,13 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                     {variation.promotion_price > 0 ? (
                       <Fragment>
                         <h3 className="lg:text-2xl md:text-xl text-lg font-medium text-[#6a7779] line-through">
-                          {formatBigNumber(variation.price)}
+                          {formatBigNumber(variation.price)} {CURRENCY_CHARACTER}
                         </h3>
                         <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
-                          {formatBigNumber(variation.promotion_price)}
+                          {formatBigNumber(variation.promotion_price)} {CURRENCY_CHARACTER}
                         </h2>
                         <span className="md:text-sm text-xs font-medium text-white px-2 py-0.5 bg-primary rounded-md">
-                          Save -
+                          Save {" "}
                           {getPercentPromotionPrice(
                             variation.price,
                             variation.promotion_price
@@ -448,7 +448,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                       </Fragment>
                     ) : (
                       <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
-                        {formatBigNumber(variation.price)}
+                        {formatBigNumber(variation.price)} {CURRENCY_CHARACTER}
                       </h2>
                     )}
                   </div>

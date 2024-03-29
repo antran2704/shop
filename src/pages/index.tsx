@@ -68,7 +68,7 @@ const Home: NextPageWithLayout = () => {
       </section>
 
       {/* Brands */}
-      <section className="py-10">
+      <section className="container__cus py-10 overflow-hidden">
         <Brands />
       </section>
     </div>

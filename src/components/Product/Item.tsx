@@ -38,14 +38,14 @@ const ProductItem = (props: Props) => {
             {data.title}
           </p>
 
-          <div className="flex items-center my-1">
+          {/* <div className="flex items-center my-1">
             {[...new Array(Math.floor(3))].map((item, index: number) => (
               <AiFillStar key={index} className="text-sm text-[#ffc30e]" />
             ))}
             {[...new Array(5 - Math.floor(3))].map((item, index: number) => (
               <AiFillStar key={index} className="text-sm text-[#dadada]" />
             ))}
-          </div>
+          </div> */}
           <div className="flex items-center gap-2">
             {data.promotion_price > 0 && (
               <Fragment>
@@ -66,10 +66,18 @@ const ProductItem = (props: Props) => {
           </div>
         </div>
 
-        {data.promotion_price > 0 && (
+        {data.inventory > 0 && data.promotion_price > 0 && (
           <div className="absolute top-0 right-0 bg-primary">
-            <p className="text-xs text-center font-medium text-white w-10 px-1 py-1">
+            <p className="text-xs text-center font-medium text-white w-10 p-1">
               {getPercentPromotionPrice(data.price, data.promotion_price)}%
+            </p>
+          </div>
+        )}
+
+         {data.inventory <= 0 && (
+          <div className="absolute top-0 right-0 bg-primary">
+            <p className="text-xs text-center font-medium text-white p-2">
+              Sold out
             </p>
           </div>
         )}
