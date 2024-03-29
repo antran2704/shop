@@ -38,7 +38,7 @@ import {
   ItemOrderCreate,
   Order,
 } from "~/interfaces/order";
-import { EPaymentMethod, EPaymentStatus } from "~/enums";
+import { EOrderStatus, EPaymentMethod, EPaymentStatus } from "~/enums";
 import { createOrder, updatePaymentStatusOrder } from "~/api-client/order";
 import { CART_KEY, checkInventoryItems } from "~/api-client/cart";
 import paymentMethods from "~/data/paymentMethods";
@@ -206,6 +206,7 @@ const CheckOut: NextPageWithLayout = () => {
       user_id: infor._id,
       user_infor: inforCustomer,
       discount: coupon,
+      status: EOrderStatus.PENDING,
       payment_status: EPaymentStatus.PENDING,
       payment_method: paymentMethod as EPaymentMethod,
     };
