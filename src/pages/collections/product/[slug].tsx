@@ -23,7 +23,7 @@ import {
 import Header from "~/components/Header";
 import ImageCus from "~/components/Image";
 import ProductQuantity from "~/components/ProductQuantity";
-import { getProductBySlug, getProducts, getVariations } from "~/api-client";
+import { getProductBySlug, getProductBySlugStatic, getProducts, getProductsStatic, getVariations } from "~/api-client";
 import {
   IBreadcrumb,
   IDataCategory,
@@ -677,7 +677,7 @@ ProductPage.getLayout = function getLayout(page: ReactElement) {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   try {
-    const res = await getProductBySlug(params?.slug as string);
+    const res = await getProductBySlugStatic(params?.slug as string);
     const product: IProductData = res.payload;
 
     return {
@@ -694,7 +694,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 };
 
 export async function getStaticPaths() {
-  const res = await getProducts();
+  const res = await getProductsStatic();
   const products = await res.payload;
 
   const paths = products.map((product: IProductData) => ({
