@@ -28,12 +28,15 @@ const ProductItem = (props: Props) => {
         className="block w-full h-full"
       >
         <ImageCus
-          src={data.thumbnail || ""}
+          src={
+            ((process.env.NEXT_PUBLIC_IMAGE_ENDPOINT as string) +
+              data.thumbnail) as string
+          }
           title={data.title}
           alt={data.title}
-          className="w-full lg:h-[220px] md:h-[180px] h-[160px] object-center"
+          className="w-full lg:h-[260px] md:h-[180px] h-[160px] object-center object-cover"
         />
-        <div className="px-2 py-2">
+        <div className="px-2 py-2 h-[120px]">
           <p className="group-hover:text-primary  h-[48px] text-base font-normal line-clamp-2">
             {data.title}
           </p>
@@ -46,22 +49,28 @@ const ProductItem = (props: Props) => {
               <AiFillStar key={index} className="text-sm text-[#dadada]" />
             ))}
           </div> */}
-          <div className="flex items-center gap-2">
-            {data.promotion_price > 0 && (
+          <div className="pt-2">
+            {data.promotion_price > 0 && data.inventory > 0 && (
               <Fragment>
-                <span className="inline-block md:text-base sm:text-sm text-xs font-medium text-primary">
+                <span className="block md:text-base text-sm font-medium text-primary">
                   {formatBigNumber(data.promotion_price)} {CURRENCY_CHARACTER}
                 </span>
-                {/* <span className="inline-block md:text-base sm:text-sm text-xs text-[#666] line-through">
+                <span className="block text-sm text-[#666] line-through">
                   {formatBigNumber(data.price)} {CURRENCY_CHARACTER}
-                </span> */}
+                </span>
               </Fragment>
             )}
 
-            {!data.promotion_price && (
-              <span className="inline-block md:text-base sm:text-sm text-xs font-medium text-primary">
+            {!data.promotion_price && data.inventory > 0 && (
+              <span className="inline-block md:text-base text-sm font-medium text-primary">
                 {formatBigNumber(data.price)} {CURRENCY_CHARACTER}
               </span>
+            )}
+
+            {data.inventory <= 0 && (
+              <p className="w-full md:text-base text-sm font-medium text-primary">
+                Sold out
+              </p>
             )}
           </div>
         </div>
@@ -70,14 +79,6 @@ const ProductItem = (props: Props) => {
           <div className="absolute top-0 right-0 bg-primary">
             <p className="text-xs text-center font-medium text-white w-10 p-1">
               {getPercentPromotionPrice(data.price, data.promotion_price)}%
-            </p>
-          </div>
-        )}
-
-         {data.inventory <= 0 && (
-          <div className="absolute top-0 right-0 bg-primary">
-            <p className="text-xs text-center font-medium text-white p-2">
-              Sold out
             </p>
           </div>
         )}

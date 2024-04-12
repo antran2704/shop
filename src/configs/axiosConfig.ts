@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { getRefreshToken, logout } from "~/api-client";
 
 const http = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_ENDPOINT_API,
+  baseURL: process.env.NEXT_PUBLIC_ENDPOINT_API
 });
 
 const AxiosGet = async (
@@ -88,7 +88,10 @@ http.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (response.status === 404 && response.data.message === "Not found key token") {
+    if (
+      response.status === 404 &&
+      response.data.message === "Not found key token"
+    ) {
       handleLogout();
       return Promise.reject(error);
     }

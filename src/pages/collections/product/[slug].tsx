@@ -23,7 +23,13 @@ import {
 import Header from "~/components/Header";
 import ImageCus from "~/components/Image";
 import ProductQuantity from "~/components/ProductQuantity";
-import { getProductBySlug, getProductBySlugStatic, getProducts, getProductsStatic, getVariations } from "~/api-client";
+import {
+  getProductBySlug,
+  getProductBySlugStatic,
+  getProducts,
+  getProductsStatic,
+  getVariations,
+} from "~/api-client";
 import {
   IBreadcrumb,
   IDataCategory,
@@ -72,6 +78,8 @@ const ICON = {
 };
 
 const REFRESH_TIME = 60; //Refresh in 1 day
+
+const URL_IMAGE = process.env.NEXT_PUBLIC_IMAGE_ENDPOINT;
 
 const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
   const { product } = props;
@@ -155,7 +163,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
     if (item) {
       if (item.thumbnail) {
-        setCurrentImage(item.thumbnail);
+        setCurrentImage(URL_IMAGE + item.thumbnail);
       }
 
       setVariation(item);
@@ -256,7 +264,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     }
 
     try {
-      const { status, payload } = await increaseCart(infor._id as string, data);
+      const { status } = await increaseCart(infor._id as string, data);
 
       if (status === 201) {
         mutate(CART_KEY.CART_USER);
@@ -285,7 +293,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
   useEffect(() => {
     if (product && product._id) {
-      setCurrentImage(product.gallery[0]);
+      setCurrentImage(URL_IMAGE + product.gallery[0]);
       handleGetVariations(product._id);
       setInventory(product.inventory);
     }
@@ -332,11 +340,11 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                 enableSwipe={true}
                 plugins={[lgThumbnail, lgZoom]}
               >
-                <a href={product.gallery[0]} className="w-1/4">
+                <a href={URL_IMAGE + product.gallery[0]} className="w-1/4">
                   <button className="absolute top-0 left-0 right-0 bottom-0"></button>
                   <ImageCus
                     className="w-full hidden"
-                    src={product.gallery[0]}
+                    src={URL_IMAGE + product.gallery[0]}
                     alt={product.title}
                     title={product.title}
                   />
@@ -345,13 +353,13 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                   .slice(1, product.gallery.length)
                   .map((image: string, index: number) => (
                     <a
-                      href={image}
+                      href={URL_IMAGE + image}
                       key={index}
                       className="w-[100px] h-[100px] rounded-lg hidden"
                     >
                       <ImageCus
                         className="w-full"
-                        src={image}
+                        src={URL_IMAGE + image}
                         alt={product.title}
                         title={product.title}
                       />
@@ -375,12 +383,12 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                   <SwiperSlide
                     key={index}
                     className="cursor-pointer"
-                    onClick={() => handleChangeImage(image)}
+                    onClick={() => handleChangeImage(URL_IMAGE + image)}
                   >
                     <ImageCus
                       title={product.title}
                       alt={product.title}
-                      src={image}
+                      src={URL_IMAGE + image}
                       className={`w-full lg:h-[100px] h-[120px] ${
                         currentImage.includes(image)
                           ? "border-primary"
@@ -411,7 +419,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                           {CURRENCY_CHARACTER}
                         </h3>
                         <sup className="md:text-sm text-xs font-medium text-white px-2 py-1 bg-primary rounded-md">
-                          Save {" "}
+                          Save{" "}
                           {getPercentPromotionPrice(
                             product.price,
                             product.promotion_price
@@ -432,13 +440,15 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                     {variation.promotion_price > 0 ? (
                       <Fragment>
                         <h3 className="lg:text-2xl md:text-xl text-lg font-medium text-[#6a7779] line-through">
-                          {formatBigNumber(variation.price)} {CURRENCY_CHARACTER}
+                          {formatBigNumber(variation.price)}{" "}
+                          {CURRENCY_CHARACTER}
                         </h3>
                         <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
-                          {formatBigNumber(variation.promotion_price)} {CURRENCY_CHARACTER}
+                          {formatBigNumber(variation.promotion_price)}{" "}
+                          {CURRENCY_CHARACTER}
                         </h2>
                         <span className="md:text-sm text-xs font-medium text-white px-2 py-0.5 bg-primary rounded-md">
-                          Save {" "}
+                          Save{" "}
                           {getPercentPromotionPrice(
                             variation.price,
                             variation.promotion_price
@@ -636,7 +646,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
             />
             <div className="flex items-center gap-5">
               <ImageCus
-                src={product.gallery[0]}
+                src={URL_IMAGE + product.gallery[0]}
                 alt="image"
                 title="image"
                 className="w-[100px] h-100px"

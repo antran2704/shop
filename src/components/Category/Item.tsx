@@ -17,10 +17,13 @@ const CategoryItem = (props: Props) => {
       className="flex flex-col items-center justify-center text-[#1e1e1e] hover:text-primary"
     >
       <ImageCus
-        src={data.thumbnail || ""}
+        src={
+          ((process.env.NEXT_PUBLIC_IMAGE_ENDPOINT as string) +
+            data.thumbnail) as string
+        }
         alt="image category"
         title="image category"
-        className="w-full h-[160px] rounded-md"
+        className="w-20 h-20 rounded-full"
       />
 
       <p className="block w-full text-sm font-medium text-center mt-3">

@@ -19,18 +19,18 @@ const ListParentCategories = () => {
     <Swiper
       modules={[Navigation]}
       cssMode={true}
-      slidesPerView={2}
+      slidesPerView={3}
       spaceBetween={20}
       navigation={true}
       breakpoints={{
         478: {
-          slidesPerView: 3,
-        },
-        650: {
           slidesPerView: 4,
         },
-        990: {
+        650: {
           slidesPerView: 6,
+        },
+        990: {
+          slidesPerView: 10,
         },
       }}
     >

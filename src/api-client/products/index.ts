@@ -10,10 +10,9 @@ const PRODUCT_KEY = {
   PRODUCT_ID: "product_id",
 };
 
-const API_ENDPOINT = "http://137.184.232.94:3006/api/v1"
 
 const getProductsStatic = async (page: number = 1) => {
-  return await axios.get(`${API_ENDPOINT}/products?page=${page}`).then(res => res.data);
+  return await axios.get(`${process.env.ENDPOINT_SERVER}/products?page=${page}`).then(res => res.data);
 };
 
 const getProducts = async (page: number = 1) => {
@@ -50,7 +49,7 @@ const getProduct = async (product_id: string) => {
 };
 
 const getProductBySlugStatic = async (slug: string) => {
-  return await axios.get(`${API_ENDPOINT}/products/${slug}`).then(res => res.data);
+  return await axios.get(`${process.env.ENDPOINT_SERVER}/products/${slug}`).then(res => res.data);
 };
 
 const getProductBySlug = async (slug: string) => {
