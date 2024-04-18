@@ -6,7 +6,7 @@ import { NextPageWithLayout } from "~/interfaces";
 import Brands from "~/components/Brands";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import Seo from "~/components/Seo";
-import { useProducts } from "~/hooks/useProducts";
+import { useHotProducts, useProducts } from "~/hooks/useProducts";
 import ListParentCategories from "~/components/Category/List";
 import ListProducts from "~/components/Product/List";
 import Banners from "~/components/Banners";
@@ -14,7 +14,23 @@ import Banners from "~/components/Banners";
 const Layout = DefaultLayout;
 
 const Home: NextPageWithLayout = () => {
-  const { products, loadingProducts } = useProducts(1);
+  const { products, loadingProducts } = useProducts(1, {
+    title: "1",
+    thumbnail: "1",
+    price: "1",
+    promotion_price: "1",
+    slug: "1",
+    inventory: "1"
+  });
+
+  const { hotProducts, loadingHotProducts } = useHotProducts(1, {
+    title: "1",
+    thumbnail: "1",
+    price: "1",
+    promotion_price: "1",
+    slug: "1",
+    inventory: "1"
+  });
 
   return (
     <div>
@@ -46,8 +62,8 @@ const Home: NextPageWithLayout = () => {
       <section className="container__cus py-5">
         <ListProducts
           title="Sản phẩm Hot 🔥"
-          isLoading={loadingProducts}
-          items={products}
+          isLoading={loadingHotProducts}
+          items={hotProducts}
         />
       </section>
 

@@ -8,15 +8,33 @@ const PRODUCT_KEY = {
   PRODUCTS_OTHER: "products_other",
   PRODUCTS_CATEGORY: "products_category",
   PRODUCT_ID: "product_id",
+  PRODUCT_HOT: "product_hot",
 };
-
 
 const getProductsStatic = async (page: number = 1) => {
-  return await axios.get(`${process.env.ENDPOINT_SERVER}/products?page=${page}`).then(res => res.data);
+  return await axios
+    .get(`${process.env.ENDPOINT_SERVER}/products?page=${page}`)
+    .then((res) => res.data);
 };
 
-const getProducts = async (page: number = 1) => {
-  return await AxiosGet(`/products?page=${page}`);
+const getProducts = async (
+  page: number = 1,
+  select?: IQueryParam<Partial<IProductData>>
+) => {
+  const parseQuery = qs.stringify(select);
+  return await AxiosGet(
+    `/products?page=${page}${parseQuery && "&" + parseQuery}`
+  );
+};
+
+const getHotProducts = async (
+  page: number = 1,
+  select?: IQueryParam<Partial<IProductData>>
+) => {
+  const parseQuery = qs.stringify(select);
+  return await AxiosGet(
+    `/products/hot?page=${page}${parseQuery && "&" + parseQuery}`
+  );
 };
 
 const getOtherProducts = async (
@@ -27,19 +45,21 @@ const getOtherProducts = async (
 ) => {
   const parseQuery = qs.stringify(select);
   return await AxiosGet(
-    `/products/other?category_id=${category_id}&product_id=${product_id}&page=${page}&${parseQuery}`
+    `/products/other?category_id=${category_id}&product_id=${product_id}&page=${page}${
+      parseQuery && "&" + parseQuery
+    }`
   );
 };
 
 const getProductsInCategory = async (
   category_id: string,
   filter: IFilter | null,
-  page: number = 1
+  page: number = 1,
 ) => {
   const parseQuery = qs.stringify(filter, { indices: false });
   return await AxiosGet(
     `/products/category/${category_id}?page=${page}${
-      filter && "&" + parseQuery
+      parseQuery && "&" + parseQuery
     }`
   );
 };
@@ -49,7 +69,9 @@ const getProduct = async (product_id: string) => {
 };
 
 const getProductBySlugStatic = async (slug: string) => {
-  return await axios.get(`${process.env.ENDPOINT_SERVER}/products/${slug}`).then(res => res.data);
+  return await axios
+    .get(`${process.env.ENDPOINT_SERVER}/products/${slug}`)
+    .then((res) => res.data);
 };
 
 const getProductBySlug = async (slug: string) => {
@@ -76,5 +98,6 @@ export {
   getProductsWithFilter,
   getProductBySlugStatic,
   getProductsStatic,
+  getHotProducts,
   PRODUCT_KEY,
 };

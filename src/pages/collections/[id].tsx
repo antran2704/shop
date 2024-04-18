@@ -100,7 +100,10 @@ const CollectionItem: NextPageWithLayout = () => {
       setBreadcrumbs([
         { label: "Home", url_path: `/` },
         ...items,
-        { label: category.title, url_path: `/collections/${category.slug}.${category._id}` },
+        {
+          label: category.title,
+          url_path: `/collections/${category.slug}.${category._id}`,
+        },
       ]);
     }
   }, [category]);
@@ -138,7 +141,7 @@ const CollectionItem: NextPageWithLayout = () => {
                 <FilterPrice
                   title="GIÁ SẢN PHẨM"
                   items={filterPrice}
-                  name="price"
+                  name="filterPrice"
                 />
 
                 <button
@@ -233,56 +236,61 @@ const CollectionItem: NextPageWithLayout = () => {
             )}
           </div>
 
-          <div
-            className={`scroll lg:hidden block fixed top-0 bottom-0 ${
-              showFilter
-                ? "right-0 opacity-100"
-                : "-right-56 opacity-0 pointer-events-none"
-            } md:w-1/2 w-3/4 bg-white p-5 shadow-xl transition-all ease-linear duration-100 overflow-y-auto z-40`}
-          >
-            <form>
-              {category && category.childrens.length > 0 && (
-                <FilterLinks
-                  title="Danh mục sản phẩm"
-                  path="/collections"
-                  items={category.childrens}
-                />
-              )}
+          <div className="lg:hidden block">
+            <div
+              className={`fixed top-0 bottom-0 ${
+                showFilter
+                  ? "right-0 opacity-100"
+                  : "-right-56 opacity-0 pointer-events-none"
+              } md:w-1/2 w-3/4 bg-white p-5 shadow-xl transition-all ease-linear duration-100 z-40`}
+            >
+              <form>
+                <div className="scroll max-h-[80vh] overflow-y-auto">
+                  {category && category.childrens.length > 0 && (
+                    <FilterLinks
+                      title="Danh mục sản phẩm"
+                      path="/collections"
+                      items={category.childrens}
+                    />
+                  )}
 
-              {router.isReady &&
-                attributes.map((attribute: IAttribute) => (
-                  <FilterCheckBox
-                    key={attribute._id}
-                    title={attribute.name}
-                    name={attribute.code}
-                    items={attribute.variants}
+                  {router.isReady &&
+                    attributes.map((attribute: IAttribute) => (
+                      <FilterCheckBox
+                        key={attribute._id}
+                        title={attribute.name}
+                        name={attribute.code}
+                        items={attribute.variants}
+                      />
+                    ))}
+
+                  <FilterPrice
+                    title="GIÁ SẢN PHẨM"
+                    items={filterPrice}
+                    name="filterPrice"
                   />
-                ))}
+                </div>
 
-              <FilterPrice
-                title="GIÁ SẢN PHẨM"
-                items={filterPrice}
-                name="price"
-              />
-
-              <button
-                ref={btnSubmitFilterRef}
-                type="submit"
-                className="w-full flex items-center justify-center bg-primary text-white text-lg font-medium px-5 py-2 mt-3"
-              >
-                Filter Now
-              </button>
-              <button
-                onClick={() => router.replace({ query: { id } })}
-                type="button"
-                className="w-full flex items-center justify-center bg-[#d2d2d2] hover:bg-primary text-white text-lg capitalize font-medium px-5 py-2 mt-3 transition-all ease-linear duration-75"
-              >
-                Clear Filter
-              </button>
-            </form>
+                <div className="absolute bottom-0 left-0 right-0 flex sm:flex-nowrap flex-wrap items-center h-auto justify-center p-5 border-t gap-2">
+                  <button
+                    ref={btnSubmitFilterRef}
+                    type="submit"
+                    className="sm:w-2/4 w-full flex items-center justify-center bg-primary text-white text-lg font-medium px-5 py-2 rounded-md"
+                  >
+                    Filter Now
+                  </button>
+                  <button
+                    onClick={() => router.replace({ query: { id } })}
+                    type="button"
+                    className="sm:w-2/4 w-full flex items-center justify-center bg-black hover:bg-primary text-white text-lg capitalize font-medium px-5 py-2 transition-all ease-linear duration-75 rounded-md"
+                  >
+                    Clear Filter
+                  </button>
+                </div>
+              </form>
+            </div>
+            {showFilter && <LayoutClose handleClose={handleShowFilter} />} 
           </div>
-
-          {showFilter && <LayoutClose handleClose={handleShowFilter} />}
         </div>
       </div>
 

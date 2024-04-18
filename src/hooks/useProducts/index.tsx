@@ -1,6 +1,7 @@
 import useSWR, { SWRConfiguration } from "swr";
 import {
   PRODUCT_KEY,
+  getHotProducts,
   getOtherProducts,
   getProducts,
   getProductsInCategory,
@@ -11,9 +12,12 @@ import { IFilter, IPagination, IProductData, IQueryParam } from "~/interfaces";
 // refesh 1 hour
 const REFESH_TIME = 1000 * 60 * 60;
 
-const fetcherProducts = async (page: number) => {
+const fetcherProducts = async (
+  page: number,
+  select?: IQueryParam<Partial<IProductData>>
+) => {
   try {
-    const res = await getProducts(page);
+    const res = await getProducts(page, select);
 
     if (res.status === 200) {
       return res;
@@ -29,8 +33,19 @@ const fetcherOtherProducts = async (
   page: number = 1,
   select?: IQueryParam<Partial<IProductData>>
 ) => {
+  const res = await getOtherProducts(product_id, category_id, page, select);
+
+  if (res.status === 200) {
+    return res;
+  }
+};
+
+const fetcherHotProducts = async (
+  page: number = 1,
+  select?: IQueryParam<Partial<IProductData>>
+) => {
   try {
-    const res = await getOtherProducts(product_id, category_id, page, select);
+    const res = await getHotProducts(page, select);
 
     if (res.status === 200) {
       return res;
@@ -56,10 +71,14 @@ const fetcherProductsInCategory = async (
   }
 };
 
-const useProducts = (page: number = 1, options?: Partial<SWRConfiguration>) => {
+const useProducts = (
+  page: number = 1,
+  select?: IQueryParam<Partial<IProductData>>,
+  options?: Partial<SWRConfiguration>
+) => {
   const { data, isLoading, mutate, error } = useSWR(
     [PRODUCT_KEY.PRODUCTS_PAGE, page],
-    () => fetcherProducts(page),
+    () => fetcherProducts(page, select),
     {
       ...options,
       revalidateOnFocus: false,
@@ -78,6 +97,32 @@ const useProducts = (page: number = 1, options?: Partial<SWRConfiguration>) => {
   };
 };
 
+const useHotProducts = (
+  page: number = 1,
+  select?: IQueryParam<Partial<IProductData>>,
+  options?: Partial<SWRConfiguration>
+) => {
+  const { data, isLoading, mutate, error } = useSWR(
+    [PRODUCT_KEY.PRODUCT_HOT, page],
+    () => fetcherHotProducts(page, select),
+    {
+      ...options,
+      revalidateOnFocus: false,
+      dedupingInterval: REFESH_TIME,
+      keepPreviousData: true,
+      fallbackData: { payload: [], pagination: initPagination },
+    }
+  );
+
+  return {
+    hotProducts: data.payload,
+    pagination: data.pagination as IPagination,
+    loadingHotProducts: isLoading,
+    error,
+    mutate,
+  };
+};
+
 const useOtherProducts = (
   isReady: boolean,
   product_id: string,
@@ -87,7 +132,9 @@ const useOtherProducts = (
   options?: Partial<SWRConfiguration>
 ) => {
   const { data, isLoading, mutate, error } = useSWR(
-    isReady ? [PRODUCT_KEY.PRODUCTS_OTHER, category_id, product_id, page] : null,
+    isReady
+      ? [PRODUCT_KEY.PRODUCTS_OTHER, category_id, product_id, page]
+      : null,
     () => fetcherOtherProducts(category_id, product_id, page, select),
     {
       ...options,
@@ -139,4 +186,4 @@ const useProductsInCategory = (
   };
 };
 
-export { useProducts, useOtherProducts, useProductsInCategory };
+export { useProducts, useOtherProducts, useHotProducts, useProductsInCategory };

@@ -223,8 +223,13 @@ const Navbar: FC = () => {
                         Tài khoản
                       </Link>
                     </li>
-                    <li className="px-4 py-2 cursor-pointer hover:text-primary">
-                      Đơn hàng
+                    <li>
+                      <Link
+                        href="/account"
+                        className="block px-4 py-2 cursor-pointer hover:text-primary"
+                      >
+                        Đơn hàng
+                      </Link>
                     </li>
                     <li
                       onClick={onLogout}

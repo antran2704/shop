@@ -24,9 +24,7 @@ import Header from "~/components/Header";
 import ImageCus from "~/components/Image";
 import ProductQuantity from "~/components/ProductQuantity";
 import {
-  getProductBySlug,
   getProductBySlugStatic,
-  getProducts,
   getProductsStatic,
   getVariations,
 } from "~/api-client";
@@ -107,10 +105,10 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
   const { otherProducts, loadingOtherProducts } = useOtherProducts(
     !!product,
-    product?.category._id as string,
+    product?.category?._id as string || "",
     product?._id as string,
     1,
-    { title: "1", slug: "1", thumbnail: "1", price: "1", promotion_price: "1" }
+    { title: "1", slug: "1", thumbnail: "1", price: "1", promotion_price: "1", inventory: "1" }
   );
 
   const onSelectOption = (key: string, value: string) => {
@@ -325,12 +323,14 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
         <div className="flex lg:flex-nowrap flex-wrap items-start lg:justify-between justify-center my-14 gap-10">
           <div className="lg:sticky relative lg:top-20 lg:w-5/12 sm:w-10/12 w-full bg-white p-5 rounded-md select-none overflow-hidden">
             <div className="w-full lg:h-[500px] h-[400px] rounded-md overflow-hidden">
-              <ImageCus
-                title={product.title}
-                alt={product.title}
-                src={currentImage}
-                className="w-full h-full"
-              />
+              {currentImage && (
+                <ImageCus
+                  title={product.title}
+                  alt={product.title}
+                  src={currentImage}
+                  className="w-full h-full"
+                />
+              )}
             </div>
             <div>
               {/* gallery image */}

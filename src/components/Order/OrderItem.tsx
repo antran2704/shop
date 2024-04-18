@@ -112,7 +112,7 @@ const OrderItem = (props: Props) => {
               <div className={`flex md:flex-row flex-col items-center gap-5`}>
                 <div className="md:w-[100px] md:h-[100px] md:min-w-[100px] md:min-h-[100px] w-[120px] h-[120px] min-w-[120px] min-h-[120px]">
                   <ImageCus
-                    src={item.product.thumbnail as string}
+                    src={process.env.NEXT_PUBLIC_IMAGE_ENDPOINT as string + item.product.thumbnail as string}
                     title={"order"}
                     alt={"order"}
                     className="w-full h-full object-fill object-center rounded-md"
