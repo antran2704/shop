@@ -1,51 +1,50 @@
-import Link from "next/link";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment } from "react";
 import { Navigation, Pagination, EffectFade, Autoplay } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { getBanners } from "~/api-client/banner";
 import { useBanners } from "~/hooks/useBanner";
 import { Banner } from "~/interfaces/banner";
 
 const Banners = () => {
-  const {banners, loadingBanner} = useBanners();
-  
-  if (banners.length === 0 && loadingBanner) {
-    return <Fragment></Fragment>;
-  }
+    const { banners, loadingBanner } = useBanners();
 
-  return (
-    <Swiper
-      modules={[Navigation, Pagination, EffectFade, Autoplay]}
-      effect="fade"
-      slidesPerView={1}
-      loop={true}
-      enabled={true}
-      speed={600}
-      autoplay={{
-        delay: 8000,
-      }}
-      breakpoints={{
-        960: {
-          navigation: {
-            enabled: true,
-          },
-        },
-      }}
-      navigation={{ enabled: false }}
-      pagination={{ clickable: true }}
-      className="w-full h-full"
-    >
-      {banners.map((banner: Banner) => (
-        <SwiperSlide key={banner._id}>
-          <div
-            className="relative flex items-center sm:justify-start justify-center w-full h-full bg-cover bg-center"
-            style={{
-              backgroundImage: `url(${process.env.NEXT_PUBLIC_IMAGE_ENDPOINT + banner.image})`,
+    if (banners.length === 0 && loadingBanner) {
+        return <Fragment></Fragment>;
+    }
+
+    return (
+        <Swiper
+            modules={[Navigation, Pagination, EffectFade, Autoplay]}
+            effect="fade"
+            slidesPerView={1}
+            loop={true}
+            enabled={true}
+            speed={600}
+            autoplay={{
+                delay: 8000
             }}
-          ></div>
-        </SwiperSlide>
-      ))}
-      {/* <SwiperSlide
+            breakpoints={{
+                960: {
+                    navigation: {
+                        enabled: true
+                    }
+                }
+            }}
+            navigation={{ enabled: false }}
+            pagination={{ clickable: true }}
+            className="w-full h-full">
+            {banners.map((banner: Banner) => (
+                <SwiperSlide key={banner._id}>
+                    <div
+                        className="relative flex items-center sm:justify-start justify-center w-full h-full bg-cover bg-center"
+                        style={{
+                            backgroundImage: `url(${
+                                process.env.NEXT_PUBLIC_IMAGE_ENDPOINT +
+                                banner.image
+                            })`
+                        }}></div>
+                </SwiperSlide>
+            ))}
+            {/* <SwiperSlide
           className="relative flex items-center sm:justify-start justify-center w-full h-full bg-cover bg-center md:pl-24 px-5"
           style={{ backgroundImage: "url(/images/banner2.webp)" }}
         >
@@ -66,8 +65,8 @@ const Banners = () => {
             </button>
           </div>
         </SwiperSlide> */}
-    </Swiper>
-  );
+        </Swiper>
+    );
 };
 
 export default Banners;

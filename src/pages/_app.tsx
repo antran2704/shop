@@ -16,15 +16,17 @@ import { AppPropsWithLayout } from "~/interfaces";
 import { PrimaryLoading } from "~/components/Loading";
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
-  const getLayout = Component.getLayout ?? ((page) => page);
-  return (
-    <Provider store={store}>
-      <ClerkProvider>
-        <ClerkLoading>
-          <PrimaryLoading  />
-        </ClerkLoading>
-        <ClerkLoaded>{getLayout(<Component {...pageProps} />)}</ClerkLoaded>
-      </ClerkProvider>
-    </Provider>
-  );
+    const getLayout = Component.getLayout ?? ((page) => page);
+    return (
+        <Provider store={store}>
+            <ClerkProvider>
+                <ClerkLoading>
+                    <PrimaryLoading />
+                </ClerkLoading>
+                <ClerkLoaded>
+                    {getLayout(<Component {...pageProps} />)}
+                </ClerkLoaded>
+            </ClerkProvider>
+        </Provider>
+    );
 }

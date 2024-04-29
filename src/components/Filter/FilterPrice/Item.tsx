@@ -3,58 +3,60 @@ import { FC, memo, useEffect, useRef } from "react";
 import { IVariant } from "~/interfaces";
 
 interface Props {
-  name: string;
-  data: IVariant;
+    name: string;
+    data: IVariant;
 }
 
 const FilterPriceItem: FC<Props> = (props: Props) => {
-  const { data, name } = props;
+    const { data, name } = props;
 
-  const router = useRouter();
-  const query = router.query;
+    const router = useRouter();
+    const query = router.query;
 
-  const inpRef = useRef<HTMLInputElement>(null);
+    const inpRef = useRef<HTMLInputElement>(null);
 
-  const handleChecked = (item: string): boolean => {
-    if (
-      typeof query[name.toLowerCase()] === "string" &&
-      query[name.toLowerCase()] === item
-    ) {
-      return true;
-    }
+    const handleChecked = (item: string): boolean => {
+        if (
+            typeof query[name.toLowerCase()] === "string" &&
+            query[name.toLowerCase()] === item
+        ) {
+            return true;
+        }
 
-    return false;
-  };
+        return false;
+    };
 
-  const onClick = () => {
-    if (router.isReady && inpRef.current) {
-      const isChecked = inpRef.current.checked;
-      inpRef.current.checked = !isChecked;
-    }
-  };
+    const onClick = () => {
+        if (router.isReady && inpRef.current) {
+            const isChecked = inpRef.current.checked;
+            inpRef.current.checked = !isChecked;
+        }
+    };
 
-  useEffect(() => {
-    if (router.isReady && inpRef.current) {
-      const isChecked = handleChecked(data.value);
-      inpRef.current.checked = isChecked;
-    }
-  }, [query]);
+    useEffect(() => {
+        if (router.isReady && inpRef.current) {
+            const isChecked = handleChecked(data.value);
+            inpRef.current.checked = isChecked;
+        }
+    }, [query]);
 
-  return (
-    <li className="flex items-center w-full cursor-pointer gap-2" onClick={onClick}>
-      <input
-        ref={inpRef}
-        id={data.value}
-        type="radio"
-        name={name.toLowerCase()}
-        onClick={onClick}
-        value={data.value}
-        className="min-w-3 w-3 h-3 rounded-md"
-      />
+    return (
+        <li
+            className="flex items-center w-full cursor-pointer gap-2"
+            onClick={onClick}>
+            <input
+                ref={inpRef}
+                id={data.value}
+                type="radio"
+                name={name.toLowerCase()}
+                onClick={onClick}
+                value={data.value}
+                className="min-w-3 w-3 h-3 rounded-md"
+            />
 
-      <p className="text-xs capitalizez">{data.name}</p>
-    </li>
-  );
+            <p className="text-xs capitalizez">{data.name}</p>
+        </li>
+    );
 };
 
 export default memo(FilterPriceItem);

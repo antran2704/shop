@@ -1,5 +1,5 @@
 interface IFilter {
-  [x: string]: string | string[];
+    [x: string]: string | string[];
 }
 
 export type { IFilter };
