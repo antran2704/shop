@@ -45,7 +45,7 @@ const Brands = () => {
                     delay: 3000,
                     disableOnInteraction: false
                 }}
-                speed={3000}
+                speed={1000}
                 slidesPerView={2}
                 loop={true}
                 enabled={true}
@@ -53,7 +53,7 @@ const Brands = () => {
                 freeMode={true}>
                 {listBrand.map((brand: string, index: number) => (
                     <SwiperSlide key={index}>
-                        <ImageCus
+                        <img
                             title="Brand"
                             src={brand}
                             alt="Brand"

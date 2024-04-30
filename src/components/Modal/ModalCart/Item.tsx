@@ -18,10 +18,10 @@ const ModalCartItem = (props: Props) => {
         props;
     return (
         <li>
-            <Link
-                href={`/collections/product/${data.product._id}.${data.product.slug}`}
-                className="relative flex items-center pb-3 px-2 border-b border-borderColor gap-4">
-                <div className="h-20">
+            <div className="relative flex items-center pb-3 px-2 border-b border-borderColor gap-4">
+                <Link
+                    href={`/collections/product/${data.product._id}.${data.product.slug}`}
+                    className="h-20">
                     <ImageCus
                         src={
                             ((process.env
@@ -32,8 +32,10 @@ const ModalCartItem = (props: Props) => {
                         alt="img"
                         title="img"
                     />
-                </div>
-                <div className="w-6/12">
+                </Link>
+                <Link
+                    href={`/collections/product/${data.product._id}.${data.product.slug}`}
+                    className="w-6/12">
                     <p className="sm:text-base text-sm font-medium hover:text-primary line-clamp-2">
                         {data.variation
                             ? data.variation.title
@@ -67,7 +69,7 @@ const ModalCartItem = (props: Props) => {
                             {" VND"}X {data.quantity}
                         </p>
                     )}
-                </div>
+                </Link>
 
                 <AiFillCloseCircle
                     onClick={() => {
@@ -76,7 +78,7 @@ const ModalCartItem = (props: Props) => {
                     }}
                     className="absolute top-0 right-2 text-2xl hover:text-primary cursor-pointer"
                 />
-            </Link>
+            </div>
         </li>
     );
 };

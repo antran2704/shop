@@ -138,9 +138,9 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
                             required
                             type="email"
                             placeholder="Your Email Address"
-                            className="h-11 sm:w-9/12 w-full bg-white px-5 py-2 outline-0"
+                            className="h-11 sm:w-9/12 w-full bg-white px-5 py-2 outline-0 sm:rounded-none rounded-md"
                         />
-                        <button className="h-11 sm:w-3/12 w-1/2 px-5 text-white bg-primary">
+                        <button className="h-11 sm:w-3/12 w-1/2 sm:rounded-none rounded-md px-5 text-white bg-primary">
                             Subscribe
                         </button>
                     </form>

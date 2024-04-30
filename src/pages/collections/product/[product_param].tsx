@@ -83,7 +83,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     const { product } = props;
 
     const router = useRouter();
-    const { slug } = router.query;
+    const { product_param: slug } = router.query;
     const { infor } = useAppSelector((state) => state.user);
 
     const { mutate } = useSWRConfig();

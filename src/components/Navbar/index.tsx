@@ -40,6 +40,7 @@ const Navbar: FC = () => {
     const [showModalCart, setShowModalCart] = useState<boolean>(false);
     const [showNavbarMobile, setShowNavarMobile] = useState<boolean>(false);
     const [noResult, setNoResult] = useState<boolean>(false);
+    const [searchLoading, setSearchLoading] = useState<boolean>(false);
 
     const [currentNav, setCurrentNav] = useState([initDataNavbar]);
     const [typeShow, setTypeShow] = useState<"next" | "prev" | null>(null);
@@ -88,6 +89,8 @@ const Navbar: FC = () => {
     };
 
     const handelSearch = async () => {
+        setSearchLoading(true);
+
         try {
             const response = await searchProductsMenu(searchText as string, 8);
 
@@ -101,6 +104,8 @@ const Navbar: FC = () => {
         } catch (error) {
             console.log(error);
         }
+
+        setSearchLoading(false);
     };
 
     useEffect(() => {
@@ -510,11 +515,12 @@ const Navbar: FC = () => {
             <div
                 className={`w-full sm:hidden relative flex items-center ${
                     showNavbarMobile ? "px-5 py-2" : "h-0 p-0 overflow-hidden"
-                } bg-white border shadow-mdtransition-all ease-linear duration-100 z-0 gap-2`}>
+                } bg-white border shadow-md transition-all ease-linear duration-100 z-0 gap-2`}>
                 <Search
                     searchText={searchText}
                     onChange={onChangeValue}
                     onClearText={onClearSearchText}
+                    loading={searchLoading}
                     listItem={listSearch}
                     noResult={noResult}
                 />
