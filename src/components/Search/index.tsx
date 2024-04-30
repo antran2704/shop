@@ -78,7 +78,7 @@ const Search = (props: Props) => {
                 />
                 {searchText && (
                     <div onClick={onClearText} className="min-w-6 w-6 h-6">
-                        <IoMdClose className="text-xl w-full cursor-pointer" />
+                        <IoMdClose className="text-xl w-full h-full cursor-pointer" />
                     </div>
                 )}
 

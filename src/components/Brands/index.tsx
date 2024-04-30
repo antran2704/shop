@@ -3,20 +3,20 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import ImageCus from "../Image";
 
 const listBrand: string[] = [
-    "/images/brand-1.avif",
-    "/images/brand-2.avif",
     "/images/brand-3.webp",
     "/images/brand-4.webp",
-    "/images/brand-1.avif",
-    "/images/brand-2.avif",
     "/images/brand-3.webp",
     "/images/brand-4.webp",
-    "/images/brand-1.avif",
-    "/images/brand-2.avif",
     "/images/brand-3.webp",
     "/images/brand-4.webp",
-    "/images/brand-1.avif",
-    "/images/brand-2.avif",
+    "/images/brand-3.webp",
+    "/images/brand-4.webp",
+    "/images/brand-3.webp",
+    "/images/brand-4.webp",
+    "/images/brand-3.webp",
+    "/images/brand-4.webp",
+    "/images/brand-3.webp",
+    "/images/brand-4.webp",
     "/images/brand-3.webp",
     "/images/brand-4.webp"
 ];
@@ -53,7 +53,7 @@ const Brands = () => {
                 freeMode={true}>
                 {listBrand.map((brand: string, index: number) => (
                     <SwiperSlide key={index}>
-                        <img
+                        <ImageCus
                             title="Brand"
                             src={brand}
                             alt="Brand"

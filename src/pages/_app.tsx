@@ -17,6 +17,15 @@ import { PrimaryLoading } from "~/components/Loading";
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
     const getLayout = Component.getLayout ?? ((page) => page);
+    
+    console.log(
+        "%cHello there! 🙋",
+        "color: #f8796c;font-size: 18px;font-weight: 600;"
+    );
+    console.log(
+        "%cShop Antran was created with many love 🥰🥰🥰",
+        "color: #f8796c;font-size: 16px;font-weight: 500;"
+    );
     return (
         <Provider store={store}>
             <ClerkProvider>
