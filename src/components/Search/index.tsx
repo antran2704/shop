@@ -77,7 +77,7 @@ const Search = (props: Props) => {
                     className={`flex-1 px-2 outline-none transition-all ease-linear duration-100`}
                 />
                 {searchText && (
-                    <div onClick={onClearText} className="min-w-6">
+                    <div onClick={onClearText} className="min-w-6 w-6 h-6">
                         <IoMdClose className="text-xl w-full cursor-pointer" />
                     </div>
                 )}
