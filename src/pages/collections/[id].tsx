@@ -322,16 +322,7 @@ const CollectionItem: NextPageWithLayout = () => {
             </div>
 
             <section className="py-5">
-                <div className="container__cus p-5">
-                    <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-xl font-medium text-[#1e1e1e]">
-                            Danh mục
-                        </h3>
-                    </div>
-                    <div className="p-5 border-2 rounded-md">
-                        <ListParentCategories />
-                    </div>
-                </div>
+                <ListParentCategories title="Danh mục" />
             </section>
         </div>
     );

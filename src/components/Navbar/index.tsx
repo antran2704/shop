@@ -88,6 +88,10 @@ const Navbar: FC = () => {
         setTypeShow("prev");
     };
 
+    const onShowSearchMobile = useCallback(() => {
+        setShowNavarMobile(!showNavbarMobile);
+    }, [showNavbarMobile]);
+
     const handelSearch = async () => {
         setSearchLoading(true);
 
@@ -164,9 +168,12 @@ const Navbar: FC = () => {
 
                         <div className="lg:w-6/12 w-5/12 sm:block hidden">
                             <Search
+                                loading={searchLoading}
                                 searchText={searchText}
                                 onChange={onChangeValue}
                                 onClearText={onClearSearchText}
+                                showSearchMobile={showNavbarMobile}
+                                onShowSearchMobile={onShowSearchMobile}
                                 listItem={listSearch}
                                 noResult={noResult}
                             />
@@ -518,14 +525,16 @@ const Navbar: FC = () => {
                 } bg-white border shadow-md transition-all ease-linear duration-100 z-0 gap-2`}>
                 <Search
                     searchText={searchText}
+                    showSearchMobile={showNavbarMobile}
                     onChange={onChangeValue}
                     onClearText={onClearSearchText}
+                    onShowSearchMobile={onShowSearchMobile}
                     loading={searchLoading}
                     listItem={listSearch}
                     noResult={noResult}
                 />
                 <IoMdCloseCircleOutline
-                    onClick={() => setShowNavarMobile(!showNavbarMobile)}
+                    onClick={onShowSearchMobile}
                     className="text-2xl cursor-pointer"
                 />
             </div>

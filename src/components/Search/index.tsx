@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
     ChangeEvent,
     Fragment,
@@ -19,6 +18,8 @@ interface Props {
     listItem: IProductHome[];
     loading?: boolean;
     noResult: boolean;
+    showSearchMobile: boolean;
+    onShowSearchMobile: () => void;
     onClearText: () => void;
     onChange: (value: string) => void;
 }
@@ -30,6 +31,8 @@ const Search = (props: Props) => {
         listItem,
         noResult = false,
         loading = false,
+        showSearchMobile,
+        onShowSearchMobile,
         onChange,
         onClearText
     } = props;
@@ -40,6 +43,16 @@ const Search = (props: Props) => {
     const inpSearchRef = useRef<HTMLInputElement>(null);
 
     const [showSearch, setShowSearch] = useState<boolean>(false);
+
+    const onClick = (item: IProductHome) => {
+        setShowSearch(false);
+
+        if (showSearchMobile) {
+            onShowSearchMobile();
+        }
+
+        router.push(`/collections/product/${item._id}.${item.slug}`);
+    };
 
     const onChangeValue = (e: ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -112,15 +125,14 @@ const Search = (props: Props) => {
                     {!loading && !noResult && listItem.length > 0 && (
                         <ul className="w-full">
                             {listItem.map((item: IProductHome) => (
-                                <li key={item._id}>
-                                    <Link
-                                        href={`/collections/product/${item._id}.${item.slug}`}
-                                        className="flex items-center hover:bg-[#e5e5e5] py-2 px-3 transition-all ease-linear duration-75 gap-2">
-                                        <AiOutlineSearch className="min-w-6 w-6 h-6" />
-                                        <p className="text-base line-clamp-2">
-                                            {item.title}
-                                        </p>
-                                    </Link>
+                                <li
+                                    onClick={() => onClick(item)}
+                                    key={item._id}
+                                    className="flex items-center hover:bg-[#e5e5e5] py-2 px-3 transition-all ease-linear duration-75 cursor-pointer gap-2">
+                                    <AiOutlineSearch className="min-w-6 w-6 h-6" />
+                                    <p className="text-base line-clamp-2">
+                                        {item.title}
+                                    </p>
                                 </li>
                             ))}
                         </ul>

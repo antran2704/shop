@@ -81,7 +81,6 @@ const URL_IMAGE = process.env.NEXT_PUBLIC_IMAGE_ENDPOINT;
 
 const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     const { product } = props;
-
     const router = useRouter();
     const { product_param: slug } = router.query;
     const { infor } = useAppSelector((state) => state.user);

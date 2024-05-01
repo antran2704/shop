@@ -12,13 +12,6 @@ export default authMiddleware({
     ],
     ignoredRoutes: [
         "/api/(.*)"
-        // "/api/products",
-        // "/api/products/(.*)",
-        // "/api/attributes",
-        // "/api/attributes/(.*)",
-        // "/api/variations",
-        // "/api/variations/(.*)",
-        // "/api/categories/(.*)",
     ],
     async afterAuth(auth, req) {
         if (!auth.userId && !auth.isPublicRoute) {
