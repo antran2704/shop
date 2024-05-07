@@ -31,11 +31,11 @@ import { useRouter } from "next/router";
 import { createPayment, getDiscount } from "~/api-client";
 import { toast } from "react-toastify";
 import { AiFillCloseCircle } from "react-icons/ai";
-import { InputText, InputEmail } from "~/components/InputField";
+import { InputText, InputEmail, InputNumber } from "~/components/InputField";
 import { IOrderCreate, ItemOrderCreate, Order } from "~/interfaces/order";
 import { EOrderStatus, EPaymentMethod, EPaymentStatus } from "~/enums";
 import { createOrder, updatePaymentStatusOrder } from "~/api-client/order";
-import { CART_KEY, checkInventoryItems } from "~/api-client/cart";
+import { CART_KEY, checkInventoryItems, getCartItems } from "~/api-client/cart";
 import paymentMethods from "~/data/paymentMethods";
 
 const initInforCustomer: IInforCheckout = {
@@ -116,6 +116,17 @@ const CheckOut: NextPageWithLayout = () => {
         }
 
         setInforCustomer({ ...inforCustomer, [name]: value });
+    };
+
+    const handleChangePhoneNumber = (name: string, value: number): void => {
+        if (invalidFields.includes(name as keyof IInforCheckout)) {
+            const newFields = invalidFields.filter(
+                (field: string) => field !== name
+            );
+            setInvalidFields(newFields);
+        }
+
+        setInforCustomer({ ...inforCustomer, [name]: value.toString() });
     };
 
     const handlePaymentMethod = async (
@@ -306,10 +317,18 @@ const CheckOut: NextPageWithLayout = () => {
             setInforCustomer(inforCus);
             setSaveInfor(true);
         }
-    }, []);
+
+        if (!inforCus && infor._id) {
+            setInforCustomer({
+                ...inforCustomer,
+                email: infor.email,
+                name: infor.name
+            });
+        }
+    }, [infor]);
 
     useEffect(() => {
-        if (cart && cart_products.length <= 0) {
+        if (cart && cart.cart_count <= 0) {
             router.push("/cart");
         }
 
@@ -359,7 +378,7 @@ const CheckOut: NextPageWithLayout = () => {
                                     required={true}
                                     getValue={handleChangeInforCus}
                                 />
-                                <InputText
+                                <InputNumber
                                     name="phoneNumber"
                                     error={
                                         invalidFields.includes("phoneNumber")
@@ -371,7 +390,7 @@ const CheckOut: NextPageWithLayout = () => {
                                     className="h-10 px-4 border border-[#e5e5e5] rounded-md"
                                     width="lg:w-4/12 w-full"
                                     required={true}
-                                    getValue={handleChangeInforCus}
+                                    getValue={handleChangePhoneNumber}
                                 />
                             </div>
                             <div className="flex lg:flex-nowrap flex-wrap w-full items-center justify-between gap-3">
