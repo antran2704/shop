@@ -143,8 +143,8 @@ const Navbar: FC = () => {
     }, [router.pathname]);
 
     return (
-        <header className="sticky top-0 left-0 right-0 z-30">
-            <div className="relative w-full bg-white z-10">
+        <Fragment>
+            <div className="sticky top-0 left-0 right-0 z-30 bg-white">
                 <div className="container__cus">
                     <nav className={`flex items-center justify-between py-3`}>
                         <div className="flex items-center md:w-3/12 sm:w-4/12 w-5/12 gap-3">
@@ -328,11 +328,11 @@ const Navbar: FC = () => {
 
             {/* navbar content on PC */}
             <div
-                className={`relative lg:block hidden bg-white border ${
+                className={`sticky top-0 left-0 right-0 lg:block hidden bg-white border ${
                     top > 300
-                        ? "-translate-y-16 opacity-0 pointer-events-none"
-                        : "translate-y-0 opacity-100"
-                } shadow-md transition-all ease-linear duration-100 z-0`}>
+                        ? "pointer-events-none"
+                        : "opacity-100"
+                } shadow-md transition-all ease-linear duration-100 z-20`}>
                 <ul className="container__cus xl:flex hidden w-full items-center justify-center px-5 py-4 transition-all ease-linear duration-100 gap-6">
                     {initDataNavbar.map((item: INavItem, index: number) => (
                         <li key={index} className={`${styles.navbarItem}`}>
@@ -522,7 +522,7 @@ const Navbar: FC = () => {
             <div
                 className={`w-full sm:hidden relative flex items-center ${
                     showNavbarMobile ? "px-5 py-2" : "h-0 p-0 overflow-hidden"
-                } bg-white border shadow-md transition-all ease-linear duration-100 z-0 gap-2`}>
+                } bg-white border shadow-md transition-all ease-linear duration-100 z-50 gap-2`}>
                 <Search
                     searchText={searchText}
                     showSearchMobile={showNavbarMobile}
@@ -541,7 +541,7 @@ const Navbar: FC = () => {
 
             {/* modal cart */}
             <ModalCart show={showModalCart} setShow={setShowModalCart} />
-        </header>
+        </Fragment>
     );
 };
 

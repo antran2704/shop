@@ -8,11 +8,11 @@ export default authMiddleware({
         "/about-us",
         "/sign-in",
         "/collections",
-        "/collections/(.*)"
+        "/collections/(.*)",
+        "/blogs",
+        "/blogs/(.*)"
     ],
-    ignoredRoutes: [
-        "/api/(.*)"
-    ],
+    ignoredRoutes: ["/api/(.*)"],
     async afterAuth(auth, req) {
         if (!auth.userId && !auth.isPublicRoute) {
             return redirectToSignIn({ returnBackUrl: req.url });
