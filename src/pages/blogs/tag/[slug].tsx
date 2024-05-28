@@ -9,8 +9,9 @@ import { IHomeBlog } from "~/interfaces/blog";
 import BlogLayout from "~/layouts/BlogLayout";
 import DefaultLayout from "~/layouts/DefaultLayout";
 
-const BlogsPage = () => {
+const TagBlogsPage = () => {
     const router = useRouter();
+
     const { page } = router.query;
     const [currentPage, setCurrentPage] = useState<number>(
         page ? Number(page) : 1
@@ -69,8 +70,8 @@ const BlogsPage = () => {
     );
 };
 
-export default BlogsPage;
+export default TagBlogsPage;
 
-BlogsPage.getLayout = function getLayout(page: ReactElement) {
+TagBlogsPage.getLayout = function getLayout(page: ReactElement) {
     return <DefaultLayout>{page}</DefaultLayout>;
 };

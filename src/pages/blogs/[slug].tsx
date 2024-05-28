@@ -1,7 +1,7 @@
 import { GetStaticProps } from "next";
-import { ReactElement } from "react";
-import { getBlog, getBlogStatic, getBlogsStatic } from "~/api-client";
-import { IBlog } from "~/interfaces/blog";
+import { ReactElement, useEffect, useState } from "react";
+import { getBlog, getBlogStatic, getBlogs, getBlogsStatic } from "~/api-client";
+import { IBlog, IHomeBlog, TagBlog } from "~/interfaces/blog";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import "react-quill/dist/quill.snow.css";
 
@@ -10,6 +10,10 @@ import hljs from "highlight.js";
 import "highlight.js/styles/tokyo-night-dark.css";
 import { useRouter } from "next/router";
 import { PrimaryLoading } from "~/components/Loading";
+import { getDateTime } from "~/helpers/datetime";
+import Link from "next/link";
+import clsx from "clsx";
+import OtherBlog from "~/components/Blog/OtherBlog";
 
 interface Props {
     blog: IBlog;
@@ -32,18 +36,99 @@ const BlogDetail = (props: Props) => {
         return <PrimaryLoading />;
     }
 
+    const [blogs, setBlogs] = useState<IBlog[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+
+    console.log("blog:::", blog);
+
+    const handleGetBlogs = async (page: number = 1) => {
+        setLoading(true);
+
+        try {
+            const data = await getBlogs(page);
+
+            if (data.status === 200) {
+                setBlogs(data.payload);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+
+        setLoading(false);
+    };
+
+    useEffect(() => {
+        handleGetBlogs(1);
+    }, []);
+
     return (
-        <div className="container__cus py-10">
-            <h1>detail blog</h1>
-            <div className="quill ql-snow">
-                <div
-                    className="ql-editor"
-                    dangerouslySetInnerHTML={{
-                        __html: blog.content
-                    }}
+        <div className="container__cus  py-10">
+            <div className="bg-white p-5 max-w-[800px] mx-auto rounded-md">
+                <h1 className="lg:text-3xl md:text-2xl text-xl font-semibold">
+                    {blog.title}
+                </h1>
+
+                <div className="py-5">
+                    <div className="flex items-center gap-2">
+                        <img
+                            src="https://images.unsplash.com/photo-1716847214513-dfac4f00635b?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                            alt="avartar"
+                            title="avartar"
+                            loading="lazy"
+                            width="auto"
+                            height="auto"
+                            className="w-16 h-16 object-cover object-center rounded-full overflow-hidden"
+                        />
+
+                        <div>
+                            <h3 className="md:text-lg text-base">
+                                {blog.author?.name}
+                            </h3>
+                            <p className="md:text-base text-sm">
+                                {getDateTime(blog.updatedAt as string)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="quill ql-snow">
+                    <div
+                        className="ql-editor"
+                        dangerouslySetInnerHTML={{
+                            __html: blog.content
+                        }}
+                    />
+                </div>
+
+                {!!blog.tags.length && (
+                    <div className="py-5">
+                        <h4 className="md:text-lg text-base font-semibold">
+                            #Tag
+                        </h4>
+                        <ul className="flex items-center flex-wrap py-2 gap-2">
+                            {blog.tags.map((item: TagBlog) => (
+                                <li>
+                                    <Link
+                                        href={`/blogs/tag/${item.slug}`}
+                                        className={clsx(
+                                            "flex items-center justify-center text-base px-5 py-1 hover:bg-primary hover:text-white border rounded-lg cursor-pointer transition-all ease-linear duration-100"
+                                        )}>
+                                        {item.title}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </div>
+
+            <div className="py-5">
+                <OtherBlog
+                    title="Bài viết nổi bật khác"
+                    isLoading={loading}
+                    items={blogs}
                 />
             </div>
-            {/* <CustomEditor content={blog.content} /> */}
         </div>
     );
 };

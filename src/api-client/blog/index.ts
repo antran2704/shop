@@ -1,5 +1,8 @@
 import axios from "axios";
+import qs from "qs";
+
 import { AxiosGet } from "~/configs/axiosConfig";
+import { IFilter } from "~/interfaces";
 
 const BLOG_KEY = {
     BLOG_ALL: "blog_all"
@@ -20,7 +23,21 @@ const getBlog = async (slug: string) => {
 };
 
 const getBlogStatic = async (slug: string) => {
-    return await axios.get(`${process.env.ENDPOINT_SERVER}/blogs/${slug}`).then(res => res.data);
+    return await axios
+        .get(`${process.env.ENDPOINT_SERVER}/blogs/${slug}`)
+        .then((res) => res.data);
 };
 
-export { getBlogs, getBlog, getBlogsStatic, getBlogStatic, BLOG_KEY };
+const searchBlog = async (filter: IFilter | null) => {
+    const parseQuery = qs.stringify(filter, { indices: false });
+    return await AxiosGet(`/blogs/search`).then((res) => res.data);
+};
+
+export {
+    getBlogs,
+    getBlog,
+    getBlogsStatic,
+    getBlogStatic,
+    searchBlog,
+    BLOG_KEY
+};

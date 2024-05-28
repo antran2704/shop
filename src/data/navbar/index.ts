@@ -83,6 +83,10 @@ export const initDataNavbar: INavItem[] = [
         path: "/about-us"
     },
     {
+        name: "Blog",
+        path: "/blogs"
+    },
+    {
         name: "Contact",
         path: "/contact"
     }
