@@ -31,9 +31,12 @@ const OtherBlog = (props: Props) => {
                     navigation={true}
                     breakpoints={{
                         640: {
-                            slidesPerView: 3
+                            slidesPerView: 2
                         },
                         768: {
+                            slidesPerView: 3
+                        },
+                        1024: {
                             slidesPerView: 4
                         }
                     }}>

@@ -25,7 +25,7 @@ const BlogItem = (props: Props) => {
                     />
                 </div>
 
-                <div className="py-4 px-6">
+                <div className="p-4">
                     <h1 className="title-font md:text-lg text-base font-medium text-gray-900 mb-3 line-clamp-2">
                         {data.title}
                     </h1>

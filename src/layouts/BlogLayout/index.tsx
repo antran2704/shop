@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import Pagination from "rc-pagination";
 import { useEffect, useState } from "react";
 import { getTagBlogs } from "~/api-client/tagBlog";
+import { useBlogsTag } from "~/hooks/useBlog";
 import { IPagination } from "~/interfaces";
 import { ITagBlog } from "~/interfaces/tagBlog";
 
@@ -11,33 +12,26 @@ interface Props {
     children: JSX.Element;
     pagination: IPagination;
     title: string;
+    message?: string | null;
     onPagination: (page: number) => void;
+    onChangeTag: (tagId: string) => void;
 }
 
 const PATH_ALL: string = "/blogs";
 
 const BlogLayout = (props: Props) => {
-    const { children, pagination, title, onPagination } = props;
+    const {
+        children,
+        pagination,
+        title,
+        message = null,
+        onPagination,
+        onChangeTag
+    } = props;
     const router = useRouter();
     const tagSlug: string = router.query.slug as string;
-    
-    const [tags, setTags] = useState<ITagBlog[]>([]);
 
-    const handleGetTagBlogs = async (page: number = 1) => {
-        try {
-            const data = await getTagBlogs(page);
-
-            if (data.status === 200) {
-                setTags(data.payload);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    useEffect(() => {
-        handleGetTagBlogs(1);
-    }, []);
+    const { tags } = useBlogsTag(1);
 
     return (
         <section className="container__cus py-5">
@@ -46,8 +40,15 @@ const BlogLayout = (props: Props) => {
             </h1>
 
             <div className="flex items-start lg:flex-row flex-col-reverse justify-between py-5 gap-5">
-                <div className="lg:w-8/12 w-full grid lg:grid-cols-3 grid-cols-2 gap-5">
-                    {children}
+                <div className="lg:w-8/12 w-full">
+                    {message && (
+                        <h3 className="w-full lg:text-2xl md:text-xl text-lg font-medium text-center py-10">
+                            {message}
+                        </h3>
+                    )}
+                    <div className="grid md:grid-cols-3 grid-cols-2 gap-5">
+                        {children}
+                    </div>
                 </div>
 
                 <div className="lg:w-3/12 w-full">
@@ -70,25 +71,24 @@ const BlogLayout = (props: Props) => {
                             </Link>
                         </li>
                         {tags.map((tag: ITagBlog) => (
-                            <li key={tag._id}>
-                                <Link
-                                    href={`/blogs/tag/${tag.slug}`}
-                                    className={clsx(
-                                        "flex items-center justify-center text-base px-5 py-1 hover:bg-primary hover:text-white border rounded-lg cursor-pointer transition-all ease-linear duration-100",
-                                        [
-                                            tagSlug === tag.slug &&
-                                                "bg-primary text-white"
-                                        ]
-                                    )}>
-                                    {tag.title}
-                                </Link>
+                            <li
+                                onClick={() => onChangeTag(tag._id)}
+                                key={tag._id}
+                                className={clsx(
+                                    "flex items-center justify-center text-base px-5 py-1 hover:bg-primary hover:text-white border rounded-lg cursor-pointer transition-all ease-linear duration-100",
+                                    [
+                                        tagSlug === tag._id &&
+                                            "bg-primary text-white"
+                                    ]
+                                )}>
+                                {tag.title}
                             </li>
                         ))}
                     </ul>
                 </div>
             </div>
 
-            {pagination.totalItems > pagination.pageSize && (
+            {pagination.totalItems > 0 && (
                 <Pagination
                     current={pagination.currentPage}
                     className="pagination"

@@ -21,4 +21,11 @@ interface IBlog {
 
 type IHomeBlog = Omit<IBlog, "content">;
 
-export type { IBlog, AuthorBlog, TagBlog, IHomeBlog };
+interface IFilterBlog {
+    search: string | null;
+    tag: string | null;
+    page: number;
+    limit: number;
+}
+
+export type { IBlog, AuthorBlog, TagBlog, IHomeBlog, IFilterBlog };

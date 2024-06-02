@@ -1,7 +1,7 @@
 import { GetStaticProps } from "next";
 import { ReactElement, useEffect, useState } from "react";
-import { getBlog, getBlogStatic, getBlogs, getBlogsStatic } from "~/api-client";
-import { IBlog, IHomeBlog, TagBlog } from "~/interfaces/blog";
+import { getBlogStatic, getBlogsStatic, otherBlogs } from "~/api-client";
+import { IBlog, TagBlog } from "~/interfaces/blog";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import "react-quill/dist/quill.snow.css";
 
@@ -14,6 +14,7 @@ import { getDateTime } from "~/helpers/datetime";
 import Link from "next/link";
 import clsx from "clsx";
 import OtherBlog from "~/components/Blog/OtherBlog";
+import { NextPageWithLayout } from "~/interfaces";
 
 interface Props {
     blog: IBlog;
@@ -26,26 +27,21 @@ hljs.configure({
     ignoreUnescapedHTML: true,
     throwUnescapedHTML: true
 });
-// hljs.registerLanguage("javascript ", javascript);
 
-const BlogDetail = (props: Props) => {
+const BlogDetail: NextPageWithLayout<Props> = (props: Props) => {
     const { blog } = props;
     const router = useRouter();
-
-    if (router.isFallback && !blog) {
-        return <PrimaryLoading />;
-    }
 
     const [blogs, setBlogs] = useState<IBlog[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
-    console.log("blog:::", blog);
+    const handleGetOtherBlogs = async (blogId: string) => {
+        if (!blogId) return;
 
-    const handleGetBlogs = async (page: number = 1) => {
         setLoading(true);
 
         try {
-            const data = await getBlogs(page);
+            const data = await otherBlogs(blogId);
 
             if (data.status === 200) {
                 setBlogs(data.payload);
@@ -58,8 +54,12 @@ const BlogDetail = (props: Props) => {
     };
 
     useEffect(() => {
-        handleGetBlogs(1);
+        handleGetOtherBlogs(blog._id);
     }, []);
+
+    if (router.isFallback && !blog) {
+        return <PrimaryLoading />;
+    }
 
     return (
         <div className="container__cus  py-10">
@@ -107,7 +107,7 @@ const BlogDetail = (props: Props) => {
                         </h4>
                         <ul className="flex items-center flex-wrap py-2 gap-2">
                             {blog.tags.map((item: TagBlog) => (
-                                <li>
+                                <li key={item._id}>
                                     <Link
                                         href={`/blogs/tag/${item.slug}`}
                                         className={clsx(

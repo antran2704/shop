@@ -13,3 +13,5 @@ export * from "./checkout";
 export * from "./coupon";
 export * from "./inputField";
 export * from "./Select";
+export * from "./blog";
+export * from "./tagBlog";

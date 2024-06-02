@@ -2,10 +2,12 @@ import axios from "axios";
 import qs from "qs";
 
 import { AxiosGet } from "~/configs/axiosConfig";
-import { IFilter } from "~/interfaces";
+import { IFilterBlog } from "~/interfaces/blog";
 
 const BLOG_KEY = {
-    BLOG_ALL: "blog_all"
+    ALL_BLOG: "all_blog",
+    TAG_BLOG: "tag_blog",
+    OTHER_BLOG: "other_blog"
 };
 
 const getBlogs = async (page: number = 1) => {
@@ -28,9 +30,15 @@ const getBlogStatic = async (slug: string) => {
         .then((res) => res.data);
 };
 
-const searchBlog = async (filter: IFilter | null) => {
-    const parseQuery = qs.stringify(filter, { indices: false });
-    return await AxiosGet(`/blogs/search`).then((res) => res.data);
+const searchBlog = async (filter: IFilterBlog) => {
+    const parseQuery = qs.stringify(filter, {
+        filter: (prefix, value) => value || undefined
+    });
+    return await AxiosGet(`/blogs/search${parseQuery && "?" + parseQuery}`);
+};
+
+const otherBlogs = async (blogId: string) => {
+    return await AxiosGet(`/blogs/other/${blogId}`);
 };
 
 export {
@@ -39,5 +47,6 @@ export {
     getBlogsStatic,
     getBlogStatic,
     searchBlog,
+    otherBlogs,
     BLOG_KEY
 };
