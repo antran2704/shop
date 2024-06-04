@@ -13,8 +13,8 @@ const BlogsPage = () => {
 
     const { blogs, pagination, loadingBlogs } = useBlogs(pageParam);
 
-    const onChangeTag = (tagId: string) => {
-        router.push(`/blogs/tag/${tagId}`);
+    const onChangeTag = (slug: string) => {
+        router.push(`/blogs/tag/${slug}`);
     };
 
     const onPagination = (page: number) => {

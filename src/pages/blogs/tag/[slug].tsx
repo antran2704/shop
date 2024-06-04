@@ -24,9 +24,9 @@ const TagBlogsPage = () => {
 
     const { blogs, pagination, loadingBlogs } = useBlogsWithTag(params);
 
-    const onChangeTag = (tagId: string) => {
-        setParams({ ...params, page: 1, tag: tagId, search: null });
-        router.push(`/blogs/tag/${tagId}`);
+    const onChangeTag = (slug: string) => {
+        setParams({ ...params, page: 1, tag: slug, search: null });
+        router.push(`/blogs/tag/${slug}`);
     };
 
     const onPagination = (page: number) => {

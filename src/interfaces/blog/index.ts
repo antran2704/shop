@@ -1,8 +1,14 @@
-import { ITagBlog } from "../tagBlog";
 import { IUserInfor } from "../user";
 
 type AuthorBlog = Pick<IUserInfor, "_id" | "name">;
-type TagBlog = Pick<ITagBlog, "_id" | "slug" | "title">;
+type TagBlog = {
+    tag: {
+      _id: string;
+      title: string;
+      slug: string;
+    };
+    slug: string;
+  };
 
 interface IBlog {
     _id: string;

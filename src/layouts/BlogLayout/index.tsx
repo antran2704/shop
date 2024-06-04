@@ -72,12 +72,12 @@ const BlogLayout = (props: Props) => {
                         </li>
                         {tags.map((tag: ITagBlog) => (
                             <li
-                                onClick={() => onChangeTag(tag._id)}
+                                onClick={() => onChangeTag(tag.slug)}
                                 key={tag._id}
                                 className={clsx(
                                     "flex items-center justify-center text-base px-5 py-1 hover:bg-primary hover:text-white border rounded-lg cursor-pointer transition-all ease-linear duration-100",
                                     [
-                                        tagSlug === tag._id &&
+                                        tagSlug === tag.slug &&
                                             "bg-primary text-white"
                                     ]
                                 )}>

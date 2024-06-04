@@ -107,13 +107,13 @@ const BlogDetail: NextPageWithLayout<Props> = (props: Props) => {
                         </h4>
                         <ul className="flex items-center flex-wrap py-2 gap-2">
                             {blog.tags.map((item: TagBlog) => (
-                                <li key={item._id}>
+                                <li key={item.tag._id}>
                                     <Link
-                                        href={`/blogs/tag/${item.slug}`}
+                                        href={`/blogs/tag/${item.tag.slug}`}
                                         className={clsx(
                                             "flex items-center justify-center text-base px-5 py-1 hover:bg-primary hover:text-white border rounded-lg cursor-pointer transition-all ease-linear duration-100"
                                         )}>
-                                        {item.title}
+                                        {item.tag.title}
                                     </Link>
                                 </li>
                             ))}
