@@ -63,7 +63,7 @@ const BlogDetail: NextPageWithLayout<Props> = (props: Props) => {
 
     return (
         <div className="container__cus  py-10">
-            <div className="bg-white p-5 max-w-[800px] mx-auto rounded-md">
+            <div className="bg-white p-5 mx-auto rounded-md">
                 <h1 className="lg:text-3xl md:text-2xl text-xl font-semibold">
                     {blog.title}
                 </h1>

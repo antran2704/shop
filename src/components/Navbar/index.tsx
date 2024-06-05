@@ -259,79 +259,13 @@ const Navbar: FC = () => {
                             <LayoutClose handleClose={handleShowModal} />
                         )}
                     </nav>
-
-                    {/* navbar Tablet & Mobile */}
-                    <div
-                        className={`${styles.navbarMobile} ${
-                            typeShow ? styles[typeShow] : ""
-                        } ${
-                            showNavbar ? styles.show : ""
-                        } xl:hidden block fixed top-0 bottom-0 left-0 py-4 md:w-1/2 w-2/3 bg-white shadow-lg overflow-hidden z-40`}>
-                        <div className="w-full mb-3 px-2">
-                            {currentNav.length > 1 ? (
-                                <BsArrowLeftShort
-                                    className="text-3xl hover:text-primary cursor-pointer"
-                                    onClick={handleBack}
-                                />
-                            ) : (
-                                <IoMdCloseCircleOutline
-                                    className="text-3xl hover:text-primary ml-auto cursor-pointer"
-                                    onClick={handleShowModal}
-                                />
-                            )}
-                        </div>
-                        <ul>
-                            {currentNav[currentNav.length - 1].map(
-                                (item: INavItem, index: number) => (
-                                    <li
-                                        key={index}
-                                        className={`${styles.navbarItem} w-full px-6`}>
-                                        {!item.children && (
-                                            <Link
-                                                href={item.path || "/"}
-                                                onClick={handleShowModal}
-                                                className={`block w-full text-lg font-medium py-2 text-[#1e1e1e] ${
-                                                    router.pathname ===
-                                                    item.path
-                                                        ? "text-primary"
-                                                        : ""
-                                                } hover:text-primary transition-all ease-linear duration-100`}>
-                                                {item.name}
-                                            </Link>
-                                        )}
-
-                                        {item.children && (
-                                            <p
-                                                onClick={() =>
-                                                    handleAddItem(
-                                                        item.children as INavItem[]
-                                                    )
-                                                }
-                                                className={`flex items-center justify-between text-lg font-medium py-2 text-[#1e1e1e] ${
-                                                    router.pathname ===
-                                                    item.path
-                                                        ? "text-primary"
-                                                        : ""
-                                                } hover:text-primary transition-all ease-linear duration-100  cursor-pointer`}>
-                                                {item.name}
-
-                                                <BsArrowRightShort className="text-3xl" />
-                                            </p>
-                                        )}
-                                    </li>
-                                )
-                            )}
-                        </ul>
-                    </div>
                 </div>
             </div>
 
             {/* navbar content on PC */}
             <div
                 className={`sticky top-0 left-0 right-0 lg:block hidden bg-white border ${
-                    top > 300
-                        ? "pointer-events-none"
-                        : "opacity-100"
+                    top > 300 ? "pointer-events-none" : "opacity-100"
                 } shadow-md transition-all ease-linear duration-100 z-20`}>
                 <ul className="container__cus xl:flex hidden w-full items-center justify-center px-5 py-4 transition-all ease-linear duration-100 gap-6">
                     {initDataNavbar.map((item: INavItem, index: number) => (
@@ -518,11 +452,73 @@ const Navbar: FC = () => {
                 </ul>
             </div>
 
+            {/* navbar Tablet & Mobile */}
+            <div
+                className={`${styles.navbarMobile} ${
+                    typeShow ? styles[typeShow] : ""
+                } ${
+                    showNavbar ? styles.show : ""
+                } xl:hidden block fixed top-0 bottom-0 left-0 py-4 md:w-1/2 w-2/3 bg-white shadow-lg overflow-hidden z-40`}>
+                <div className="w-full mb-3 px-2">
+                    {currentNav.length > 1 ? (
+                        <BsArrowLeftShort
+                            className="text-3xl hover:text-primary cursor-pointer"
+                            onClick={handleBack}
+                        />
+                    ) : (
+                        <IoMdCloseCircleOutline
+                            className="text-3xl hover:text-primary ml-auto cursor-pointer"
+                            onClick={handleShowModal}
+                        />
+                    )}
+                </div>
+                <ul>
+                    {currentNav[currentNav.length - 1].map(
+                        (item: INavItem, index: number) => (
+                            <li
+                                key={index}
+                                className={`${styles.navbarItem} w-full px-6`}>
+                                {!item.children && (
+                                    <Link
+                                        href={item.path || "/"}
+                                        onClick={handleShowModal}
+                                        className={`block w-full text-lg font-medium py-2 text-[#1e1e1e] ${
+                                            router.pathname === item.path
+                                                ? "text-primary"
+                                                : ""
+                                        } hover:text-primary transition-all ease-linear duration-100`}>
+                                        {item.name}
+                                    </Link>
+                                )}
+
+                                {item.children && (
+                                    <p
+                                        onClick={() =>
+                                            handleAddItem(
+                                                item.children as INavItem[]
+                                            )
+                                        }
+                                        className={`flex items-center justify-between text-lg font-medium py-2 text-[#1e1e1e] ${
+                                            router.pathname === item.path
+                                                ? "text-primary"
+                                                : ""
+                                        } hover:text-primary transition-all ease-linear duration-100  cursor-pointer`}>
+                                        {item.name}
+
+                                        <BsArrowRightShort className="text-3xl" />
+                                    </p>
+                                )}
+                            </li>
+                        )
+                    )}
+                </ul>
+            </div>
+
             {/* Search on Mobile */}
             <div
-                className={`w-full sm:hidden relative flex items-center ${
+                className={`w-full sm:hidden sticky top-16 flex items-center ${
                     showNavbarMobile ? "px-5 py-2" : "h-0 p-0 overflow-hidden"
-                } bg-white border shadow-md transition-all ease-linear duration-100 z-50 gap-2`}>
+                } bg-white shadow-md transition-all ease-linear duration-100 z-20 gap-2`}>
                 <Search
                     searchText={searchText}
                     showSearchMobile={showNavbarMobile}
