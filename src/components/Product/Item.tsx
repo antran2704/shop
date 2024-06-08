@@ -25,28 +25,23 @@ const ProductItem = (props: Props) => {
             <Link
                 href={`/collections/product/${data._id}.${data.slug}`}
                 className="block w-full h-full">
-                <ImageCus
-                    src={
-                        ((process.env.NEXT_PUBLIC_IMAGE_ENDPOINT as string) +
-                            data.thumbnail) as string
-                    }
-                    title={data.title}
-                    alt={data.title}
-                    className="w-full lg:h-[260px] md:h-[180px] h-[160px] object-center object-cover"
-                />
+                <div className="relative pb-[100%] ">
+                    <ImageCus
+                        src={
+                            ((process.env
+                                .NEXT_PUBLIC_IMAGE_ENDPOINT as string) +
+                                data.thumbnail) as string
+                        }
+                        title={data.title}
+                        alt={data.title}
+                        className="absolute left-0 right-0 top-0 bottom-0 w-full h-full object-center object-cover"
+                    />
+                </div>
                 <div className="px-2 py-2 h-[120px]">
                     <p className="group-hover:text-primary  h-[48px] text-base font-normal line-clamp-2">
                         {data.title}
                     </p>
 
-                    {/* <div className="flex items-center my-1">
-            {[...new Array(Math.floor(3))].map((item, index: number) => (
-              <AiFillStar key={index} className="text-sm text-[#ffc30e]" />
-            ))}
-            {[...new Array(5 - Math.floor(3))].map((item, index: number) => (
-              <AiFillStar key={index} className="text-sm text-[#dadada]" />
-            ))}
-          </div> */}
                     <div className="pt-2">
                         {data.promotion_price > 0 && data.inventory > 0 && (
                             <Fragment>

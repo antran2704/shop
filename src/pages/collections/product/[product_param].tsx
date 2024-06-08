@@ -275,7 +275,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                 mutate(CART_KEY.CART_USER);
                 mutate(CART_KEY.CART_ITEMS);
                 toast.success("Thêm thành công", {
-                    position: toast.POSITION.BOTTOM_RIGHT
+                    position: toast.POSITION.TOP_CENTER
                 });
             }
         } catch (error: any) {
@@ -329,14 +329,15 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
             <section className="container__cus">
                 <div className="flex lg:flex-nowrap flex-wrap items-start lg:justify-between justify-center my-14 gap-10">
+                    {/* content left */}
                     <div className="lg:sticky relative lg:top-20 lg:w-5/12 sm:w-10/12 w-full bg-white p-5 rounded-md select-none overflow-hidden">
-                        <div className="w-full lg:h-[500px] h-[400px] rounded-md overflow-hidden">
+                        <div className="relative w-full pb-[100%] rounded-md overflow-hidden">
                             {currentImage && (
                                 <ImageCus
                                     title={product.title}
                                     alt={product.title}
                                     src={currentImage}
-                                    className="w-full h-full"
+                                    className="absolute top-0 left-0 right-0 bottom-0 w-full h-full"
                                 />
                             )}
                         </div>
@@ -400,7 +401,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                                 title={product.title}
                                                 alt={product.title}
                                                 src={URL_IMAGE + image}
-                                                className={`w-full lg:h-[100px] h-[120px] ${
+                                                className={`w-full lg:h-[100px] sm:h-[160px] h-[120px] ${
                                                     currentImage.includes(image)
                                                         ? "border-primary"
                                                         : "border-white"
@@ -412,6 +413,9 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                             </Swiper>
                         </div>
                     </div>
+                    {/* content left */}
+
+                    {/* content right */}
                     <div className="lg:w-7/12 w-full flex flex-col gap-5">
                         <div className="w-full bg-white p-5 rounded-md">
                             <div className="pb-5 mb-5 border-b border-borderColor">
@@ -447,7 +451,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                                 </sup>
                                             </Fragment>
                                         ) : (
-                                            <h3 className="md:text-2xl text-lg font-medium">
+                                            <h3 className="lg:text-3xl md:text-2xl text-lg font-medium">
                                                 {formatBigNumber(product.price)}{" "}
                                                 {CURRENCY_CHARACTER}
                                             </h3>
@@ -684,6 +688,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                             )
                         )}
                     </div>
+                    {/* content right */}
                 </div>
             </section>
 

@@ -74,17 +74,17 @@ http.interceptors.response.use(
         if (!response) return Promise.reject(error);
 
         if (response.status === 500) {
-            toast.error("Error in server, please try again", {
-                position: toast.POSITION.TOP_RIGHT
-            });
+            // toast.error("Error in server, please try again", {
+            //     position: toast.POSITION.TOP_RIGHT
+            // });
 
             return Promise.reject(error);
         }
 
         if (response.status === 403) {
-            toast.error("Forbidden, please login", {
-                position: toast.POSITION.TOP_RIGHT
-            });
+            // toast.error("Forbidden, please login", {
+            //     position: toast.POSITION.TOP_RIGHT
+            // });
             return Promise.reject(error);
         }
 

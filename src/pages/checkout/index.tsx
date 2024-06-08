@@ -37,6 +37,7 @@ import { EOrderStatus, EPaymentMethod, EPaymentStatus } from "~/enums";
 import { createOrder, updatePaymentStatusOrder } from "~/api-client/order";
 import { CART_KEY, checkInventoryItems, getCartItems } from "~/api-client/cart";
 import paymentMethods from "~/data/paymentMethods";
+import { SpinLoading } from "~/components/Loading";
 
 const initInforCustomer: IInforCheckout = {
     email: "",
@@ -56,7 +57,7 @@ const CheckOut: NextPageWithLayout = () => {
         infor._id as string
     );
 
-    const { cart_products } = useCartItems(!!infor._id, infor._id as string, {
+    const { cart_products, loadingCartItems } = useCartItems(!!infor._id, infor._id as string, {
         refreshWhenHidden: true
     });
 
@@ -734,6 +735,8 @@ const CheckOut: NextPageWithLayout = () => {
                     </div>
                 </div>
             </div>
+
+            {loadingCart && <SpinLoading className="text-3xl" />}
         </div>
     );
 };
