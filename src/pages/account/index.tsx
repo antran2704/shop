@@ -209,7 +209,7 @@ const AccountPage: NextPageWithLayout = () => {
                     )}
 
                 {(loadingOrders || !orders) && (
-                    <div className="w-full h-[120px] flex items-center justify-center bg-white mt-4">
+                    <div className="relative w-full h-[120px] flex items-center justify-center bg-white mt-4">
                         <SpinLoading className="h-8 w-8" />
                     </div>
                 )}

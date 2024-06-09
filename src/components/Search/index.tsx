@@ -117,7 +117,7 @@ const Search = (props: Props) => {
                         )}
 
                     {loading && searchText && (
-                        <div className="flex items-center justify-center py-2 px-3">
+                        <div className="relative flex items-center justify-center h-8 py-2 px-3">
                             <SpinLoading className="text-2xl" />
                         </div>
                     )}
