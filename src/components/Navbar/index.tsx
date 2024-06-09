@@ -516,7 +516,7 @@ const Navbar: FC = () => {
 
             {/* Search on Mobile */}
             <div
-                className={`w-full sm:hidden sticky top-16 flex items-center ${
+                className={`w-full sm:hidden sticky top-14 flex items-center ${
                     showNavbarMobile ? "px-5 py-2" : "h-0 p-0 overflow-hidden"
                 } bg-white shadow-md transition-all ease-linear duration-100 z-20 gap-2`}>
                 <Search
