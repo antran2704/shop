@@ -85,7 +85,7 @@ function Footer() {
                                 <Link
                                     href={"tel:0946003423"}
                                     className={`text-base text-[#1e1e1e] hover:text-primary hover:underline whitespace-nowrap transition-all ease-linear duration-100`}>
-                                    0946003423
+                                    094600XXXX
                                 </Link>
                             </li>
                             <li>
