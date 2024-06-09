@@ -99,9 +99,9 @@ http.interceptors.response.use(
         const originalRequest = error.config;
 
         if (response.status === 401) {
-            if (originalRequest.method === "post") {
-                return Promise.reject(error);
-            }
+            // if (originalRequest.method === "post") {
+            //     return Promise.reject(error);
+            // }
 
             if (!isRefresh && !originalRequest._retry) {
                 isRefresh = true;
