@@ -3,7 +3,12 @@ import { FC, useState, useEffect } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 
 import ProductQuantity from "~/components/ProductQuantity";
-import { ICartItem, SendCartItem, SendDeleteCartItem } from "~/interfaces";
+import {
+    ICartItem,
+    IProductInfo,
+    SendCartItem,
+    SendDeleteCartItem
+} from "~/interfaces";
 import ImageCus from "~/components/Image";
 import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
 import { CART_KEY, deleteItemCart, updateCart } from "~/api-client/cart";
@@ -12,6 +17,7 @@ import useDebounce from "~/hooks/useDebounce";
 import { toast } from "react-toastify";
 import { useSWRConfig } from "swr";
 import ModalConfirm from "../Modal/ModalConfirm";
+import { getProductInfo } from "~/api-client";
 
 interface Props {
     data: ICartItem;
@@ -23,9 +29,16 @@ const CartItem: FC<Props> = (props: Props) => {
     const { mutate } = useSWRConfig();
 
     const [totalProduct, setTotalProduct] = useState<number>(0);
-    const [inventory, setInventory] = useState<number>(0);
+    // const [inventory, setInventory] = useState<number>(0);
     const total = useDebounce(totalProduct.toString(), 1000);
     const [showModalConfirm, setShowModalConfirm] = useState<boolean>(false);
+
+    const [infoProduct, setInfoProduct] = useState<IProductInfo>({
+        inventory: 1,
+        price: 0,
+        promotion_price: 0
+    });
+
     const handeDeleteItem = async (data: ICartItem) => {
         if (!infor._id || !data) return;
 
@@ -42,6 +55,17 @@ const CartItem: FC<Props> = (props: Props) => {
             }
         } catch (error) {
             console.log(error);
+        }
+    };
+
+    const handleGetInfo = async (productId: string) => {
+        const { status, payload } = await getProductInfo(productId);
+
+        if (status === 200) {
+            // setInventory(payload.inventory);
+            setInfoProduct(payload);
+
+            // console.log("cart", payload)
         }
     };
 
@@ -70,30 +94,38 @@ const CartItem: FC<Props> = (props: Props) => {
     };
 
     useEffect(() => {
+        console.log("totalProduct", totalProduct, data)
         if (totalProduct > 0 && totalProduct !== data.quantity) {
             updateCartItem();
         }
     }, [total]);
 
     useEffect(() => {
+        if (data.variation) {
+            handleGetInfo(data.variation._id as string);
+        } else {
+            handleGetInfo(data.product._id as string);
+        }
+
+        // console.log("data", data)
         setTotalProduct(data.quantity);
-        setInventory(
-            data.variation
-                ? (data.variation.inventory as number)
-                : (data.product.inventory as number)
-        );
-    }, [data]);
+        // setInventory(
+        //     data.variation
+        //         ? (data.variation.inventory as number)
+        //         : (data.product.inventory as number)
+        // );
+    }, []);
 
     return (
         <li
             className={`flex md:flex-row flex-col items-center justify-between w-full bg-white lg:pb-5 p-5 ${
-                inventory < data.quantity
+                infoProduct.inventory < data.quantity
                     ? "border-primary"
                     : "border-transparent"
             } border-2 rounded-md gap-5`}>
             <div
                 className={`flex md:flex-row flex-col items-center md:w-6/12 ${
-                    inventory <= 0 ? "opacity-80" : ""
+                    infoProduct.inventory <= 0 ? "opacity-80" : ""
                 }  gap-5`}>
                 <Link
                     href={`/collections/product/${data.product._id}.${data.product.slug}`}
@@ -137,44 +169,42 @@ const CartItem: FC<Props> = (props: Props) => {
 
                     {!data.variation && (
                         <p className="w-full lg:text-base md:text-sm md:text-start text-center">
-                            {(data.product.promotion_price as number) > 0
+                            {(infoProduct.promotion_price as number) > 0
                                 ? formatBigNumber(
-                                      data.product.promotion_price as number
+                                      infoProduct.promotion_price as number
                                   )
-                                : formatBigNumber(data.product.price as number)}
+                                : formatBigNumber(infoProduct.price as number)}
                             {" VND"}
                         </p>
                     )}
                     {data.variation && (
                         <p className="w-full lg:text-base md:text-sm md:text-start text-center">
-                            {(data.variation.promotion_price as number) > 0
+                            {(infoProduct.promotion_price as number) > 0
                                 ? formatBigNumber(
-                                      data.variation.promotion_price as number
+                                      infoProduct.promotion_price as number
                                   )
-                                : formatBigNumber(
-                                      data.variation.price as number
-                                  )}
+                                : formatBigNumber(infoProduct.price as number)}
                             {" VND"}
                         </p>
                     )}
 
                     <div className="mt-2">
                         {!data.variation &&
-                            (data.product.inventory as number) > 0 && (
+                            (infoProduct.inventory as number) > 0 && (
                                 <p className="w-full lg:text-base md:text-sm md:text-start text-center">
                                     Còn{" "}
                                     <span className="text-primary">
-                                        {data.product.inventory}
+                                        {infoProduct.inventory}
                                     </span>{" "}
                                     sản phẩm
                                 </p>
                             )}
                         {data.variation &&
-                            (data.variation.inventory as number) > 0 && (
+                            (infoProduct.inventory as number) > 0 && (
                                 <p className="w-full lg:text-base md:text-sm md:text-start text-center">
                                     Còn{" "}
                                     <span className="text-primary">
-                                        {data.variation.inventory}
+                                        {infoProduct.inventory}
                                     </span>{" "}
                                     sản phẩm
                                 </p>
@@ -184,10 +214,10 @@ const CartItem: FC<Props> = (props: Props) => {
             </div>
 
             <div>
-                {inventory > 0 ? (
+                {infoProduct.inventory > 0 ? (
                     <ProductQuantity
                         total={totalProduct}
-                        max={inventory}
+                        max={infoProduct.inventory}
                         setTotalProduct={setTotalProduct}
                     />
                 ) : (
@@ -199,26 +229,26 @@ const CartItem: FC<Props> = (props: Props) => {
 
             {!data.variation && (
                 <p className="min-w-28 w-28 lg:text-base md:text-sm text-center">
-                    {(data.product.promotion_price as number) > 0
+                    {(infoProduct.promotion_price as number) > 0
                         ? formatBigNumber(
-                              (data.product.promotion_price as number) *
+                              (infoProduct.promotion_price as number) *
                                   data.quantity
                           )
                         : formatBigNumber(
-                              (data.product.price as number) * data.quantity
+                              (infoProduct.price as number) * data.quantity
                           )}
                     {" VND"}
                 </p>
             )}
             {data.variation && (
                 <p className="min-w-28 w-28 lg:text-base md:text-sm text-center">
-                    {(data.variation.promotion_price as number) > 0
+                    {(infoProduct.promotion_price as number) > 0
                         ? formatBigNumber(
-                              (data.variation.promotion_price as number) *
+                              (infoProduct.promotion_price as number) *
                                   data.quantity
                           )
                         : formatBigNumber(
-                              (data.variation.price as number) * data.quantity
+                              (infoProduct.price as number) * data.quantity
                           )}
                     {" VND"}
                 </p>

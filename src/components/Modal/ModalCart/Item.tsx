@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { ICartItem } from "~/interfaces";
+import { ICartItem, IProductInfo } from "~/interfaces";
 
 import ImageCus from "~/components/Image";
 import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
 import { AiFillCloseCircle } from "react-icons/ai";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { getProductInfo } from "~/api-client";
 
 interface Props {
     data: ICartItem;
@@ -16,6 +17,29 @@ interface Props {
 const ModalCartItem = (props: Props) => {
     const { data, showModalConfirm, setSelectItem, setShowModalConfirm } =
         props;
+
+    const [infoProduct, setInfoProduct] = useState<IProductInfo>({
+        inventory: 1,
+        price: 0,
+        promotion_price: 0
+    });
+
+    const handleGetInfo = async (productId: string) => {
+        const { status, payload } = await getProductInfo(productId);
+
+        if (status === 200) {
+            setInfoProduct(payload);
+        }
+    };
+
+    useEffect(() => {
+        if (data.variation) {
+            handleGetInfo(data.variation._id as string);
+        } else {
+            handleGetInfo(data.product._id as string);
+        }
+    }, []);
+
     return (
         <li>
             <div className="relative flex items-center pb-3 px-2 border-b border-borderColor gap-4">
@@ -48,12 +72,12 @@ const ModalCartItem = (props: Props) => {
                     )}
                     {data.variation && (
                         <p className="sm:text-base text-sm mt-2">
-                            {(data.variation.promotion_price as number) > 0
+                            {(infoProduct.promotion_price as number) > 0
                                 ? formatBigNumber(
-                                      data.variation.promotion_price as number
+                                      infoProduct.promotion_price as number
                                   )
                                 : formatBigNumber(
-                                      data.variation.price as number
+                                      infoProduct.price as number
                                   )}
                             {" VND "}X {data.quantity}
                         </p>
@@ -61,11 +85,11 @@ const ModalCartItem = (props: Props) => {
 
                     {!data.variation && (
                         <p className="sm:text-base text-sm mt-2">
-                            {(data.product.promotion_price as number) > 0
+                            {(infoProduct.promotion_price as number) > 0
                                 ? formatBigNumber(
-                                      data.product.promotion_price as number
+                                      infoProduct.promotion_price as number
                                   )
-                                : formatBigNumber(data.product.price as number)}
+                                : formatBigNumber(infoProduct.price as number)}
                             {" VND"}X {data.quantity}
                         </p>
                     )}

@@ -29,7 +29,7 @@ const Cart: NextPageWithLayout = () => {
     const { infor } = useAppSelector((state) => state.user);
 
     const { cart } = useCart(!!infor._id, infor._id as string, {
-        refreshWhenHidden: true
+        refreshWhenHidden: false
     });
 
     const { cart_products, loadingCartItems } = useCartItems(
@@ -97,8 +97,6 @@ const Cart: NextPageWithLayout = () => {
                     position: toast.POSITION.TOP_RIGHT
                 });
             }
-
-            console.log(error);
         }
     };
 

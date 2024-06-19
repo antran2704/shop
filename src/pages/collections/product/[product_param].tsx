@@ -25,6 +25,7 @@ import ImageCus from "~/components/Image";
 import ProductQuantity from "~/components/ProductQuantity";
 import {
     getProductBySlugStatic,
+    getProductInfo,
     getProductsStatic,
     getVariations
 } from "~/api-client";
@@ -33,6 +34,7 @@ import {
     IDataCategory,
     IOptionProduct,
     IProductData,
+    IProductInfo,
     ISpecificationAttributes,
     ISpecificationsProduct,
     IValueOption,
@@ -84,13 +86,19 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     const router = useRouter();
     const { product_param: slug } = router.query;
     const { infor } = useAppSelector((state) => state.user);
-
     const { mutate } = useSWRConfig();
     const { user } = useUser();
     const { openSignIn } = useClerk();
+    // console.log("product", product);
+
+    const [infoProduct, setInfoProduct] = useState<IProductInfo>({
+        inventory: 1,
+        price: 0,
+        promotion_price: 0
+    });
 
     const [totalProduct, setTotalProduct] = useState<number>(1);
-    const [inventory, setInventory] = useState<number>(0);
+    // const [inventory, setInventory] = useState<number>(0);
 
     const [currentImage, setCurrentImage] = useState<string>("");
     const [message, setMessage] = useState<string | null>(null);
@@ -110,10 +118,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
         {
             title: "1",
             slug: "1",
-            thumbnail: "1",
-            price: "1",
-            promotion_price: "1",
-            inventory: "1"
+            thumbnail: "1"
         }
     );
 
@@ -152,12 +157,12 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
         const keys = Object.keys(selectOption);
         const values = Object.values(selectOption);
 
-        if (keys.length < product.options.length) {
-            setVariation(null);
-            setTotalProduct(1);
-            setInventory(product.inventory);
-            return;
-        }
+        // if (keys.length < product.options.length) {
+        //     setVariation(null);
+        //     setTotalProduct(1);
+        //     setInventory(product.inventory);
+        //     return;
+        // }
 
         const item = variations.find((variation: IVariantProduct) => {
             const optitons = variation.options;
@@ -171,8 +176,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
             }
 
             setVariation(item);
-            setTotalProduct(1);
-            setInventory(item.inventory);
+            handleGetInfo(item._id as string);
         }
     };
 
@@ -180,6 +184,16 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
         const res = await getVariations(product_id);
         if (res.status === 200) {
             setVariations(res.payload);
+        }
+    };
+
+    const handleGetInfo = async (productId: string) => {
+        const { status, payload } = await getProductInfo(productId);
+
+        if (status === 200) {
+            setTotalProduct(1);
+            // setInventory(payload.inventory);
+            setInfoProduct(payload);
         }
     };
 
@@ -301,7 +315,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
         if (product && product._id) {
             setCurrentImage(URL_IMAGE + product.gallery[0]);
             handleGetVariations(product._id);
-            setInventory(product.inventory);
+            // handleGetInfo(product._id);
         }
     }, [slug]);
 
@@ -427,32 +441,34 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
                                 {!variation && (
                                     <div className="flex flex-wrap items-end my-3 gap-3">
-                                        {product.promotion_price > 0 ? (
+                                        {infoProduct.promotion_price > 0 ? (
                                             <Fragment>
                                                 <h3 className="md:text-xl text-lg font-medium text-[#6a7779] line-through">
                                                     {formatBigNumber(
-                                                        product.price
+                                                        infoProduct.price
                                                     )}{" "}
                                                     {CURRENCY_CHARACTER}
                                                 </h3>
                                                 <h3 className="md:text-2xl text-lg font-medium">
                                                     {formatBigNumber(
-                                                        product.promotion_price
+                                                        infoProduct.promotion_price
                                                     )}{" "}
                                                     {CURRENCY_CHARACTER}
                                                 </h3>
                                                 <sup className="md:text-sm text-xs font-medium text-white px-2 py-1 bg-primary rounded-md">
                                                     Save{" "}
                                                     {getPercentPromotionPrice(
-                                                        product.price,
-                                                        product.promotion_price
+                                                        infoProduct.price,
+                                                        infoProduct.promotion_price
                                                     )}
                                                     %
                                                 </sup>
                                             </Fragment>
                                         ) : (
                                             <h3 className="lg:text-3xl md:text-2xl text-lg font-medium">
-                                                {formatBigNumber(product.price)}{" "}
+                                                {formatBigNumber(
+                                                    infoProduct.price
+                                                )}{" "}
                                                 {CURRENCY_CHARACTER}
                                             </h3>
                                         )}
@@ -461,25 +477,25 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
                                 {variation && (
                                     <div className="flex flex-wrap items-end my-3 gap-3">
-                                        {variation.promotion_price > 0 ? (
+                                        {infoProduct.promotion_price > 0 ? (
                                             <Fragment>
                                                 <h3 className="lg:text-2xl md:text-xl text-lg font-medium text-[#6a7779] line-through">
                                                     {formatBigNumber(
-                                                        variation.price
+                                                        infoProduct.price
                                                     )}{" "}
                                                     {CURRENCY_CHARACTER}
                                                 </h3>
                                                 <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
                                                     {formatBigNumber(
-                                                        variation.promotion_price
+                                                        infoProduct.promotion_price
                                                     )}{" "}
                                                     {CURRENCY_CHARACTER}
                                                 </h2>
                                                 <span className="md:text-sm text-xs font-medium text-white px-2 py-0.5 bg-primary rounded-md">
                                                     Save{" "}
                                                     {getPercentPromotionPrice(
-                                                        variation.price,
-                                                        variation.promotion_price
+                                                        infoProduct.price,
+                                                        infoProduct.promotion_price
                                                     )}
                                                     %
                                                 </span>
@@ -487,7 +503,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                         ) : (
                                             <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
                                                 {formatBigNumber(
-                                                    variation.price
+                                                    infoProduct.price
                                                 )}{" "}
                                                 {CURRENCY_CHARACTER}
                                             </h2>
@@ -521,11 +537,14 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                         Inventory:
                                     </span>
                                     <p>
-                                        {!variation
-                                            ? formatBigNumber(product.inventory)
+                                        {/* {!variation
+                                            ? formatBigNumber(
+                                                  infoProduct.inventory
+                                              )
                                             : formatBigNumber(
                                                   variation.inventory
-                                              )}
+                                              )} */}
+                                        {formatBigNumber(infoProduct.inventory)}
                                     </p>
                                 </div>
                             </div>
@@ -581,7 +600,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
                             {product && (
                                 <div>
-                                    {inventory > 0 ? (
+                                    {infoProduct.inventory > 0 ? (
                                         <div>
                                             <div className="flex items-center w-full my-5 gap-5">
                                                 <span className="md:text-base text-sm font-medium min-w-[100px]">
@@ -590,19 +609,24 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                                 <div className="flex items-center gap-5">
                                                     <ProductQuantity
                                                         total={totalProduct}
-                                                        max={inventory}
+                                                        max={
+                                                            infoProduct.inventory
+                                                        }
                                                         setTotalProduct={
                                                             setTotalProduct
                                                         }
                                                     />
                                                     <p className="sm:block hidden text-sm text-nowrap">
-                                                        {!variation
+                                                        {/* {!variation
                                                             ? formatBigNumber(
-                                                                  product.inventory
+                                                                  infoProduct.inventory
                                                               )
                                                             : formatBigNumber(
                                                                   variation.inventory
-                                                              )}{" "}
+                                                              )}{" "} */}
+                                                        {formatBigNumber(
+                                                            infoProduct.inventory
+                                                        )}{" "}
                                                         sản phẩm có sẵn
                                                     </p>
                                                 </div>
@@ -760,7 +784,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     );
     const productId: string = product_param[0];
     const slug: string = product_param[1];
-
     try {
         const res = await getProductBySlugStatic(productId, slug as string);
         const product: IProductData = res.payload;

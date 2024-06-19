@@ -40,7 +40,10 @@ interface IProduct {
     sold: number;
 }
 
-interface IVariantProduct extends IProduct {
+type IVariantProduct = Omit<
+    IProduct,
+    "inventory" | "price" | "promotion_price"
+> & {
     product_id: string;
     available: boolean;
     option1: string | null;
@@ -48,9 +51,12 @@ interface IVariantProduct extends IProduct {
     option3: string | null;
     options: string[];
     url: string | null;
-}
+};
 
-interface IProductData extends IProduct {
+type IProductData = Omit<
+    IProduct,
+    "inventory" | "price" | "promotion_price"
+> & {
     category: IParentCategory;
     categories: IParentCategory[];
     type: [];
@@ -66,20 +72,18 @@ interface IProductData extends IProduct {
     variants: IVariantProduct[];
     breadcrumbs: string[] | IDataCategory[];
     createdAt?: string;
-}
+};
 
 type IProductHome = Pick<
     IProductData,
-    | "_id"
-    | "title"
-    | "public"
-    | "price"
-    | "promotion_price"
-    | "inventory"
-    | "category"
-    | "thumbnail"
-    | "slug"
->;
+    "_id" | "title" | "public" | "category" | "thumbnail" | "slug"
+> & {
+    price: number;
+    promotion_price: number;
+    inventory: number;
+};
+
+type IProductInfo = Pick<IProduct, "price" | "promotion_price" | "inventory">;
 
 export type {
     IProductData,
@@ -88,5 +92,6 @@ export type {
     IOptionProduct,
     ISpecificationsProduct,
     ISpecificationAttributes,
-    IValueOption
+    IValueOption,
+    IProductInfo
 };

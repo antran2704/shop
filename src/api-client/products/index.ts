@@ -74,8 +74,8 @@ const getProductBySlugStatic = async (product_id: string, slug: string) => {
         .then((res) => res.data);
 };
 
-const getProductBySlug = async (slug: string) => {
-    return await AxiosGet(`/products/${slug}`);
+const getProductBySlug = async (product_id: string, slug: string) => {
+    return await AxiosGet(`/products/${product_id}/${slug}`);
 };
 
 const getProductsWithFilter = async (
@@ -89,6 +89,10 @@ const getProductsWithFilter = async (
     );
 };
 
+const getProductInfo = async (product_id: string) => {
+    return await AxiosGet(`/products/info/${product_id}`);
+};
+
 export {
     getProducts,
     getProductsInCategory,
@@ -99,5 +103,6 @@ export {
     getProductBySlugStatic,
     getProductsStatic,
     getHotProducts,
+    getProductInfo,
     PRODUCT_KEY
 };

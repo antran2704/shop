@@ -10,7 +10,7 @@ export default async function handler(
     const { userId } = await req.body;
 
     const user = await clerkClient.users.getUser(userId);
-
+    
     if (!user.privateMetadata.stripeId) {
         const stripeId = uuidv4();
         await clerkClient.users.updateUserMetadata(userId, {
