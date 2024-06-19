@@ -315,7 +315,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
         if (product && product._id) {
             setCurrentImage(URL_IMAGE + product.gallery[0]);
             handleGetVariations(product._id);
-            // handleGetInfo(product._id);
+            handleGetInfo(product._id);
         }
     }, [slug]);
 

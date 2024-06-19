@@ -57,7 +57,7 @@ const CheckOut: NextPageWithLayout = () => {
         infor._id as string
     );
 
-    const { cart_products, loadingCartItems } = useCartItems(!!infor._id, infor._id as string, {
+    const { cart_products } = useCartItems(!!infor._id, infor._id as string, {
         refreshWhenHidden: true
     });
 
@@ -199,8 +199,8 @@ const CheckOut: NextPageWithLayout = () => {
                 return {
                     product: item.product._id,
                     variation: item.variation._id,
-                    price: item.variation.price,
-                    promotion_price: item.variation.promotion_price,
+                    price: item.price,
+                    promotion_price: item.promotion_price,
                     quantity: item.quantity
                 };
             }
@@ -208,8 +208,8 @@ const CheckOut: NextPageWithLayout = () => {
             return {
                 product: item.product._id,
                 variation: null,
-                price: item.product.price,
-                promotion_price: item.product.promotion_price,
+                price: item.price,
+                promotion_price: item.promotion_price,
                 quantity: item.quantity
             };
         });
@@ -578,18 +578,13 @@ const CheckOut: NextPageWithLayout = () => {
                                                         </h3>
                                                         {item.variation && (
                                                             <p className="sm:text-sm text-xs mt-2">
-                                                                {(item.variation
-                                                                    .promotion_price as number) >
+                                                                {(item.promotion_price as number) >
                                                                 0
                                                                     ? formatBigNumber(
-                                                                          item
-                                                                              .variation
-                                                                              .promotion_price as number
+                                                                          item.promotion_price as number
                                                                       )
                                                                     : formatBigNumber(
-                                                                          item
-                                                                              .variation
-                                                                              .price as number
+                                                                          item.price as number
                                                                       )}
                                                                 {" VND "}X{" "}
                                                                 {item.quantity}
@@ -598,18 +593,13 @@ const CheckOut: NextPageWithLayout = () => {
 
                                                         {!item.variation && (
                                                             <p className="sm:text-sm text-xs mt-2">
-                                                                {(item.product
-                                                                    .promotion_price as number) >
+                                                                {(item.promotion_price as number) >
                                                                 0
                                                                     ? formatBigNumber(
-                                                                          item
-                                                                              .product
-                                                                              .promotion_price as number
+                                                                          item.promotion_price as number
                                                                       )
                                                                     : formatBigNumber(
-                                                                          item
-                                                                              .product
-                                                                              .price as number
+                                                                          item.price as number
                                                                       )}
                                                                 {" VND"}X{" "}
                                                                 {item.quantity}
@@ -619,19 +609,14 @@ const CheckOut: NextPageWithLayout = () => {
                                                 </div>
                                                 {item.variation && (
                                                     <p className="sm:text-base text-sm font-medium">
-                                                        {(item.variation
-                                                            .promotion_price as number) >
+                                                        {(item.promotion_price as number) >
                                                         0
                                                             ? formatBigNumber(
-                                                                  (item
-                                                                      .variation
-                                                                      .promotion_price as number) *
+                                                                  (item.promotion_price as number) *
                                                                       item.quantity
                                                               )
                                                             : formatBigNumber(
-                                                                  (item
-                                                                      .variation
-                                                                      .price as number) *
+                                                                  (item.price as number) *
                                                                       item.quantity
                                                               )}
                                                         {" VND "}
@@ -640,17 +625,14 @@ const CheckOut: NextPageWithLayout = () => {
 
                                                 {!item.variation && (
                                                     <p className="sm:text-base text-sm font-medium">
-                                                        {(item.product
-                                                            .promotion_price as number) >
+                                                        {(item.promotion_price as number) >
                                                         0
                                                             ? formatBigNumber(
-                                                                  (item.product
-                                                                      .promotion_price as number) *
+                                                                  (item.promotion_price as number) *
                                                                       item.quantity
                                                               )
                                                             : formatBigNumber(
-                                                                  (item.product
-                                                                      .price as number) *
+                                                                  (item.price as number) *
                                                                       item.quantity
                                                               )}
                                                         {" VND"}

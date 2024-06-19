@@ -15,10 +15,11 @@ interface ItemOrder extends ICartItem {
 
 interface ItemOrderCreate {
     product: string;
-    variation: string;
+    variation: string | null;
     price: number;
     promotion_price: number;
     quantity: number;
+    inventory: number;
 }
 
 interface Order {

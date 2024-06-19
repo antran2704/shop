@@ -4,6 +4,9 @@ interface ICartItem {
     product: Partial<IProductData>;
     variation: Partial<IVariantProduct> | null;
     quantity: number;
+    price: number;
+    promotion_price: number;
+    inventory: number;
 }
 
 interface SendCartItem {
