@@ -7,7 +7,7 @@ import {
     getProductsInCategory
 } from "~/api-client";
 import { initPagination } from "~/data";
-import { IFilter, IPagination, IProductData, IQueryParam } from "~/interfaces";
+import { IFilter, IPagination, IProductData, IProductHome, IQueryParam } from "~/interfaces";
 
 // refesh 1 hour
 const REFESH_TIME = 1000 * 60 * 60;
@@ -73,7 +73,7 @@ const fetcherProductsInCategory = async (
 
 const useProducts = (
     page: number = 1,
-    select?: IQueryParam<Partial<IProductData>>,
+    select?: IQueryParam<Partial<IProductHome>>,
     options?: Partial<SWRConfiguration>
 ) => {
     const { data, isLoading, mutate, error } = useSWR(
@@ -99,7 +99,7 @@ const useProducts = (
 
 const useHotProducts = (
     page: number = 1,
-    select?: IQueryParam<Partial<IProductData>>,
+    select?: IQueryParam<Partial<IProductHome>>,
     options?: Partial<SWRConfiguration>
 ) => {
     const { data, isLoading, mutate, error } = useSWR(

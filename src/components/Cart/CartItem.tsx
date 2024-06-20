@@ -3,12 +3,7 @@ import { FC, useState, useEffect } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 
 import ProductQuantity from "~/components/ProductQuantity";
-import {
-    ICartItem,
-    IProductInfo,
-    SendCartItem,
-    SendDeleteCartItem
-} from "~/interfaces";
+import { ICartItem, SendCartItem, SendDeleteCartItem } from "~/interfaces";
 import ImageCus from "~/components/Image";
 import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
 import { CART_KEY, deleteItemCart, updateCart } from "~/api-client/cart";
@@ -17,61 +12,45 @@ import useDebounce from "~/hooks/useDebounce";
 import { toast } from "react-toastify";
 import { useSWRConfig } from "swr";
 import ModalConfirm from "../Modal/ModalConfirm";
-import { getProductInfo } from "~/api-client";
+import CartItemLoading from "./CartItemLoading";
 
 interface Props {
     data: ICartItem;
+    onDelete: (data: ICartItem) => void;
 }
 
 const CartItem: FC<Props> = (props: Props) => {
-    const { data } = props;
+    const { data, onDelete } = props;
     const { infor } = useAppSelector((state) => state.user);
     const { mutate } = useSWRConfig();
 
     const [totalProduct, setTotalProduct] = useState<number>(0);
-    // const [inventory, setInventory] = useState<number>(0);
     const total = useDebounce(totalProduct.toString(), 1000);
+
+    // const [cartItem, setCartItem] = useState<ICartItem | null>(null);
     const [showModalConfirm, setShowModalConfirm] = useState<boolean>(false);
 
-    const [infoProduct, setInfoProduct] = useState<IProductInfo>({
-        inventory: 1,
-        price: 0,
-        promotion_price: 0
-    });
+    // const handeDeleteItem = async (data: ICartItem) => {
+    //     if (!infor._id || !data) return;
 
-    const handeDeleteItem = async (data: ICartItem) => {
-        if (!infor._id || !data) return;
+    //     const dataSend: SendDeleteCartItem = {
+    //         product_id: data.product._id as string,
+    //         variation_id: data.variation?._id as string | null
+    //     };
+    //     try {
+    //         const { status } = await deleteItemCart(infor._id, dataSend);
 
-        const dataSend: SendDeleteCartItem = {
-            product_id: data.product._id as string,
-            variation_id: data.variation?._id as string | null
-        };
-        try {
-            const { status } = await deleteItemCart(infor._id, dataSend);
-
-            if (status === 201) {
-                mutate(CART_KEY.CART_USER);
-                mutate(CART_KEY.CART_ITEMS);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const handleGetInfo = async (productId: string) => {
-        const { status, payload } = await getProductInfo(productId);
-
-        if (status === 200) {
-            // setInventory(payload.inventory);
-            setInfoProduct(payload);
-
-            // console.log("cart", payload)
-        }
-    };
+    //         if (status === 201) {
+    //             mutate(CART_KEY.CART_USER);
+    //             mutate(CART_KEY.CART_ITEMS);
+    //         }
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // };
 
     const updateCartItem = async () => {
-        if (!infor._id) return;
-
+        if (!infor._id ) return;
         const dataSend: SendCartItem = {
             product_id: data.product._id as string,
             variation_id: data.variation?._id as string | null,
@@ -82,6 +61,7 @@ const CartItem: FC<Props> = (props: Props) => {
             const { status } = await updateCart(infor._id, dataSend);
 
             if (status === 201) {
+                // setCartItem({ ...cartItem, quantity: dataSend.quantity });
                 mutate(CART_KEY.CART_USER);
                 mutate(CART_KEY.CART_ITEMS);
                 toast.success("Thay đổi số lượng thành công", {
@@ -94,38 +74,30 @@ const CartItem: FC<Props> = (props: Props) => {
     };
 
     useEffect(() => {
-        console.log("totalProduct", totalProduct, data)
         if (totalProduct > 0 && totalProduct !== data.quantity) {
             updateCartItem();
         }
     }, [total]);
 
     useEffect(() => {
-        if (data.variation) {
-            handleGetInfo(data.variation._id as string);
-        } else {
-            handleGetInfo(data.product._id as string);
-        }
-
-        // console.log("data", data)
         setTotalProduct(data.quantity);
-        // setInventory(
-        //     data.variation
-        //         ? (data.variation.inventory as number)
-        //         : (data.product.inventory as number)
-        // );
-    }, []);
+        // setCartItem(data);
+    }, [data]);
+
+    // if (!cartItem) {
+    //     return <CartItemLoading />;
+    // }
 
     return (
         <li
             className={`flex md:flex-row flex-col items-center justify-between w-full bg-white lg:pb-5 p-5 ${
-                infoProduct.inventory < data.quantity
+                data.inventory < data.quantity
                     ? "border-primary"
                     : "border-transparent"
             } border-2 rounded-md gap-5`}>
             <div
                 className={`flex md:flex-row flex-col items-center md:w-6/12 ${
-                    infoProduct.inventory <= 0 ? "opacity-80" : ""
+                    data.inventory <= 0 ? "opacity-80" : ""
                 }  gap-5`}>
                 <Link
                     href={`/collections/product/${data.product._id}.${data.product.slug}`}
@@ -167,57 +139,30 @@ const CartItem: FC<Props> = (props: Props) => {
                         </Link>
                     )}
 
-                    {!data.variation && (
-                        <p className="w-full lg:text-base md:text-sm md:text-start text-center">
-                            {(infoProduct.promotion_price as number) > 0
-                                ? formatBigNumber(
-                                      infoProduct.promotion_price as number
-                                  )
-                                : formatBigNumber(infoProduct.price as number)}
-                            {" VND"}
-                        </p>
-                    )}
-                    {data.variation && (
-                        <p className="w-full lg:text-base md:text-sm md:text-start text-center">
-                            {(infoProduct.promotion_price as number) > 0
-                                ? formatBigNumber(
-                                      infoProduct.promotion_price as number
-                                  )
-                                : formatBigNumber(infoProduct.price as number)}
-                            {" VND"}
-                        </p>
-                    )}
+                    <p className="w-full lg:text-base md:text-sm md:text-start text-center">
+                        {(data.promotion_price as number) > 0
+                            ? formatBigNumber(data.promotion_price as number)
+                            : formatBigNumber(data.price as number)}
+                        {" VND"}
+                    </p>
 
                     <div className="mt-2">
-                        {!data.variation &&
-                            (infoProduct.inventory as number) > 0 && (
-                                <p className="w-full lg:text-base md:text-sm md:text-start text-center">
-                                    Còn{" "}
-                                    <span className="text-primary">
-                                        {infoProduct.inventory}
-                                    </span>{" "}
-                                    sản phẩm
-                                </p>
-                            )}
-                        {data.variation &&
-                            (infoProduct.inventory as number) > 0 && (
-                                <p className="w-full lg:text-base md:text-sm md:text-start text-center">
-                                    Còn{" "}
-                                    <span className="text-primary">
-                                        {infoProduct.inventory}
-                                    </span>{" "}
-                                    sản phẩm
-                                </p>
-                            )}
+                        <p className="w-full lg:text-base md:text-sm md:text-start text-center">
+                            Còn{" "}
+                            <span className="text-primary">
+                                {data.inventory}
+                            </span>{" "}
+                            sản phẩm
+                        </p>
                     </div>
                 </div>
             </div>
 
             <div>
-                {infoProduct.inventory > 0 ? (
+                {data.inventory > 0 ? (
                     <ProductQuantity
                         total={totalProduct}
-                        max={infoProduct.inventory}
+                        max={data.inventory}
                         setTotalProduct={setTotalProduct}
                     />
                 ) : (
@@ -227,32 +172,15 @@ const CartItem: FC<Props> = (props: Props) => {
                 )}
             </div>
 
-            {!data.variation && (
-                <p className="min-w-28 w-28 lg:text-base md:text-sm text-center">
-                    {(infoProduct.promotion_price as number) > 0
-                        ? formatBigNumber(
-                              (infoProduct.promotion_price as number) *
-                                  data.quantity
-                          )
-                        : formatBigNumber(
-                              (infoProduct.price as number) * data.quantity
-                          )}
-                    {" VND"}
-                </p>
-            )}
-            {data.variation && (
-                <p className="min-w-28 w-28 lg:text-base md:text-sm text-center">
-                    {(infoProduct.promotion_price as number) > 0
-                        ? formatBigNumber(
-                              (infoProduct.promotion_price as number) *
-                                  data.quantity
-                          )
-                        : formatBigNumber(
-                              (infoProduct.price as number) * data.quantity
-                          )}
-                    {" VND"}
-                </p>
-            )}
+            <p className="min-w-28 w-28 lg:text-base md:text-sm text-center">
+                {(data.promotion_price as number) > 0
+                    ? formatBigNumber(
+                          (data.promotion_price as number) * data.quantity
+                      )
+                    : formatBigNumber((data.price as number) * data.quantity)}
+                {" VND"}
+            </p>
+
             <div className="flex items-center justify-center w-fit p-5">
                 <FaRegTrashAlt
                     className="text-xl hover:text-primary cursor-pointer"
@@ -264,7 +192,7 @@ const CartItem: FC<Props> = (props: Props) => {
                 <ModalConfirm
                     title="Confirm"
                     onClick={() => {
-                        handeDeleteItem(data);
+                        onDelete(data);
                         setShowModalConfirm(!showModalConfirm);
                     }}
                     onClose={() => {

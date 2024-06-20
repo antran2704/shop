@@ -1,7 +1,11 @@
 import { ReactElement, useEffect, useState } from "react";
 import Header from "~/components/Header";
 
-import { ICartItem, NextPageWithLayout } from "~/interfaces";
+import {
+    ICartItem,
+    NextPageWithLayout,
+    SendDeleteCartItem
+} from "~/interfaces";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import { useCart, useCartItems } from "~/hooks/useCart";
 import { useAppSelector } from "~/store/hooks";
@@ -11,7 +15,8 @@ import CartItemLoading from "~/components/Cart/CartItemLoading";
 import {
     CART_KEY,
     checkInventoryItems,
-    deleteAllItemsCart
+    deleteAllItemsCart,
+    deleteItemCart
 } from "~/api-client/cart";
 import { useSWRConfig } from "swr";
 import { toast } from "react-toastify";
@@ -44,6 +49,7 @@ const Cart: NextPageWithLayout = () => {
 
     const { mutate } = useSWRConfig();
 
+    // const [items, setItems] = useState<ICartItem[]>([]);
     const [showModalConfirm, setShowModalConfirm] = useState<boolean>(false);
 
     const onCheckout = async () => {
@@ -72,7 +78,31 @@ const Cart: NextPageWithLayout = () => {
                     position: toast.POSITION.TOP_RIGHT
                 });
             }
+        }
+    };
 
+    const handleDeleteItem = async (data: ICartItem) => {
+        if (!infor._id || !data) return;
+
+        const dataSend: SendDeleteCartItem = {
+            product_id: data.product._id as string,
+            variation_id: data.variation?._id as string | null
+        };
+        try {
+            const { status } = await deleteItemCart(infor._id, dataSend);
+
+            if (status === 201) {
+                // const newItems = items.filter(
+                //     (item: ICartItem) =>
+                //         item.product !== data.product &&
+                //         item.variation !== data.variation
+                // );
+
+                // setItems([...newItems]);
+                mutate(CART_KEY.CART_USER);
+                mutate(CART_KEY.CART_ITEMS);
+            }
+        } catch (error) {
             console.log(error);
         }
     };
@@ -118,6 +148,7 @@ const Cart: NextPageWithLayout = () => {
     useEffect(() => {
         if (cart_products.length > 0) {
             handleCheckInventoryItems();
+            // setItems(cart_products);
         }
     }, [loadingCartItems]);
 
@@ -135,11 +166,13 @@ const Cart: NextPageWithLayout = () => {
                 {cart && !loadingCartItems && cart_products.length > 0 && (
                     <div>
                         <ul className="flex flex-col items-start my-10 gap-5">
-                            {cart_products.map(
-                                (item: ICartItem, index: number) => (
-                                    <CartItem data={item} key={index} />
-                                )
-                            )}
+                            {cart_products.map((item: ICartItem, index: number) => (
+                                <CartItem
+                                    onDelete={handleDeleteItem}
+                                    data={item}
+                                    key={index}
+                                />
+                            ))}
                         </ul>
                         <div className="flex lg:flex-nowrap flex-wrap items-start justify-between gap-5">
                             <div className="lg:w-4/12 w-full">
@@ -191,11 +224,9 @@ const Cart: NextPageWithLayout = () => {
                 {!cart && (
                     <div>
                         <ul className="flex flex-col items-start my-10 lg:gap-5 gap-10">
-                            {[...new Array(3)].map(
-                                (item: any, index: number) => (
-                                    <CartItemLoading key={index} />
-                                )
-                            )}
+                            {[...new Array(3)].map((_, index: number) => (
+                                <CartItemLoading key={index} />
+                            ))}
                         </ul>
                     </div>
                 )}

@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { ICartItem, IProductInfo } from "~/interfaces";
+import { ICartItem } from "~/interfaces";
 
 import ImageCus from "~/components/Image";
 import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
 import { AiFillCloseCircle } from "react-icons/ai";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { getProductInfo } from "~/api-client";
+import { Dispatch, SetStateAction } from "react";
 
 interface Props {
     data: ICartItem;
@@ -17,28 +16,6 @@ interface Props {
 const ModalCartItem = (props: Props) => {
     const { data, showModalConfirm, setSelectItem, setShowModalConfirm } =
         props;
-
-    const [infoProduct, setInfoProduct] = useState<IProductInfo>({
-        inventory: 1,
-        price: 0,
-        promotion_price: 0
-    });
-
-    const handleGetInfo = async (productId: string) => {
-        const { status, payload } = await getProductInfo(productId);
-
-        if (status === 200) {
-            setInfoProduct(payload);
-        }
-    };
-
-    useEffect(() => {
-        if (data.variation) {
-            handleGetInfo(data.variation._id as string);
-        } else {
-            handleGetInfo(data.product._id as string);
-        }
-    }, []);
 
     return (
         <li>
@@ -70,29 +47,12 @@ const ModalCartItem = (props: Props) => {
                             {data.variation.options?.join("/")}
                         </div>
                     )}
-                    {data.variation && (
-                        <p className="sm:text-base text-sm mt-2">
-                            {(infoProduct.promotion_price as number) > 0
-                                ? formatBigNumber(
-                                      infoProduct.promotion_price as number
-                                  )
-                                : formatBigNumber(
-                                      infoProduct.price as number
-                                  )}
-                            {" VND "}X {data.quantity}
-                        </p>
-                    )}
-
-                    {!data.variation && (
-                        <p className="sm:text-base text-sm mt-2">
-                            {(infoProduct.promotion_price as number) > 0
-                                ? formatBigNumber(
-                                      infoProduct.promotion_price as number
-                                  )
-                                : formatBigNumber(infoProduct.price as number)}
-                            {" VND"}X {data.quantity}
-                        </p>
-                    )}
+                    <p className="sm:text-base text-sm mt-2">
+                        {(data.promotion_price as number) > 0
+                            ? formatBigNumber(data.promotion_price as number)
+                            : formatBigNumber(data.price as number)}
+                        {" VND "}X {data.quantity}
+                    </p>
                 </Link>
 
                 <AiFillCloseCircle

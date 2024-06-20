@@ -16,6 +16,7 @@ import {
     IBreadcrumb,
     IFilter,
     IProductData,
+    IProductHome,
     IVariant,
     NextPageWithLayout
 } from "~/interfaces";
@@ -226,7 +227,7 @@ const CollectionItem: NextPageWithLayout = () => {
                             {!loadingProducts &&
                                 products.length > 0 &&
                                 products.map(
-                                    (product: IProductData, index: number) => (
+                                    (product: IProductHome, index: number) => (
                                         <ProductItem
                                             key={index}
                                             data={product}

@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, memo, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { AiOutlineClose } from "react-icons/ai";
 
@@ -31,8 +31,11 @@ const ModalCart = (props: Props) => {
     const { cart } = useCart(!!infor._id, infor._id as string);
     const { cart_products, loadingCartItems } = useCartItems(
         !!infor._id,
-        infor._id as string
+        infor._id as string,
+        { refreshWhenHidden: true }
     );
+
+    console.log("cart_products moidal", cart_products);
 
     const [selectItem, setSelectItem] = useState<ICartItem | null>(null);
     const [showModalConfirm, setShowModalConfirm] = useState<boolean>(false);
@@ -150,4 +153,4 @@ const ModalCart = (props: Props) => {
     );
 };
 
-export default ModalCart;
+export default memo(ModalCart);

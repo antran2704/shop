@@ -140,16 +140,16 @@ const CheckOut: NextPageWithLayout = () => {
                     await updatePaymentStatusOrder(order.order_id, {
                         payment_status: EPaymentStatus.SUCCESS
                     });
-                    router.push(`/checkout/${order.order_id}`);
+                    await router.push(`/checkout/${order.order_id}`);
                     break;
 
                 case EPaymentMethod.BANKING:
-                    router.push(`/checkout/${order.order_id}`);
+                    await router.push(`/checkout/${order.order_id}`);
                     break;
 
                 case EPaymentMethod.VNPAY:
                     const urlPayment = await createPayment(order);
-                    router.push(urlPayment.payload);
+                    await router.push(urlPayment.payload);
                     break;
 
                 default:
@@ -157,6 +157,9 @@ const CheckOut: NextPageWithLayout = () => {
                         position: toast.POSITION.TOP_RIGHT
                     });
             }
+
+            mutate(CART_KEY.CART_USER);
+            mutate(CART_KEY.CART_ITEMS);
         } catch (error) {
             console.log(error);
         }
