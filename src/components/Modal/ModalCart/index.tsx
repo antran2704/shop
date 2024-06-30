@@ -35,8 +35,6 @@ const ModalCart = (props: Props) => {
         { refreshWhenHidden: true }
     );
 
-    console.log("cart_products moidal", cart_products);
-
     const [selectItem, setSelectItem] = useState<ICartItem | null>(null);
     const [showModalConfirm, setShowModalConfirm] = useState<boolean>(false);
 

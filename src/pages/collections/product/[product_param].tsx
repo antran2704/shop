@@ -98,7 +98,6 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     });
 
     const [totalProduct, setTotalProduct] = useState<number>(1);
-    // const [inventory, setInventory] = useState<number>(0);
 
     const [currentImage, setCurrentImage] = useState<string>("");
     const [message, setMessage] = useState<string | null>(null);
@@ -107,6 +106,8 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     const [variation, setVariation] = useState<IVariantProduct | null>(null);
 
     const [selectOption, setSelectOption] = useState<ISelectOption>({});
+
+    const [currentId, setCurrentId] = useState<string | null>(null);
 
     const [showPopup, setShow] = useState<boolean>(false);
 
@@ -154,15 +155,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     };
 
     const handleGetVariation = () => {
-        const keys = Object.keys(selectOption);
         const values = Object.values(selectOption);
-
-        // if (keys.length < product.options.length) {
-        //     setVariation(null);
-        //     setTotalProduct(1);
-        //     setInventory(product.inventory);
-        //     return;
-        // }
 
         const item = variations.find((variation: IVariantProduct) => {
             const optitons = variation.options;
@@ -188,12 +181,14 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     };
 
     const handleGetInfo = async (productId: string) => {
+        if (productId === currentId) return;
+
         const { status, payload } = await getProductInfo(productId);
 
         if (status === 200) {
             setTotalProduct(1);
-            // setInventory(payload.inventory);
             setInfoProduct(payload);
+            setCurrentId(productId);
         }
     };
 
@@ -320,8 +315,18 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     }, [slug]);
 
     useEffect(() => {
-        if (product && product.options.length > 0) {
+        if (
+            product &&
+            product.options.length === Object.keys(selectOption).length
+        ) {
             handleGetVariation();
+        }
+
+        if (
+            product &&
+            product.options.length !== Object.keys(selectOption).length
+        ) {
+            handleGetInfo(product._id as string);
         }
     }, [selectOption]);
 
@@ -537,13 +542,6 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                         Inventory:
                                     </span>
                                     <p>
-                                        {/* {!variation
-                                            ? formatBigNumber(
-                                                  infoProduct.inventory
-                                              )
-                                            : formatBigNumber(
-                                                  variation.inventory
-                                              )} */}
                                         {formatBigNumber(infoProduct.inventory)}
                                     </p>
                                 </div>
@@ -617,13 +615,6 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                                         }
                                                     />
                                                     <p className="sm:block hidden text-sm text-nowrap">
-                                                        {/* {!variation
-                                                            ? formatBigNumber(
-                                                                  infoProduct.inventory
-                                                              )
-                                                            : formatBigNumber(
-                                                                  variation.inventory
-                                                              )}{" "} */}
                                                         {formatBigNumber(
                                                             infoProduct.inventory
                                                         )}{" "}
