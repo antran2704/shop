@@ -9,7 +9,8 @@ interface IOptionProduct {
     _id: string;
     code: string;
     name: string;
-    values: IValueOption[];
+    // values: IValueOption[];
+    values: string[];
 }
 
 interface ISpecificationAttributes {

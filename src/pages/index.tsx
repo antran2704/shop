@@ -14,23 +14,9 @@ import Banners from "~/components/Banners";
 const Layout = DefaultLayout;
 
 const Home: NextPageWithLayout = () => {
-    const { products, loadingProducts } = useProducts(1, {
-        title: "1",
-        thumbnail: "1",
-        price: "1",
-        promotion_price: "1",
-        slug: "1",
-        inventory: "1"
-    });
+    const { products, loadingProducts } = useProducts(1);
 
-    const { hotProducts, loadingHotProducts } = useHotProducts(1, {
-        title: "1",
-        thumbnail: "1",
-        price: "1",
-        promotion_price: "1",
-        slug: "1",
-        inventory: "1"
-    });
+    const { hotProducts, loadingHotProducts } = useHotProducts(1);
 
     return (
         <div>
@@ -48,7 +34,7 @@ const Home: NextPageWithLayout = () => {
 
             {/* Category */}
             <section className="container__cus py-5">
-                <ListParentCategories title="Danh mục"/>
+                <ListParentCategories title="Danh mục" />
             </section>
 
             <section className="container__cus py-5">

@@ -17,24 +17,12 @@ const getProductsStatic = async (page: number = 1) => {
         .then((res) => res.data);
 };
 
-const getProducts = async (
-    page: number = 1,
-    select?: IQueryParam<Partial<IProductData>>
-) => {
-    const parseQuery = qs.stringify(select);
-    return await AxiosGet(
-        `/products?page=${page}${parseQuery && "&" + parseQuery}`
-    );
+const getProducts = async (page: number = 1) => {
+    return await AxiosGet(`/products?page=${page}`);
 };
 
-const getHotProducts = async (
-    page: number = 1,
-    select?: IQueryParam<Partial<IProductData>>
-) => {
-    const parseQuery = qs.stringify(select);
-    return await AxiosGet(
-        `/products/hot?page=${page}${parseQuery && "&" + parseQuery}`
-    );
+const getHotProducts = async (page: number = 1) => {
+    return await AxiosGet(`/products/hot?page=${page}`);
 };
 
 const getOtherProducts = async (
@@ -51,16 +39,9 @@ const getOtherProducts = async (
     );
 };
 
-const getProductsInCategory = async (
-    category_id: string,
-    filter: IFilter | null,
-    page: number = 1
-) => {
-    const parseQuery = qs.stringify(filter, { indices: false });
+const getProductsInCategory = async (category_id: string, page: number = 1) => {
     return await AxiosGet(
-        `/products/category/${category_id}?page=${page}${
-            parseQuery && "&" + parseQuery
-        }`
+        `/products/category/${category_id}?page=${page}`
     );
 };
 
@@ -68,9 +49,9 @@ const getProduct = async (product_id: string) => {
     return await AxiosGet(`/products/id/${product_id}`);
 };
 
-const getProductBySlugStatic = async (product_id: string, slug: string) => {
+const getProductBySlugStatic = async (product_id: string) => {
     return await axios
-        .get(`${process.env.ENDPOINT_SERVER}/products/${product_id}/${slug}`)
+        .get(`${process.env.ENDPOINT_SERVER}/products/id/${product_id}`)
         .then((res) => res.data);
 };
 
@@ -89,8 +70,8 @@ const getProductsWithFilter = async (
     );
 };
 
-const getProductInfo = async (product_id: string) => {
-    return await AxiosGet(`/products/info/${product_id}`);
+const getStockProduct = async (product_id: string) => {
+    return await AxiosGet(`/products/stock/${product_id}`);
 };
 
 export {
@@ -103,6 +84,6 @@ export {
     getProductBySlugStatic,
     getProductsStatic,
     getHotProducts,
-    getProductInfo,
+    getStockProduct,
     PRODUCT_KEY
 };

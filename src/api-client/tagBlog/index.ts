@@ -5,7 +5,7 @@ const TAG_BLOG_KEY = {
 };
 
 const getTagBlogs = async (page: number = 1) => {
-    return await AxiosGet(`/blogs-tag?page=${page}`);
+    return await AxiosGet(`/blog-tags?page=${page}`);
 };
 
 export { getTagBlogs, TAG_BLOG_KEY };

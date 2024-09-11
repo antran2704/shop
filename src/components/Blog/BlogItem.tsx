@@ -14,10 +14,7 @@ const BlogItem = (props: Props) => {
                 <div className="relative pb-[100%]">
                     <img
                         className="absolute top-0 right-0 left-0 bottom-0 h-full w-full object-cover object-center"
-                        src={
-                            process.env.NEXT_PUBLIC_IMAGE_ENDPOINT +
-                            data.thumbnail
-                        }
+                        src={data.thumbnail}
                         alt={data.meta_title}
                         title={data.meta_title}
                         width="auto"

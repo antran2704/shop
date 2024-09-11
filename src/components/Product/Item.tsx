@@ -23,15 +23,11 @@ const ProductItem = (props: Props) => {
                 hoverScale ? "hover:scale-105" : ""
             } hover:shadow-lg border rounded-md overflow-hidden transition-all ease-linear duration-100`}>
             <Link
-                href={`/collections/product/${data._id}.${data.slug}`}
+                href={`/products/${data._id}.${data.slug}`}
                 className="block w-full h-full">
                 <div className="relative pb-[100%] ">
                     <ImageCus
-                        src={
-                            ((process.env
-                                .NEXT_PUBLIC_IMAGE_ENDPOINT as string) +
-                                data.thumbnail) as string
-                        }
+                        src={data.thumbnail as string}
                         title={data.title}
                         alt={data.title}
                         className="absolute left-0 right-0 top-0 bottom-0 w-full h-full object-center object-cover"

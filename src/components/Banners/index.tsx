@@ -37,10 +37,7 @@ const Banners = () => {
                     <div
                         className="relative flex items-center sm:justify-start justify-center w-full h-full bg-cover bg-center"
                         style={{
-                            backgroundImage: `url(${
-                                process.env.NEXT_PUBLIC_IMAGE_ENDPOINT +
-                                banner.image
-                            })`
+                            backgroundImage: `url(${banner.image})`
                         }}></div>
                 </SwiperSlide>
             ))}

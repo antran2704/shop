@@ -25,7 +25,7 @@ import ImageCus from "~/components/Image";
 import ProductQuantity from "~/components/ProductQuantity";
 import {
     getProductBySlugStatic,
-    getProductInfo,
+    getStockProduct,
     getProductsStatic,
     getVariations
 } from "~/api-client";
@@ -79,8 +79,6 @@ const ICON = {
 
 const REFRESH_TIME = 60; //Refresh in 1 day
 
-const URL_IMAGE = process.env.NEXT_PUBLIC_IMAGE_ENDPOINT;
-
 const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
     const { product } = props;
     const router = useRouter();
@@ -115,12 +113,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
         !!product,
         (product?.category?._id as string) || "",
         product?._id as string,
-        1,
-        {
-            title: "1",
-            slug: "1",
-            thumbnail: "1"
-        }
+        1
     );
 
     const onSelectOption = (key: string, value: string) => {
@@ -165,25 +158,26 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
         if (item) {
             if (item.thumbnail) {
-                setCurrentImage(URL_IMAGE + item.thumbnail);
+                setCurrentImage(item.thumbnail);
             }
 
             setVariation(item);
-            handleGetInfo(item._id as string);
+            handleGetStock(item._id as string);
         }
     };
 
     const handleGetVariations = async (product_id: string) => {
+        // TODO: catch error
         const res = await getVariations(product_id);
         if (res.status === 200) {
             setVariations(res.payload);
         }
     };
 
-    const handleGetInfo = async (productId: string) => {
+    const handleGetStock = async (productId: string) => {
         if (productId === currentId) return;
 
-        const { status, payload } = await getProductInfo(productId);
+        const { status, payload } = await getStockProduct(productId);
 
         if (status === 200) {
             setTotalProduct(1);
@@ -308,9 +302,9 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
     useEffect(() => {
         if (product && product._id) {
-            setCurrentImage(URL_IMAGE + product.gallery[0]);
+            setCurrentImage(product.gallery[0]);
             handleGetVariations(product._id);
-            handleGetInfo(product._id);
+            handleGetStock(product._id);
         }
     }, [slug]);
 
@@ -326,7 +320,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
             product &&
             product.options.length !== Object.keys(selectOption).length
         ) {
-            handleGetInfo(product._id as string);
+            handleGetStock(product._id as string);
         }
     }, [selectOption]);
 
@@ -368,12 +362,12 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                 enableSwipe={true}
                                 plugins={[lgThumbnail, lgZoom]}>
                                 <a
-                                    href={URL_IMAGE + product.gallery[0]}
+                                    href={product.gallery[0]}
                                     className="w-1/4">
                                     <button className="absolute top-0 left-0 right-0 bottom-0"></button>
                                     <ImageCus
                                         className="w-full hidden"
-                                        src={URL_IMAGE + product.gallery[0]}
+                                        src={product.gallery[0]}
                                         alt={product.title}
                                         title={product.title}
                                     />
@@ -382,12 +376,12 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                     .slice(1, product.gallery.length)
                                     .map((image: string, index: number) => (
                                         <a
-                                            href={URL_IMAGE + image}
+                                            href={image}
                                             key={index}
                                             className="w-[100px] h-[100px] rounded-lg hidden">
                                             <ImageCus
                                                 className="w-full"
-                                                src={URL_IMAGE + image}
+                                                src={image}
                                                 alt={product.title}
                                                 title={product.title}
                                             />
@@ -413,13 +407,13 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                             className="cursor-pointer"
                                             onClick={() =>
                                                 handleChangeImage(
-                                                    URL_IMAGE + image
+                                                    image
                                                 )
                                             }>
                                             <ImageCus
                                                 title={product.title}
                                                 alt={product.title}
-                                                src={URL_IMAGE + image}
+                                                src={image}
                                                 className={`w-full lg:h-[100px] sm:h-[160px] h-[120px] ${
                                                     currentImage.includes(image)
                                                         ? "border-primary"
@@ -561,14 +555,15 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     {option.values.map(
                                                         (
-                                                            value: IValueOption
+                                                            value: string,
+                                                            index: number
                                                         ) => (
                                                             <button
-                                                                key={value._id}
+                                                                key={index}
                                                                 onClick={() =>
                                                                     onSelectOption(
                                                                         option.code,
-                                                                        value.label
+                                                                        value
                                                                     )
                                                                 }
                                                                 className={`text-sm px-4 py-1 hover:text-white ${
@@ -576,11 +571,11 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                                                         option
                                                                             .code
                                                                     ] ===
-                                                                    value.label
+                                                                    value
                                                                         ? "bg-primary text-white"
                                                                         : ""
                                                                 } hover:bg-primary border border-borderColor rounded-md transition-all ease-linear duration-100 cursor-pointer`}>
-                                                                {value.label}
+                                                                {value}
                                                             </button>
                                                         )
                                                     )}
@@ -731,7 +726,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                         />
                         <div className="flex items-center gap-5">
                             <ImageCus
-                                src={URL_IMAGE + product.gallery[0]}
+                                src={product.gallery[0]}
                                 alt="image"
                                 title="image"
                                 className="w-[100px] h-100px"
@@ -774,9 +769,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         "."
     );
     const productId: string = product_param[0];
-    const slug: string = product_param[1];
+
     try {
-        const res = await getProductBySlugStatic(productId, slug as string);
+        const res = await getProductBySlugStatic(productId);
         const product: IProductData = res.payload;
 
         return {

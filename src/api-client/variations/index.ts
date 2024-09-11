@@ -1,7 +1,7 @@
 import { AxiosGet } from "~/configs/axiosConfig";
 
 const getVariations = async (product_id: string) => {
-    return await AxiosGet(`/variations/all/${product_id}`);
+    return await AxiosGet(`/variations/${product_id}`);
 };
 
 const getVariation = async (variation_id: string) => {

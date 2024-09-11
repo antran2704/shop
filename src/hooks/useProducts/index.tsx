@@ -7,7 +7,13 @@ import {
     getProductsInCategory
 } from "~/api-client";
 import { initPagination } from "~/data";
-import { IFilter, IPagination, IProductData, IProductHome, IQueryParam } from "~/interfaces";
+import {
+    IFilter,
+    IPagination,
+    IProductData,
+    IProductHome,
+    IQueryParam
+} from "~/interfaces";
 
 // refesh 1 hour
 const REFESH_TIME = 1000 * 60 * 60;
@@ -17,7 +23,7 @@ const fetcherProducts = async (
     select?: IQueryParam<Partial<IProductData>>
 ) => {
     try {
-        const res = await getProducts(page, select);
+        const res = await getProducts(page);
 
         if (res.status === 200) {
             return res;
@@ -31,21 +37,17 @@ const fetcherOtherProducts = async (
     product_id: string,
     category_id: string,
     page: number = 1,
-    select?: IQueryParam<Partial<IProductData>>
 ) => {
-    const res = await getOtherProducts(product_id, category_id, page, select);
+    const res = await getProductsInCategory(category_id, page);
 
     if (res.status === 200) {
         return res;
     }
 };
 
-const fetcherHotProducts = async (
-    page: number = 1,
-    select?: IQueryParam<Partial<IProductData>>
-) => {
+const fetcherHotProducts = async (page: number = 1) => {
     try {
-        const res = await getHotProducts(page, select);
+        const res = await getHotProducts(page);
 
         if (res.status === 200) {
             return res;
@@ -61,7 +63,7 @@ const fetcherProductsInCategory = async (
     page: number = 1
 ) => {
     try {
-        const res = await getProductsInCategory(category_id, filter, page);
+        const res = await getProductsInCategory(category_id, page);
 
         if (res.status === 200) {
             return res;
@@ -99,12 +101,11 @@ const useProducts = (
 
 const useHotProducts = (
     page: number = 1,
-    select?: IQueryParam<Partial<IProductHome>>,
     options?: Partial<SWRConfiguration>
 ) => {
     const { data, isLoading, mutate, error } = useSWR(
         [PRODUCT_KEY.PRODUCT_HOT, page],
-        () => fetcherHotProducts(page, select),
+        () => fetcherHotProducts(page),
         {
             ...options,
             revalidateOnFocus: false,
@@ -128,14 +129,13 @@ const useOtherProducts = (
     product_id: string,
     category_id: string,
     page: number = 1,
-    select?: IQueryParam<Partial<IProductData>>,
     options?: Partial<SWRConfiguration>
 ) => {
     const { data, isLoading, mutate, error } = useSWR(
         isReady
             ? [PRODUCT_KEY.PRODUCTS_OTHER, category_id, product_id, page]
             : null,
-        () => fetcherOtherProducts(category_id, product_id, page, select),
+        () => fetcherOtherProducts(category_id, product_id, page),
         {
             ...options,
             revalidateOnFocus: false,
