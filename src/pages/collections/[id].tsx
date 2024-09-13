@@ -113,7 +113,7 @@ const CollectionItem: NextPageWithLayout = () => {
          <div className="container__cus">
             <div className="flex lg:flex-nowrap flex-wrap items-start justify-between my-10 gap-5">
                <div className="lg:w-3/12 lg:block hidden bg-white p-5 rounded-lg">
-                  <FilterCollection />
+                 <FilterCollection />
                   {/* {router.isReady && !loadingAttributes && (
                             <form>
                                 {category && category.children.length > 0 && (
