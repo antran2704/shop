@@ -12,122 +12,115 @@ import ProductLoading from "~/components/Product/Loading";
 
 import { useCategory } from "~/hooks/useCategories";
 import {
-    IAttribute,
-    IBreadcrumb,
-    IFilter,
-    IProductData,
-    IProductHome,
-    IVariant,
-    NextPageWithLayout
+   IBreadcrumb,
+   IListProduct,
+   IVariant,
+   NextPageWithLayout,
 } from "~/interfaces";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import useGetAttributes from "~/hooks/useAttributes";
 import { useProductsInCategory } from "~/hooks/useProducts";
-import LayoutClose from "~/components/Layout/LayoutClose";
-import FilterLinks from "~/components/Filter/FilterLinks";
-import FilterPrice from "~/components/Filter/FilterPrice";
 import ListParentCategories from "~/components/Category/List";
+import { ORDER_PARAMATER_ENUM } from "~/enums/paramater";
+import FilterCollection from "./components/Filter";
 
 const Layout = DefaultLayout;
 
 const filterPrice: IVariant[] = [
-    { _id: "1", name: "Dưới 500.000VND", value: "0.500000", public: true },
-    {
-        _id: "2",
-        name: "500.000VND - 1.000.000VND",
-        value: "500000.1000000",
-        public: true
-    },
-    {
-        _id: "3",
-        name: "1.000.000VND - 1.500.000VND",
-        value: "1000000.1500000",
-        public: true
-    },
-    {
-        _id: "4",
-        name: "1.500.000VND - 2.000.000VND",
-        value: "1500000.2000000",
-        public: true
-    },
-    {
-        _id: "5",
-        name: "Trên 2.000.000VND",
-        value: "2000000.1000000000",
-        public: true
-    }
+   { _id: "1", name: "Dưới 500.000VND", value: "0.500000", public: true },
+   {
+      _id: "2",
+      name: "500.000VND - 1.000.000VND",
+      value: "500000.1000000",
+      public: true,
+   },
+   {
+      _id: "3",
+      name: "1.000.000VND - 1.500.000VND",
+      value: "1000000.1500000",
+      public: true,
+   },
+   {
+      _id: "4",
+      name: "1.500.000VND - 2.000.000VND",
+      value: "1500000.2000000",
+      public: true,
+   },
+   {
+      _id: "5",
+      name: "Trên 2.000.000VND",
+      value: "2000000.1000000000",
+      public: true,
+   },
 ];
 
 const CollectionItem: NextPageWithLayout = () => {
-    const router = useRouter();
-    const { id, page, ...query } = router.query;
-    const currentPage = page ? Number(page) : 1;
+   const router = useRouter();
+   const { id, page, ...query } = router.query;
+   const currentPage = page ? Number(page) : 1;
 
-    const btnSubmitFilterRef = useRef<HTMLButtonElement>(null);
-    const [showFilter, setShowFilter] = useState<boolean>(false);
-    const [breadcrumbs, setBreadcrumbs] = useState<IBreadcrumb[]>([]);
+   const btnSubmitFilterRef = useRef<HTMLButtonElement>(null);
 
-    const category_id =
-        router.isReady && id ? (id as string).split(".")[1] : null;
+   const [showFilter, setShowFilter] = useState<boolean>(false);
+   const [breadcrumbs, setBreadcrumbs] = useState<IBreadcrumb[]>([]);
 
-    const { products, pagination, loadingProducts } = useProductsInCategory(
-        router.isReady,
-        category_id as string,
-        query as IFilter,
-        currentPage
-    );
+   const category_id =
+      router.isReady && id ? (id as string).split(".")[1] : null;
 
-    const { category } = useCategory(router.isReady, category_id as string);
+   const { products, pagination, loadingProducts } = useProductsInCategory(
+      router.isReady,
+      category_id as string,
+      { page: 1, take: 16, order: ORDER_PARAMATER_ENUM.DESC },
+   );
 
-    const { attributes, loadingAttributes } = useGetAttributes();
+   const { category } = useCategory(router.isReady, category_id as string);
 
-    const handleShowFilter = () => {
-        setShowFilter(!showFilter);
-    };
+   const handleShowFilter = () => {
+      setShowFilter(!showFilter);
+   };
 
-    useEffect(() => {
-        if (showFilter) {
-            setShowFilter(false);
-        }
-    }, [router.query]);
+   useEffect(() => {
+      if (showFilter) {
+         setShowFilter(false);
+      }
+   }, [router.query]);
 
-    useEffect(() => {
-        if (category && category._id) {
-            const items: IBreadcrumb[] = category.breadcrumbs.map(
-                (item: any) => ({
-                    label: item.title,
-                    url_path: `/collections/${item.slug}.${item._id}`
-                })
-            );
+   useEffect(() => {
+      if (category && category._id) {
+         const items: IBreadcrumb[] = category.breadcrumbs.map((item: any) => ({
+            label: item.title,
+            url_path: `/collections/${item.slug}.${item._id}`,
+         }));
 
-            setBreadcrumbs([
-                { label: "Home", url_path: `/` },
-                ...items,
-                {
-                    label: category.title,
-                    url_path: `/collections/${category.slug}.${category._id}`
-                }
-            ]);
-        }
-    }, [category]);
+         setBreadcrumbs([
+            { label: "Home", url_path: `/` },
+            ...items,
+            {
+               label: category.title,
+               url_path: `/collections/${category.slug}.${category._id}`,
+            },
+         ]);
+      }
+   }, [category]);
 
-    return (
-        <div>
-            <Header
-                title={category?._id ? category.title : ""}
-                breadcrumbs={breadcrumbs}
-            />
+   return (
+      <div>
+         <Header
+            title={category?._id ? category.title : ""}
+            breadcrumbs={breadcrumbs}
+         />
 
-            <div className="container__cus">
-                <div className="flex lg:flex-nowrap flex-wrap items-start justify-between my-10 gap-5">
-                    <div className="lg:w-2/12 lg:block hidden bg-white p-5 rounded-lg">
-                        {router.isReady && !loadingAttributes && (
+         <div className="container__cus">
+            <div className="flex lg:flex-nowrap flex-wrap items-start justify-between my-10 gap-5">
+               <div className="lg:w-3/12 lg:block hidden bg-white p-5 rounded-lg">
+                  <FilterCollection />
+                  {/* {router.isReady && !loadingAttributes && (
                             <form>
-                                {category && category.childrens.length > 0 && (
+                                {category && category.children.length > 0 && (
                                     <FilterLinks
                                         title="Danh mục sản phẩm"
                                         path="/collections"
-                                        items={category.childrens}
+                                        items={category.children}
                                     />
                                 )}
 
@@ -162,9 +155,9 @@ const CollectionItem: NextPageWithLayout = () => {
                                     Clear Filter
                                 </button>
                             </form>
-                        )}
+                        )} */}
 
-                        {(!router.isReady || loadingAttributes) && (
+                  {/* {(!router.isReady || loadingAttributes) && (
                             <ul className="w-full flex flex-col gap-2">
                                 {[...new Array(10)].map(
                                     (item: any, index: number) => (
@@ -174,90 +167,78 @@ const CollectionItem: NextPageWithLayout = () => {
                                     )
                                 )}
                             </ul>
-                        )}
-                    </div>
-                    <div className="lg:w-10/12 w-full bg-white p-5 rounded-lg">
-                        <div className="flex items-center lg:justify-end justify-between gap-5">
-                            <div
-                                onClick={handleShowFilter}
-                                className="lg:hidden flex items-center hover:text-primary cursor-pointer">
-                                <FaFilter className="text-lg min-w-10 w-10" />
-                                <p className="text-sm font-medium">Filter</p>
-                            </div>
-                            {products.length > 0 && (
-                                <Fragment>
-                                    <p className="flex items-center justify-end lg:text-base md:text-sm text-xs text-right font-medium gap-1">
-                                        <span>Showing</span>
-                                        {pagination.currentPage === 1
-                                            ? 1
-                                            : pagination.pageSize *
-                                                  pagination.currentPage -
-                                              1 +
-                                              1}
-                                        <span>-</span>
-                                        {pagination.pageSize *
-                                            pagination.currentPage >
-                                        pagination.totalItems
-                                            ? pagination.totalItems
-                                            : pagination.pageSize *
-                                              pagination.currentPage}
-                                        <span>of</span>
-                                        {pagination.totalItems}
-                                        <span>result</span>
-                                    </p>
-                                </Fragment>
-                            )}
-                        </div>
-                        {router.isReady &&
-                            !loadingProducts &&
-                            products.length === 0 && (
-                                <Fragment>
-                                    <h3 className="text-2xl text-center">
-                                        No item
-                                    </h3>
-                                    <Link
-                                        className="block text-xl text-center hover:text-primary hover:underline font-medium mt-2"
-                                        href={"/"}>
-                                        Back to home
-                                    </Link>
-                                </Fragment>
-                            )}
+                        )} */}
+               </div>
+               <div className="lg:w-9/12 w-full bg-white p-5 rounded-lg">
+                  <div className="flex items-center lg:justify-end justify-between gap-5">
+                     <div
+                        onClick={handleShowFilter}
+                        className="lg:hidden flex items-center hover:text-primary cursor-pointer">
+                        <FaFilter className="text-lg min-w-10 w-10" />
+                        <p className="text-sm font-medium">Filter</p>
+                     </div>
+                     {products.length > 0 && (
+                        <Fragment>
+                           <p className="flex items-center justify-end lg:text-base md:text-sm text-xs text-right font-medium gap-1">
+                              <span>Showing</span>
+                              {pagination.page === 1
+                                 ? 1
+                                 : pagination.take * pagination.page - 1 + 1}
+                              <span>-</span>
+                              {pagination.take * pagination.page >
+                              pagination.total
+                                 ? pagination.total
+                                 : pagination.take * pagination.page}
+                              <span>of</span>
+                              {pagination.total}
+                              <span>result</span>
+                           </p>
+                        </Fragment>
+                     )}
+                  </div>
+                  {router.isReady &&
+                     !loadingProducts &&
+                     products.length === 0 && (
+                        <Fragment>
+                           <h3 className="text-2xl text-center">No item</h3>
+                           <Link
+                              className="block text-xl text-center hover:text-primary hover:underline font-medium mt-2"
+                              href={"/"}>
+                              Back to home
+                           </Link>
+                        </Fragment>
+                     )}
 
-                        <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 mt-5 gap-4">
-                            {!loadingProducts &&
-                                products.length > 0 &&
-                                products.map(
-                                    (product: IProductHome, index: number) => (
-                                        <ProductItem
-                                            key={index}
-                                            data={product}
-                                        />
-                                    )
-                                )}
+                  <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 mt-5 gap-4">
+                     {!loadingProducts &&
+                        products.length > 0 &&
+                        products.map((product: IListProduct, index: number) => (
+                           <ProductItem key={index} data={product} />
+                        ))}
 
-                            {(!router.isReady || loadingProducts) &&
-                                [...new Array(5)].map((item, index: number) => (
-                                    <ProductLoading key={index} />
-                                ))}
-                        </div>
+                     {(!router.isReady || loadingProducts) &&
+                        [...new Array(5)].map((item, index: number) => (
+                           <ProductLoading key={index} />
+                        ))}
+                  </div>
 
-                        {/* pagination */}
-                        {pagination.totalItems > pagination.pageSize && (
-                            <Pagination
-                                current={currentPage}
-                                className="pagination"
-                                onChange={(page) =>
-                                    router.replace({
-                                        query: { ...router.query, page }
-                                    })
-                                }
-                                total={pagination.totalItems}
-                                pageSize={pagination.pageSize}
-                            />
-                        )}
-                    </div>
+                  {/* pagination */}
+                  {pagination.total > pagination.take && (
+                     <Pagination
+                        current={currentPage}
+                        className="pagination"
+                        onChange={(page) =>
+                           router.replace({
+                              query: { ...router.query, page },
+                           })
+                        }
+                        total={pagination.total}
+                        pageSize={pagination.take}
+                     />
+                  )}
+               </div>
 
-                    <div className="lg:hidden block">
+               {/* <div className="lg:hidden block">
                         <div
                             className={`fixed top-0 bottom-0 ${
                                 showFilter
@@ -267,11 +248,11 @@ const CollectionItem: NextPageWithLayout = () => {
                             <form>
                                 <div className="scroll max-h-[80vh] overflow-y-auto">
                                     {category &&
-                                        category.childrens.length > 0 && (
+                                        category.children.length > 0 && (
                                             <FilterLinks
                                                 title="Danh mục sản phẩm"
                                                 path="/collections"
-                                                items={category.childrens}
+                                                items={category.children}
                                             />
                                         )}
 
@@ -318,19 +299,19 @@ const CollectionItem: NextPageWithLayout = () => {
                                 disableScroll={false}
                             />
                         )}
-                    </div>
-                </div>
+                    </div> */}
             </div>
 
-            <section className="py-5">
-                <ListParentCategories title="Danh mục" />
-            </section>
-        </div>
-    );
+            <div className="py-5">
+               <ListParentCategories title="Danh mục" />
+            </div>
+         </div>
+      </div>
+   );
 };
 
 export default CollectionItem;
 
 CollectionItem.getLayout = function getLayout(page: ReactElement) {
-    return <Layout>{page}</Layout>;
+   return <Layout>{page}</Layout>;
 };

@@ -8,50 +8,50 @@ import BlogLayout from "~/layouts/BlogLayout";
 import DefaultLayout from "~/layouts/DefaultLayout";
 
 const BlogsPage = () => {
-    const router = useRouter();
-    const pageParam: number = router.query.page ? Number(router.query.page) : 1;
+   const router = useRouter();
+   const pageParam: number = router.query.page ? Number(router.query.page) : 1;
 
-    const { blogs, pagination, loadingBlogs } = useBlogs(pageParam);
+   const { blogs, pagination, loadingBlogs } = useBlogs(pageParam);
 
-    const onChangeTag = (slug: string) => {
-        router.push(`/blogs/tag/${slug}`);
-    };
+   const onChangeTag = (slug: string) => {
+      router.push(`/blogs/tag/${slug}`);
+   };
 
-    const onPagination = (page: number) => {
-        router.replace({
-            query: { ...router.query, page }
-        });
-    };
+   const onPagination = (page: number) => {
+      router.replace({
+         query: { ...router.query, page },
+      });
+   };
 
-    return (
-        <BlogLayout
-            title="Blog"
-            pagination={pagination}
-            onPagination={onPagination}
-            onChangeTag={onChangeTag}
-            message={
-                !loadingBlogs && !blogs.length
-                    ? " Không tìm thấy bài viết nào"
-                    : null
-            }>
-            <Fragment>
-                {!loadingBlogs &&
-                    !!blogs.length &&
-                    blogs.map((blog: IHomeBlog) => (
-                        <BlogItem key={blog._id} data={blog} />
-                    ))}
+   return (
+      <BlogLayout
+         title="Blog"
+         pagination={pagination}
+         onPagination={onPagination}
+         onChangeTag={onChangeTag}
+         message={
+            !loadingBlogs && !blogs.length
+               ? " Không tìm thấy bài viết nào"
+               : null
+         }>
+         <Fragment>
+            {!loadingBlogs &&
+               !!blogs.length &&
+               blogs.map((blog: IHomeBlog) => (
+                  <BlogItem key={blog._id} data={blog} />
+               ))}
 
-                {loadingBlogs &&
-                    [...new Array(3)].map((_, index: number) => (
-                        <LoadingBlog key={index} />
-                    ))}
-            </Fragment>
-        </BlogLayout>
-    );
+            {loadingBlogs &&
+               [...new Array(3)].map((_, index: number) => (
+                  <LoadingBlog key={index} />
+               ))}
+         </Fragment>
+      </BlogLayout>
+   );
 };
 
 export default BlogsPage;
 
 BlogsPage.getLayout = function getLayout(page: ReactElement) {
-    return <DefaultLayout>{page}</DefaultLayout>;
+   return <DefaultLayout>{page}</DefaultLayout>;
 };

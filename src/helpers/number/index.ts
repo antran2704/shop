@@ -1,7 +1,7 @@
 const checkValidNumber = (value: number) => {
-    const regexNumber = /^[0-9]*\.?[0-9]*$/;
+   const regexNumber = /^[0-9]*\.?[0-9]*$/;
 
-    return regexNumber.test(value.toString());
+   return regexNumber.test(value.toString());
 };
 
 export default checkValidNumber;

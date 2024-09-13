@@ -1,5 +1,8 @@
-interface IFilter {
-    [x: string]: string | string[];
+interface IFilterItem {
+   id: string;
+   label: string;
+   value: string;
+   path?: string;
 }
 
-export type { IFilter };
+export type { IFilterItem };

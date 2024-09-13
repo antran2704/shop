@@ -17,29 +17,27 @@ import { PrimaryLoading } from "~/components/Loading";
 import { useEffect } from "react";
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
-    const getLayout = Component.getLayout ?? ((page) => page);
+   const getLayout = Component.getLayout ?? ((page) => page);
 
-    useEffect(() => {
-        console.log(
-            "%cHello there! 🙋",
-            "color: #f8796c;font-size: 18px;font-weight: 600;"
-        );
-        console.log(
-            "%cShop Antran was created with many love 🥰🥰🥰",
-            "color: #f8796c;font-size: 16px;font-weight: 500;"
-        );
-    }, []);
+   useEffect(() => {
+      console.log(
+         "%cHello there! 🙋",
+         "color: #f8796c;font-size: 18px;font-weight: 600;",
+      );
+      console.log(
+         "%cShop Antran was created with many love 🥰🥰🥰",
+         "color: #f8796c;font-size: 16px;font-weight: 500;",
+      );
+   }, []);
 
-    return (
-        <Provider store={store}>
-            <ClerkProvider>
-                <ClerkLoading>
-                    <PrimaryLoading />
-                </ClerkLoading>
-                <ClerkLoaded>
-                    {getLayout(<Component {...pageProps} />)}
-                </ClerkLoaded>
-            </ClerkProvider>
-        </Provider>
-    );
+   return (
+      <Provider store={store}>
+         <ClerkProvider>
+            <ClerkLoading>
+               <PrimaryLoading />
+            </ClerkLoading>
+            <ClerkLoaded>{getLayout(<Component {...pageProps} />)}</ClerkLoaded>
+         </ClerkProvider>
+      </Provider>
+   );
 }
