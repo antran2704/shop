@@ -1,5 +1,3 @@
-import qs from "qs";
-import { IFilter, IProductData, IQueryParam } from "~/interfaces";
 import { AxiosGet } from "~/configs/axiosConfig";
 import axios from "axios";
 import { ISearch } from "~/interfaces/paramater";
@@ -20,7 +18,7 @@ const getProductsStatic = async (page: number = 1) => {
 };
 
 const getProducts = async (paramater: ISearch) => {
-   const parseParamater = parseQueryString(paramater);
+   const parseParamater = parseQueryString(paramater, { arrayFormat: "comma" });
    return await AxiosGet("/products" + parseParamater);
 };
 
@@ -57,10 +55,7 @@ const getProductBySlug = async (product_id: string, slug: string) => {
    return await AxiosGet(`/products/${product_id}/${slug}`);
 };
 
-const getProductsWithFilter = async (
-   filter: IFilter | null,
-   page: number = 1,
-) => {
+const getProductsWithFilter = async (filter: any, page: number = 1) => {
    return await AxiosGet(
       `/products/search?search=${filter?.search || ""}&category=${
          filter?.category || ""

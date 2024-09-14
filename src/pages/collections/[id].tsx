@@ -1,12 +1,11 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Fragment, ReactElement, useEffect, useRef, useState } from "react";
+import { Fragment, ReactElement, useEffect, useState } from "react";
 import Pagination from "rc-pagination";
 
 import { FaFilter } from "react-icons/fa";
 
 import Header from "~/components/Header";
-import FilterCheckBox from "~/components/Filter/FilterCheckBox";
 import ProductItem from "~/components/Product/Item";
 import ProductLoading from "~/components/Product/Loading";
 
@@ -14,15 +13,18 @@ import { useCategory } from "~/hooks/useCategories";
 import {
    IBreadcrumb,
    IListProduct,
+   IPagination,
    IVariant,
    NextPageWithLayout,
 } from "~/interfaces";
 import DefaultLayout from "~/layouts/DefaultLayout";
-import useGetAttributes from "~/hooks/useAttributes";
 import { useProductsInCategory } from "~/hooks/useProducts";
 import ListParentCategories from "~/components/Category/List";
 import { ORDER_PARAMATER_ENUM } from "~/enums/paramater";
 import FilterCollection from "./components/Filter";
+import { getProducts } from "~/api-client";
+import { initPagination } from "~/data";
+import { IResponseWithPagination } from "~/interfaces/response";
 
 const Layout = DefaultLayout;
 
@@ -59,24 +61,57 @@ const CollectionItem: NextPageWithLayout = () => {
    const { id, page, ...query } = router.query;
    const currentPage = page ? Number(page) : 1;
 
-   const btnSubmitFilterRef = useRef<HTMLButtonElement>(null);
-
    const [showFilter, setShowFilter] = useState<boolean>(false);
    const [breadcrumbs, setBreadcrumbs] = useState<IBreadcrumb[]>([]);
 
    const category_id =
       router.isReady && id ? (id as string).split(".")[1] : null;
 
-   const { products, pagination, loadingProducts } = useProductsInCategory(
-      router.isReady,
-      category_id as string,
-      { page: 1, take: 16, order: ORDER_PARAMATER_ENUM.DESC },
-   );
+   // const { products, pagination, loadingProducts } = useProductsInCategory(
+   //    router.isReady,
+   //    category_id as string,
+   //    { page: 1, take: 16, order: ORDER_PARAMATER_ENUM.DESC },
+   // );
 
    const { category } = useCategory(router.isReady, category_id as string);
+   const [products, setProducts] = useState<IListProduct[]>([]);
+   const [pagination, setPagination] = useState<IPagination>(initPagination);
+   const [loading, setLoading] = useState<{ product: boolean }>({
+      product: true,
+   });
+
+   const onLoading = (key: keyof typeof loading, value: boolean) => {
+      setLoading({ ...loading, [key]: value });
+   };
 
    const handleShowFilter = () => {
       setShowFilter(!showFilter);
+   };
+
+   const handleGetProduct = async (filter: any) => {
+      onLoading("product", true);
+
+      const paramater = {
+         order: ORDER_PARAMATER_ENUM.DESC,
+         page: 1,
+         take: 1,
+         category: category_id,
+         ...filter,
+      };
+
+      await getProducts(paramater)
+         .then(
+            ({
+               payload,
+               pagination,
+            }: IResponseWithPagination<IListProduct[]>) => {
+               setProducts(payload);
+               setPagination(pagination);
+            },
+         )
+         .catch((err) => err);
+
+      onLoading("product", false);
    };
 
    useEffect(() => {
@@ -100,6 +135,8 @@ const CollectionItem: NextPageWithLayout = () => {
                url_path: `/collections/${category.slug}.${category._id}`,
             },
          ]);
+
+         handleGetProduct({});
       }
    }, [category]);
 
@@ -113,7 +150,7 @@ const CollectionItem: NextPageWithLayout = () => {
          <div className="container__cus">
             <div className="flex lg:flex-nowrap flex-wrap items-start justify-between my-10 gap-5">
                <div className="lg:w-3/12 lg:block hidden bg-white p-5 rounded-lg">
-                 <FilterCollection />
+                  <FilterCollection onSubmit={handleGetProduct} />
                   {/* {router.isReady && !loadingAttributes && (
                             <form>
                                 {category && category.children.length > 0 && (
@@ -196,28 +233,25 @@ const CollectionItem: NextPageWithLayout = () => {
                         </Fragment>
                      )}
                   </div>
-                  {router.isReady &&
-                     !loadingProducts &&
-                     products.length === 0 && (
-                        <Fragment>
-                           <h3 className="text-2xl text-center">No item</h3>
-                           <Link
-                              className="block text-xl text-center hover:text-primary hover:underline font-medium mt-2"
-                              href={"/"}>
-                              Back to home
-                           </Link>
-                        </Fragment>
-                     )}
+                  {router.isReady && products.length === 0 && (
+                     <Fragment>
+                        <h3 className="text-2xl text-center">No item</h3>
+                        <Link
+                           className="block text-xl text-center hover:text-primary hover:underline font-medium mt-2"
+                           href={"/"}>
+                           Back to home
+                        </Link>
+                     </Fragment>
+                  )}
 
                   <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 mt-5 gap-4">
-                     {!loadingProducts &&
-                        products.length > 0 &&
+                     {!loading.product &&
                         products.map((product: IListProduct, index: number) => (
                            <ProductItem key={index} data={product} />
                         ))}
 
-                     {(!router.isReady || loadingProducts) &&
-                        [...new Array(5)].map((item, index: number) => (
+                     {loading.product &&
+                        [...new Array(5)].map((_, index: number) => (
                            <ProductLoading key={index} />
                         ))}
                   </div>

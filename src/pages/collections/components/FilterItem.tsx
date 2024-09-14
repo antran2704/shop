@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { IFilterItem } from "~/interfaces";
 
 interface Props {
@@ -11,7 +12,8 @@ interface Props {
       label?: string;
       box?: string;
    };
-   onChange?: (data: IFilterItem, name?: string) => void;
+   value?: string | string[];
+   onChange?: (data: string) => void;
 }
 
 const FilterItem = (props: Props) => {
@@ -21,12 +23,38 @@ const FilterItem = (props: Props) => {
       name,
       checked,
       classNames,
+      value,
       onChange,
    } = props;
 
-   const onSelect = (data: IFilterItem, name?: string) => {
-      if (onChange) onChange(data, name);
-   };
+   // const [select, setSelect] = useState<string | string[]>(
+   //    type === "checkbox" ? [] : "",
+   // );
+
+   // const onSelectRadio = (selectValue: string) => {
+   //    setSelect(selectValue);
+   //    if (onChange) onChange(selectValue);
+   // };
+
+   // const onSelectCheckbox = (selectValue: string) => {
+   //    let newValue = [...(select as string[])];
+
+   //    if (newValue && newValue.includes(selectValue)) {
+   //       newValue = newValue.filter((item) => item !== selectValue);
+   //    } else {
+   //       newValue = [selectValue];
+   //    }
+
+   //    setSelect(newValue);
+
+   //    if (onChange) onChange(newValue);
+   // };
+
+   // useEffect(() => {
+   //    if (value) {
+   //       setSelect(value);
+   //    }
+   // }, [value]);
 
    return (
       <div className="w-full">
@@ -45,9 +73,10 @@ const FilterItem = (props: Props) => {
             <div className="flex items-center gap-2">
                <input
                   type="checkbox"
-                  onChange={() => onSelect(data, name)}
+                  onChange={() => onChange && onChange(data.value)}
                   id={data.id}
                   name={name}
+                  value={data.value}
                   checked={checked}
                   className={clsx("min-w-5 w-5 h-5 rounded-md", [
                      classNames?.box,
@@ -68,10 +97,11 @@ const FilterItem = (props: Props) => {
             <div className="flex items-center gap-2">
                <input
                   type="radio"
-                  onChange={() => onSelect(data, name)}
+                  onChange={() => onChange && onChange(data.value)}
                   id={data.id}
                   name={name}
                   checked={checked}
+                  value={data.value}
                   className={clsx("min-w-3 w-3 h-3 rounded-md", [
                      classNames?.box,
                   ])}
