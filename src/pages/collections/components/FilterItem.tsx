@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { IFilterItem } from "~/interfaces";
 
 interface Props {
@@ -12,7 +11,6 @@ interface Props {
       label?: string;
       box?: string;
    };
-   value?: string | string[];
    onChange?: (data: string) => void;
 }
 
@@ -23,38 +21,8 @@ const FilterItem = (props: Props) => {
       name,
       checked,
       classNames,
-      value,
       onChange,
    } = props;
-
-   // const [select, setSelect] = useState<string | string[]>(
-   //    type === "checkbox" ? [] : "",
-   // );
-
-   // const onSelectRadio = (selectValue: string) => {
-   //    setSelect(selectValue);
-   //    if (onChange) onChange(selectValue);
-   // };
-
-   // const onSelectCheckbox = (selectValue: string) => {
-   //    let newValue = [...(select as string[])];
-
-   //    if (newValue && newValue.includes(selectValue)) {
-   //       newValue = newValue.filter((item) => item !== selectValue);
-   //    } else {
-   //       newValue = [selectValue];
-   //    }
-
-   //    setSelect(newValue);
-
-   //    if (onChange) onChange(newValue);
-   // };
-
-   // useEffect(() => {
-   //    if (value) {
-   //       setSelect(value);
-   //    }
-   // }, [value]);
 
    return (
       <div className="w-full">

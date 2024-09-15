@@ -1,9 +1,9 @@
 import { IPagination } from "~/interfaces";
 
 const initPagination: IPagination = {
-   currentPage: 1,
-   pageSize: 0,
-   totalItems: 0,
+   page: 1,
+   total: 0,
+   take: 16,
 };
 
 export { initPagination };

@@ -1,4 +1,5 @@
-import { IDataCategory, IParentCategory } from "../category";
+import { ICategoryBreadcrumb, ICategoryChild } from "../category";
+import { ISearch } from "../paramater";
 
 interface IValueOption {
    label: string;
@@ -58,8 +59,8 @@ type IProductData = Omit<
    IProduct,
    "inventory" | "price" | "promotion_price"
 > & {
-   category: IParentCategory;
-   categories: IParentCategory[];
+   category: ICategoryChild;
+   categories: ICategoryChild[];
    type: [];
    shortDescription: string;
    description: string;
@@ -71,18 +72,26 @@ type IProductData = Omit<
    viewer: number;
    rate: number;
    variants: IVariantProduct[];
-   breadcrumbs: string[] | IDataCategory[];
+   breadcrumbs: ICategoryBreadcrumb[];
    createdAt?: string;
 };
 
 interface IListProduct {
    _id: string;
    title: string;
+   shortDescription: string;
    thumbnail: string;
    inventory: number;
    price: number;
    promotion_price: number;
    slug: string;
+}
+
+interface IProductSearch extends ISearch {
+   [x: string]: unknown;
+   category?: string;
+   minPrice?: number | null;
+   maxPrice?: number | null;
 }
 
 type IProductInfo = Pick<IProduct, "price" | "promotion_price" | "inventory">;
@@ -96,4 +105,5 @@ export type {
    ISpecificationAttributes,
    IValueOption,
    IProductInfo,
+   IProductSearch,
 };

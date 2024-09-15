@@ -2,7 +2,7 @@ import { memo, Fragment } from "react";
 import { IVariant } from "~/interfaces";
 import FilterPriceItem from "./Item";
 import FilterLayout from "../Layout";
-import ShowMore from "~/components/ShowMore";
+import ShowMore from "~/components/Collapse";
 
 interface Props {
    name: string;

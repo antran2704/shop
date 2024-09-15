@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from "react";
 import { IFilterItem } from "~/interfaces";
-import { CollectionFilterItem } from ".";
+import { CheckBox, RadioBox } from "~/components/Core";
 
 interface Props {
    options: IFilterItem[];
@@ -10,7 +10,7 @@ interface Props {
       label?: string;
       box?: string;
    };
-   value?: string | string[];
+   value?: string | string[] | null;
    onChange?: (
       data: string | string[],
       options: IFilterItem | IFilterItem[],
@@ -44,10 +44,6 @@ const FilterWrap = (props: Props) => {
    const onSelectCheckbox = (selectValue: string, option: IFilterItem) => {
       let newValue = [...(selected as IFilterItem[])];
 
-      //   const isExited: boolean = newValue.some(
-      //      (item: IFilterItem) => item.id === selectValue,
-      //   );
-
       const isExited: boolean = (selectedValue as string[]).some(
          (item: string) => item === selectValue,
       );
@@ -68,39 +64,62 @@ const FilterWrap = (props: Props) => {
       if (onChange) onChange(valueOfSelected, newValue);
    };
 
+   const handleGetValue = (value: string | string[]) => {
+      if (type === "checkbox") {
+         const initValue: string[] = Array.isArray(value) ? value : [value];
+         const selectedItems: IFilterItem[] = options.filter(
+            (option: IFilterItem) => initValue.includes(option.value),
+         );
+         setSelectedValue(initValue);
+         setSelected(selectedItems);
+      }
+
+      if (type === "radio") {
+         const selectedItem = options.find(
+            (option: IFilterItem) => option.value === value,
+         );
+         setSelectedValue(value);
+         setSelected(selectedItem ? selectedItem : []);
+      }
+   };
+
    useEffect(() => {
       if (value === null || value === undefined) {
          setSelectedValue(type === "checkbox" ? [] : "");
          setSelected(type === "checkbox" ? [] : null);
-      } else {
-         setSelectedValue(value);
       }
+
+      if (value && value !== selectedValue) handleGetValue(value);
    }, [value]);
 
    return (
       <Fragment>
-         {options.map((option: IFilterItem) => (
-            <CollectionFilterItem
-               key={option.id}
-               type={type}
-               name={name}
-               data={option}
-               classNames={classNames}
-               checked={
-                  selectedValue === option.value ||
-                  selectedValue?.includes(option.value)
-               }
-               onChange={(value: string) => {
-                  if (type === "checkbox") {
-                     onSelectCheckbox(value, option);
-                  }
+         {options.map((option: IFilterItem) => {
+            const Element = type === "checkbox" ? CheckBox : RadioBox;
 
-                  if (type === "radio") {
-                     onSelectRadio(value, option);
+            return (
+               <Element
+                  key={option.id}
+                  type={type}
+                  name={name}
+                  data={option}
+                  classNames={classNames}
+                  checked={
+                     selectedValue === option.value ||
+                     selectedValue?.includes(option.value)
                   }
-               }}
-            />
-         ))}
+                  onChange={(value: string) => {
+                     if (type === "checkbox") {
+                        onSelectCheckbox(value, option);
+                     }
+
+                     if (type === "radio") {
+                        onSelectRadio(value, option);
+                     }
+                  }}
+               />
+            );
+         })}
       </Fragment>
    );
 };

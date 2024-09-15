@@ -16,8 +16,8 @@ const getCategories = async (page: number = 1) => {
    return await AxiosGet(`/categories?page=${page}`);
 };
 
-const getCategory = async (category_id: string) => {
-   return await AxiosGet(`/categories/id/${category_id}`);
+const getCategory = async (categoryId: string) => {
+   return await AxiosGet(`/categories/id/${categoryId}`);
 };
 
 const getParentCategories = async (paramater: ISearch) => {

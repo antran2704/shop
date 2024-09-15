@@ -49,7 +49,7 @@ import {
    getPercentPromotionPrice,
 } from "~/helpers/number/fomatterCurrency";
 import DefaultLayout from "~/layouts/DefaultLayout";
-import ShowMore from "~/components/ShowMore";
+import ShowMore from "~/components/Collapse";
 import ListProducts from "~/components/Product/List";
 import { useOtherProducts } from "~/hooks/useProducts";
 import Seo from "~/components/Seo";

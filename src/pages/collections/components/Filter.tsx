@@ -1,15 +1,20 @@
 import { v4 as uuidV4 } from "uuid";
 
-import FilterLayout from "~/components/Filter/Layout";
-import ShowMore from "~/components/ShowMore";
-import { IFilterItem } from "~/interfaces";
-import { Fragment, useState } from "react";
+import Collapse from "~/components/Collapse";
+import {
+   ICategory,
+   ICategoryChild,
+   IFilterItem,
+   IProductSearch,
+} from "~/interfaces";
+import { useState } from "react";
+import Link from "next/link";
+import clsx from "clsx";
+
 import useGetAttributes from "~/hooks/useAttributes";
 import { ORDER_PARAMATER_ENUM } from "~/enums/paramater";
 import { IAttribute, IAttributeChild } from "~/interfaces/attribute";
 import FilterWrap from "./FilterWrap";
-import { parseQueryString } from "~/helpers/url";
-import { useRouter } from "next/router";
 
 const filterPrice: IFilterItem[] = [
    { id: uuidV4(), label: "Dưới 500.000VND", value: "0.50000" },
@@ -36,13 +41,19 @@ const filterPrice: IFilterItem[] = [
 ];
 
 interface Props {
-   onSubmit: (filter: any) => void;
+   category?: ICategory | null;
+   paramater?: IProductSearch;
+   handleFilter: (filter: any) => void;
+   handleClearFilter: () => void;
 }
 
 const FilterCollection = (props: Props) => {
-   const { onSubmit } = props;
-
-   const router = useRouter();
+   const {
+      category = null,
+      paramater,
+      handleFilter,
+      handleClearFilter,
+   } = props;
 
    const { attributes } = useGetAttributes({
       order: ORDER_PARAMATER_ENUM.ASC,
@@ -50,7 +61,9 @@ const FilterCollection = (props: Props) => {
       take: 16,
    });
 
-   const [filter, setFilter] = useState<{ [x: string]: string | string[] }>({});
+   const [filter, setFilter] = useState<IProductSearch>(
+      paramater ? paramater : ({} as IProductSearch),
+   );
 
    const onFilter = (name: string, value: string | string[]) => {
       const itemSelects = { ...filter, [name]: value };
@@ -59,28 +72,57 @@ const FilterCollection = (props: Props) => {
 
    const onFilterPrice = (value: string) => {
       const [minPrice, maxPrice] = value.split(".");
-      const itemSelects = { ...filter, minPrice, maxPrice };
+      const itemSelects = {
+         ...filter,
+         minPrice: +minPrice,
+         maxPrice: +maxPrice,
+      };
       setFilter(itemSelects);
    };
 
    const onSubmitFilter = () => {
-      router.replace({ query: { id: router.query.id, ...filter } });
-      onSubmit(filter);
+      handleFilter(filter);
    };
 
    const onClearFilter = () => {
-      setFilter({});
-      onSubmit({});
-      router.replace({ query: { id: router.query.id } });
+      setFilter({} as IProductSearch);
+      handleClearFilter();
    };
 
    return (
-      <Fragment>
-         {attributes.map(
-            (attribute: IAttribute) =>
-               attribute.children.length > 0 && (
-                  <FilterLayout key={attribute._id} title={attribute.name}>
-                     <ShowMore maxHeight={100} className="w-full">
+      <div className="w-full relative z-40">
+         <div className="scroll lg:h-fit h-[80vh] overflow-y-auto">
+            {/* Sub category */}
+            {category && !!category.children.length && (
+               <Collapse
+                  maxHeight={100}
+                  title={"Danh mục con"}
+                  className="w-full">
+                  {category.children.map((child: ICategoryChild) => (
+                     <Link
+                        key={child._id}
+                        href={
+                           child.slug
+                              ? `/collections/${child.slug}.${child._id}`
+                              : "/"
+                        }
+                        className={clsx(
+                           "block w-full text-sm hover:text-primary capitalize cursor-pointer",
+                        )}>
+                        {child.title}
+                     </Link>
+                  ))}
+               </Collapse>
+            )}
+
+            {attributes.map(
+               (attribute: IAttribute) =>
+                  attribute.children.length > 0 && (
+                     <Collapse
+                        key={attribute._id}
+                        maxHeight={100}
+                        title={attribute.name}
+                        className="w-full">
                         <FilterWrap
                            key={attribute._id}
                            type="checkbox"
@@ -92,42 +134,45 @@ const FilterCollection = (props: Props) => {
                                  value: child.name,
                               }),
                            )}
-                           value={filter[attribute.code]}
+                           value={
+                              filter[attribute.code]
+                                 ? (filter[attribute.code] as string[])
+                                 : []
+                           }
                            onChange={(value) => onFilter(attribute.code, value)}
                         />
-                     </ShowMore>
-                  </FilterLayout>
-               ),
-         )}
+                     </Collapse>
+                  ),
+            )}
 
-         <FilterLayout title={"Giá bán"}>
-            <div className="flex flex-col mt-5 gap-5">
-               <FilterWrap
-                  type="radio"
-                  name={"price"}
-                  options={filterPrice}
-                  value={`${filter["minPrice"]}.${filter["maxPrice"]}`}
-                  onChange={(value) => onFilterPrice(value as string)}
-               />
-            </div>
-         </FilterLayout>
+            <Collapse title={"Giá bán"}>
+               <div className="flex flex-col mt-5 gap-5">
+                  <FilterWrap
+                     type="radio"
+                     name={"price"}
+                     options={filterPrice}
+                     value={`${filter["minPrice"]}.${filter["maxPrice"]}`}
+                     onChange={(value) => onFilterPrice(value as string)}
+                  />
+               </div>
+            </Collapse>
+         </div>
 
          <div className="sticky flex flex-col bg-white/50 backdrop-blur-sm bottom-0 py-2 gap-4">
             <button
                onClick={onSubmitFilter}
                type="submit"
                className="w-full flex items-center justify-center bg-primary text-white text-base capitalize font-medium px-5 py-2 rounded-md">
-               Filter Now
+               Lọc
             </button>
             <button
-               //    onClick={() => router.replace({ query: { id } })}
                onClick={onClearFilter}
                type="button"
                className="w-full flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-white text-base capitalize font-medium px-5 py-2 transition-all ease-linear duration-75 rounded-md">
-               Clear Filter
+               Hủy bộ lọc
             </button>
          </div>
-      </Fragment>
+      </div>
    );
 };
 

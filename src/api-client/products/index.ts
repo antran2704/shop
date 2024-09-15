@@ -2,6 +2,7 @@ import { AxiosGet } from "~/configs/axiosConfig";
 import axios from "axios";
 import { ISearch } from "~/interfaces/paramater";
 import { parseQueryString } from "~/helpers/url";
+import { IProductSearch } from "~/interfaces";
 
 const PRODUCT_KEY = {
    PRODUCTS_PAGE: "products_page",
@@ -17,8 +18,18 @@ const getProductsStatic = async (page: number = 1) => {
       .then((res) => res.data);
 };
 
-const getProducts = async (paramater: ISearch) => {
-   const parseParamater = parseQueryString(paramater, { arrayFormat: "comma" });
+const getProducts = async (paramater: IProductSearch) => {
+   const parseParamater = parseQueryString(paramater, {
+      arrayFormat: "comma",
+      filter: (key: keyof IProductSearch, value) => {
+         if (typeof value === "number" && key === "minPrice") {
+            return value;
+         }
+
+         return value || undefined;
+      },
+   });
+
    return await AxiosGet("/products" + parseParamater);
 };
 

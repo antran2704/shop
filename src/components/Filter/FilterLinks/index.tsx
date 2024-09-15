@@ -2,7 +2,7 @@ import { Fragment, memo } from "react";
 import FilterLayout from "../Layout";
 import Link from "next/link";
 import { IDataCategory } from "~/interfaces";
-import ShowMore from "~/components/ShowMore";
+import ShowMore from "~/components/Collapse";
 
 interface Props {
    title: string;
