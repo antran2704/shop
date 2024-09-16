@@ -1,21 +1,14 @@
 import { ICategoryBreadcrumb, ICategoryChild } from "../category";
 import { ISearch } from "../paramater";
 
-interface IValueOption {
-   label: string;
-   _id: string;
-}
-
 interface IOptionProduct {
    _id: string;
    code: string;
    name: string;
-   // values: IValueOption[];
    values: string[];
 }
 
 interface ISpecificationAttributes {
-   _id: string;
    name: string;
    value: string;
 }
@@ -27,53 +20,30 @@ interface ISpecificationsProduct {
 }
 
 interface IProduct {
-   _id: string | null;
+   _id: string;
    title: string;
-   meta_title?: string;
-   meta_description?: string;
+   shortDescription: string;
+   description: string;
    thumbnail: string | null;
+   gallery: string[];
+   category: ICategoryChild;
+   categories: ICategoryChild[];
    barcode: string | null;
    sku: string | null;
    slug: string;
-   public: boolean;
-   price: number;
-   promotion_price: number;
-   inventory: number;
+   hotProduct: boolean;
    sold: number;
+   breadcrumbs: ICategoryBreadcrumb[];
+   specifications: ISpecificationsProduct[];
+   options: IOptionProduct[];
 }
 
-type IVariantProduct = Omit<
-   IProduct,
-   "inventory" | "price" | "promotion_price"
-> & {
+type IProductChild = Omit<IProduct, "description" | "shortDescription"> & {
    product_id: string;
-   available: boolean;
    option1: string | null;
    option2: string | null;
    option3: string | null;
    options: string[];
-   url: string | null;
-};
-
-type IProductData = Omit<
-   IProduct,
-   "inventory" | "price" | "promotion_price"
-> & {
-   category: ICategoryChild;
-   categories: ICategoryChild[];
-   type: [];
-   shortDescription: string;
-   description: string;
-   options: IOptionProduct[];
-   gallery: string[];
-   brand?: string | null;
-   hotProduct?: boolean;
-   specifications: ISpecificationsProduct[];
-   viewer: number;
-   rate: number;
-   variants: IVariantProduct[];
-   breadcrumbs: ICategoryBreadcrumb[];
-   createdAt?: string;
 };
 
 interface IListProduct {
@@ -87,6 +57,16 @@ interface IListProduct {
    slug: string;
 }
 
+interface ISelectProductOption {
+   [x: string]: string;
+}
+
+interface IProductStock {
+   price: number;
+   promotion_price: number;
+   inventory: number;
+}
+
 interface IProductSearch extends ISearch {
    [x: string]: unknown;
    category?: string;
@@ -94,16 +74,14 @@ interface IProductSearch extends ISearch {
    maxPrice?: number | null;
 }
 
-type IProductInfo = Pick<IProduct, "price" | "promotion_price" | "inventory">;
-
 export type {
-   IProductData,
+   IProduct,
    IListProduct,
-   IVariantProduct,
+   IProductChild,
    IOptionProduct,
    ISpecificationsProduct,
    ISpecificationAttributes,
-   IValueOption,
-   IProductInfo,
+   IProductStock,
    IProductSearch,
+   ISelectProductOption,
 };

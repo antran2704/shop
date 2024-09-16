@@ -122,8 +122,6 @@ const CollectionItem: NextPageWithLayout = () => {
                      index !== lastChildIndex
                         ? `${child.slug}.${child._id}`
                         : null,
-                  className:
-                     index === lastChildIndex ? "text-primary font-medium" : "",
                }),
             );
 

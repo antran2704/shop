@@ -1,157 +1,119 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import {
-   useEffect,
-   useState,
-   Fragment,
-   useMemo,
-   useCallback,
-   ReactElement,
-} from "react";
+import { useEffect, useState, useMemo, ReactElement } from "react";
 
-import LightGallery from "lightgallery/react";
-import lgThumbnail from "lightgallery/plugins/thumbnail";
-import lgZoom from "lightgallery/plugins/zoom";
-import { Navigation } from "swiper";
-import { Swiper, SwiperSlide } from "swiper/react";
-import {
-   AiOutlineShoppingCart,
-   AiOutlineClose,
-   AiFillCheckCircle,
-} from "react-icons/ai";
+import { AiOutlineClose, AiFillCheckCircle } from "react-icons/ai";
 
 import Header from "~/components/Header";
 import ImageCus from "~/components/Image";
-import ProductQuantity from "~/components/ProductQuantity";
 import {
    getProductBySlugStatic,
    getStockProduct,
    getProductsStatic,
    getVariations,
+   getOtherProducts,
 } from "~/api-client";
 import {
-   IBreadcrumb,
-   IDataCategory,
-   IOptionProduct,
-   IProductData,
-   IProductInfo,
-   ISpecificationAttributes,
-   ISpecificationsProduct,
-   IValueOption,
-   IVariantProduct,
+   IProduct,
+   IProductStock,
+   IProductChild,
    NextPageWithLayout,
-   SendCartItem,
+   ICategoryBreadcrumb,
+   ISelectProductOption,
+   IListProduct,
 } from "~/interfaces";
 import { GetStaticProps } from "next";
-import {
-   CURRENCY_CHARACTER,
-   formatBigNumber,
-   getPercentPromotionPrice,
-} from "~/helpers/number/fomatterCurrency";
+
 import DefaultLayout from "~/layouts/DefaultLayout";
-import ShowMore from "~/components/Collapse";
-import ListProducts from "~/components/Product/List";
-import { useOtherProducts } from "~/hooks/useProducts";
 import Seo from "~/components/Seo";
-import { PrimaryLoading } from "~/components/Loading";
-import { useUser, useClerk } from "@clerk/nextjs";
-import { CART_KEY, increaseCart } from "~/api-client/cart";
-import { useAppSelector } from "~/store/hooks";
-import { useSWRConfig } from "swr";
-import { toast } from "react-toastify";
-import PrimaryButton from "~/components/Button/PrimaryButton";
+import { IBreadcrumbItem } from "~/interfaces/breadcrumb";
+import { IResponse, IResponseWithPagination } from "~/interfaces/response";
+import { MainInfo, ProductGallery } from "./components";
+import { ORDER_PARAMATER_ENUM } from "~/enums/paramater";
+import ListProducts from "~/components/Product/List";
 
 interface Props {
-   product: IProductData;
-}
-
-interface ISelectOption {
-   [x: string]: string;
+   product: IProduct;
 }
 
 const Layout = DefaultLayout;
-
-const ICON = {
-   AiOutlineShoppingCart: (
-      <AiOutlineShoppingCart className="lg:text-2xl text-xl" />
-   ),
-};
 
 const REFRESH_TIME = 60; //Refresh in 1 day
 
 const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
    const { product } = props;
+
    const router = useRouter();
    const { product_param: slug } = router.query;
-   const { infor } = useAppSelector((state) => state.user);
-   const { mutate } = useSWRConfig();
-   const { user } = useUser();
-   const { openSignIn } = useClerk();
-   // console.log("product", product);
 
-   const [infoProduct, setInfoProduct] = useState<IProductInfo>({
+   const [productStock, setProductStock] = useState<IProductStock>({
       inventory: 1,
       price: 0,
       promotion_price: 0,
    });
 
-   const [totalProduct, setTotalProduct] = useState<number>(1);
-
    const [currentImage, setCurrentImage] = useState<string>("");
-   const [message, setMessage] = useState<string | null>(null);
 
-   const [variations, setVariations] = useState<IVariantProduct[]>([]);
-   const [variation, setVariation] = useState<IVariantProduct | null>(null);
+   const [productChildren, setProductChildren] = useState<IProductChild[]>([]);
+   const [productChild, setProductChild] = useState<IProductChild | null>(null);
 
-   const [selectOption, setSelectOption] = useState<ISelectOption>({});
+   const [otherProduct, setOtherProduct] = useState<IListProduct[]>([]);
+   const [otherProductLoading, setOtherProductLoading] =
+      useState<boolean>(true);
+
+   const [selectOption, setSelectOption] = useState<ISelectProductOption>({});
 
    const [currentId, setCurrentId] = useState<string | null>(null);
 
    const [showPopup, setShow] = useState<boolean>(false);
 
-   const { otherProducts, loadingOtherProducts } = useOtherProducts(
-      !!product,
-      (product?.category?._id as string) || "",
-      product?._id as string,
-      1,
-   );
+   const breadcrumbs: IBreadcrumbItem[] = useMemo(() => {
+      const items: IBreadcrumbItem[] = product.breadcrumbs.map(
+         (item: ICategoryBreadcrumb) => ({
+            title: item.title,
+            path: `/collections/${item.slug}.${item._id}`,
+         }),
+      );
 
-   const onSelectOption = (key: string, value: string) => {
-      if (message) {
-         setMessage(null);
-      }
+      return [...items, { title: product.title }];
+   }, [product]);
 
-      if (selectOption[key] === value) {
-         let newOption = selectOption;
-         delete newOption[key];
+   // const { otherProducts, loadingOtherProducts } = useOtherProducts(
+   //    !!product,
+   //    (product?.category?._id as string) || "",
+   //    product?._id as string,
+   //    1,
+   // );
 
-         setSelectOption({ ...newOption });
-         return;
-      }
-
-      setSelectOption({ ...selectOption, [key]: value });
+   const onChangeOption = (value: ISelectProductOption) => {
+      setSelectOption(value);
    };
-
-   const getBreadcrumbs = useMemo(
-      () =>
-         (breadcrumbs: IDataCategory[]): IBreadcrumb[] => {
-            return breadcrumbs.map((breadcrumb: IDataCategory) => ({
-               label: breadcrumb.title,
-               url_path: `/collections/${breadcrumb.slug}.${breadcrumb._id}`,
-            }));
-         },
-      [],
-   );
 
    const handleChangeImage = (image: string) => {
       setCurrentImage(image);
    };
 
-   const handleGetVariation = () => {
+   const handleGetOtherProduct = async (productId: string) => {
+      setOtherProductLoading(true);
+
+      await getOtherProducts([productId], {
+         take: 16,
+         page: 1,
+         order: ORDER_PARAMATER_ENUM.DESC,
+      })
+         .then(({ payload }: IResponseWithPagination<IListProduct[]>) => {
+            setOtherProduct(payload);
+         })
+         .catch((err) => err);
+
+      setOtherProductLoading(false);
+   };
+
+   const handleGetChild = () => {
       const values = Object.values(selectOption);
 
-      const item = variations.find((variation: IVariantProduct) => {
-         const optitons = variation.options;
+      const item = productChildren.find((child: IProductChild) => {
+         const optitons = child.options;
 
          return optitons.every((option: string) => values.includes(option));
       });
@@ -161,159 +123,159 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
             setCurrentImage(item.thumbnail);
          }
 
-         setVariation(item);
+         setProductChild(item);
          handleGetStock(item._id as string);
       }
    };
 
-   const handleGetVariations = async (product_id: string) => {
-      // TODO: catch error
-      const res = await getVariations(product_id);
-      if (res.status === 200) {
-         setVariations(res.payload);
-      }
+   const handleGetProductChildren = async (product_id: string) => {
+      await getVariations(product_id)
+         .then(({ payload }: IResponseWithPagination<IProductChild[]>) => {
+            setProductChildren(payload);
+         })
+         .catch((err) => err);
    };
 
    const handleGetStock = async (productId: string) => {
       if (productId === currentId) return;
 
-      const { status, payload } = await getStockProduct(productId);
-
-      if (status === 200) {
-         setTotalProduct(1);
-         setInfoProduct(payload);
-         setCurrentId(productId);
-      }
+      getStockProduct(productId)
+         .then(({ payload }: IResponse<IProductStock>) => {
+            setProductStock(payload);
+            setCurrentId(productId);
+         })
+         .catch((err) => err);
    };
 
-   const hanldeBuyNow = useCallback(async () => {
-      if (!user || !infor._id) {
-         openSignIn({ redirectUrl: router.asPath });
-         return;
-      }
+   // const hanldeBuyNow = useCallback(async () => {
+   //    if (!user || !infor._id) {
+   //       openSignIn({ redirectUrl: router.asPath });
+   //       return;
+   //    }
 
-      const keysSelect = Object.keys(selectOption);
+   //    const keysSelect = Object.keys(selectOption);
 
-      if (keysSelect.length !== product.options.length) {
-         setMessage("Please select options");
-         return;
-      }
+   //    if (keysSelect.length !== product.options.length) {
+   //       setMessage("Please select options");
+   //       return;
+   //    }
 
-      let data = {} as SendCartItem;
+   //    let data = {} as SendCartItem;
 
-      if (variation) {
-         data = {
-            product_id: variation.product_id as string,
-            variation_id: variation._id,
-            quantity: totalProduct,
-         };
-      } else {
-         data = {
-            product_id: product._id as string,
-            variation_id: null,
-            quantity: totalProduct,
-         };
-      }
+   //    if (variation) {
+   //       data = {
+   //          product_id: variation.product_id as string,
+   //          variation_id: variation._id,
+   //          quantity: totalProduct,
+   //       };
+   //    } else {
+   //       data = {
+   //          product_id: product._id as string,
+   //          variation_id: null,
+   //          quantity: totalProduct,
+   //       };
+   //    }
 
-      try {
-         const { status } = await increaseCart(infor._id as string, data);
+   //    try {
+   //       const { status } = await increaseCart(infor._id as string, data);
 
-         if (status === 201) {
-            mutate(CART_KEY.CART_USER);
-            mutate(CART_KEY.CART_ITEMS);
-            router.push("/cart");
-         }
-      } catch (error: any) {
-         if (!error.response) return;
+   //       if (status === 201) {
+   //          mutate(CART_KEY.CART_USER);
+   //          mutate(CART_KEY.CART_ITEMS);
+   //          router.push("/cart");
+   //       }
+   //    } catch (error: any) {
+   //       if (!error.response) return;
 
-         const res = error.response;
+   //       const res = error.response;
 
-         if (
-            res.status === 400 &&
-            res.data.message === "Quantity order bigger than inventory"
-         ) {
-            toast.warning(
-               "Bạn đã có sản phẩm này trong giỏ hàng, không thể thêm số lượng",
-               {
-                  position: toast.POSITION.TOP_RIGHT,
-               },
-            );
-         }
-      }
-   }, [selectOption, user, infor, totalProduct, variation]);
+   //       if (
+   //          res.status === 400 &&
+   //          res.data.message === "Quantity order bigger than inventory"
+   //       ) {
+   //          toast.warning(
+   //             "Bạn đã có sản phẩm này trong giỏ hàng, không thể thêm số lượng",
+   //             {
+   //                position: toast.POSITION.TOP_RIGHT,
+   //             },
+   //          );
+   //       }
+   //    }
+   // }, [selectOption, user, infor, totalProduct, variation]);
 
-   const hanldeAddCart = useCallback(async () => {
-      if (!user || !infor._id) {
-         openSignIn({ redirectUrl: router.asPath });
-         return;
-      }
+   // const hanldeAddCart = useCallback(async () => {
+   //    if (!user || !infor._id) {
+   //       openSignIn({ redirectUrl: router.asPath });
+   //       return;
+   //    }
 
-      const keysSelect = Object.keys(selectOption);
+   //    const keysSelect = Object.keys(selectOption);
 
-      if (keysSelect.length !== product.options.length) {
-         setMessage("Please select options");
-         return;
-      }
+   //    if (keysSelect.length !== product.options.length) {
+   //       setMessage("Please select options");
+   //       return;
+   //    }
 
-      let data = {} as SendCartItem;
+   //    let data = {} as SendCartItem;
 
-      if (variation) {
-         data = {
-            product_id: variation.product_id as string,
-            variation_id: variation._id,
-            quantity: totalProduct,
-         };
-      } else {
-         data = {
-            product_id: product._id as string,
-            variation_id: null,
-            quantity: totalProduct,
-         };
-      }
+   //    if (variation) {
+   //       data = {
+   //          product_id: variation.product_id as string,
+   //          variation_id: variation._id,
+   //          quantity: totalProduct,
+   //       };
+   //    } else {
+   //       data = {
+   //          product_id: product._id as string,
+   //          variation_id: null,
+   //          quantity: totalProduct,
+   //       };
+   //    }
 
-      try {
-         const { status } = await increaseCart(infor._id as string, data);
+   //    try {
+   //       const { status } = await increaseCart(infor._id as string, data);
 
-         if (status === 201) {
-            mutate(CART_KEY.CART_USER);
-            mutate(CART_KEY.CART_ITEMS);
-            toast.success("Thêm thành công", {
-               position: toast.POSITION.TOP_CENTER,
-            });
-         }
-      } catch (error: any) {
-         if (!error.response) return;
+   //       if (status === 201) {
+   //          mutate(CART_KEY.CART_USER);
+   //          mutate(CART_KEY.CART_ITEMS);
+   //          toast.success("Thêm thành công", {
+   //             position: toast.POSITION.TOP_CENTER,
+   //          });
+   //       }
+   //    } catch (error: any) {
+   //       if (!error.response) return;
 
-         const res = error.response;
+   //       const res = error.response;
 
-         if (
-            res.status === 400 &&
-            res.data.message === "Quantity order bigger than inventory"
-         ) {
-            toast.warning(
-               "Bạn đã có sản phẩm này trong giỏ hàng, không thể thêm số lượng",
-               {
-                  position: toast.POSITION.TOP_RIGHT,
-               },
-            );
-         }
-      }
-   }, [selectOption, user, infor, totalProduct, variation]);
+   //       if (
+   //          res.status === 400 &&
+   //          res.data.message === "Quantity order bigger than inventory"
+   //       ) {
+   //          toast.warning(
+   //             "Bạn đã có sản phẩm này trong giỏ hàng, không thể thêm số lượng",
+   //             {
+   //                position: toast.POSITION.TOP_RIGHT,
+   //             },
+   //          );
+   //       }
+   //    }
+   // }, [selectOption, user, infor, totalProduct, variation]);
 
    useEffect(() => {
       if (product && product._id) {
          setCurrentImage(product.gallery[0]);
-         handleGetVariations(product._id);
+         handleGetProductChildren(product._id);
          handleGetStock(product._id);
+         handleGetOtherProduct(product._id);
       }
-   }, [slug]);
+   }, [slug, product]);
 
    useEffect(() => {
       if (
          product &&
          product.options.length === Object.keys(selectOption).length
       ) {
-         handleGetVariation();
+         handleGetChild();
       }
 
       if (
@@ -321,176 +283,70 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
          product.options.length !== Object.keys(selectOption).length
       ) {
          handleGetStock(product._id as string);
+         setProductChild(null);
       }
    }, [selectOption]);
-
-   if (router.isFallback && !product) {
-      return <PrimaryLoading />;
-   }
 
    return (
       <div>
          <Seo title={product.title} description={product.description} />
          <Header
             title={product.title}
-            breadcrumbs={[
-               { label: "Home", url_path: "/" },
-               ...getBreadcrumbs(product.breadcrumbs as IDataCategory[]),
-               { label: product.title, url_path: "/" },
-            ]}
+            breadcrumbs={{
+               items: breadcrumbs,
+            }}
          />
 
          <section className="container__cus">
             <div className="flex lg:flex-nowrap flex-wrap items-start lg:justify-between justify-center my-14 gap-10">
                {/* content left */}
                <div className="lg:sticky relative lg:top-20 lg:w-5/12 sm:w-10/12 w-full bg-white p-5 rounded-md select-none overflow-hidden">
-                  <div className="relative w-full pb-[100%] rounded-md overflow-hidden">
-                     {currentImage && (
-                        <ImageCus
-                           title={product.title}
-                           alt={product.title}
-                           src={currentImage}
-                           className="absolute top-0 left-0 right-0 bottom-0 w-full h-full"
-                        />
-                     )}
-                  </div>
-                  <div>
-                     {/* gallery image */}
-                     <LightGallery
-                        elementClassNames="absolute top-0 left-0 right-0 bottom-0"
-                        speed={500}
-                        enableSwipe={true}
-                        plugins={[lgThumbnail, lgZoom]}>
-                        <a href={product.gallery[0]} className="w-1/4">
-                           <button className="absolute top-0 left-0 right-0 bottom-0"></button>
-                           <ImageCus
-                              className="w-full hidden"
-                              src={product.gallery[0]}
-                              alt={product.title}
-                              title={product.title}
-                           />
-                        </a>
-                        {product.gallery
-                           .slice(1, product.gallery.length)
-                           .map((image: string, index: number) => (
-                              <a
-                                 href={image}
-                                 key={index}
-                                 className="w-[100px] h-[100px] rounded-lg hidden">
-                                 <ImageCus
-                                    className="w-full"
-                                    src={image}
-                                    alt={product.title}
-                                    title={product.title}
-                                 />
-                              </a>
-                           ))}
-                     </LightGallery>
-
-                     <Swiper
-                        className="flex items-center w-full mt-4 gap-2"
-                        modules={[Navigation]}
-                        navigation={true}
-                        slidesPerView={3}
-                        spaceBetween={10}
-                        breakpoints={{
-                           800: {
-                              slidesPerView: 4,
-                           },
-                        }}>
-                        {product.gallery.map((image: string, index: number) => (
-                           <SwiperSlide
-                              key={index}
-                              className="cursor-pointer"
-                              onClick={() => handleChangeImage(image)}>
-                              <ImageCus
-                                 title={product.title}
-                                 alt={product.title}
-                                 src={image}
-                                 className={`w-full lg:h-[100px] sm:h-[160px] h-[120px] ${
-                                    currentImage.includes(image)
-                                       ? "border-primary"
-                                       : "border-white"
-                                 } border-2 rounded-lg`}
-                              />
-                           </SwiperSlide>
-                        ))}
-                     </Swiper>
-                  </div>
+                  <ProductGallery
+                     currentImg={currentImage}
+                     product={product}
+                     onChangeImg={handleChangeImage}
+                  />
                </div>
-               {/* content left */}
 
                {/* content right */}
                <div className="lg:w-7/12 w-full flex flex-col gap-5">
-                  <div className="w-full bg-white p-5 rounded-md">
+                  {/* <div className="w-full bg-white p-5 rounded-md">
                      <div className="pb-5 mb-5 border-b border-borderColor">
                         <h2 className="lg:text-2xl md:text-xl text-lg font-medium">
                            {!variation ? product.title : variation.title}
                         </h2>
 
-                        {!variation && (
-                           <div className="flex flex-wrap items-end my-3 gap-3">
-                              {infoProduct.promotion_price > 0 ? (
-                                 <Fragment>
-                                    <h3 className="md:text-xl text-lg font-medium text-[#6a7779] line-through">
-                                       {formatBigNumber(infoProduct.price)}{" "}
-                                       {CURRENCY_CHARACTER}
-                                    </h3>
-                                    <h3 className="md:text-2xl text-lg font-medium">
-                                       {formatBigNumber(
-                                          infoProduct.promotion_price,
-                                       )}{" "}
-                                       {CURRENCY_CHARACTER}
-                                    </h3>
-                                    <sup className="md:text-sm text-xs font-medium text-white px-2 py-1 bg-primary rounded-md">
-                                       Save{" "}
-                                       {getPercentPromotionPrice(
-                                          infoProduct.price,
-                                          infoProduct.promotion_price,
-                                       )}
-                                       %
-                                    </sup>
-                                 </Fragment>
-                              ) : (
-                                 <h3 className="lg:text-3xl md:text-2xl text-lg font-medium">
-                                    {formatBigNumber(infoProduct.price)}{" "}
+                        <div className="flex flex-wrap items-end my-3 gap-3">
+                           {productStock.promotion_price > 0 ? (
+                              <Fragment>
+                                 <h3 className="md:text-2xl text-lg font-medium text-primary">
+                                    {formatBigNumber(
+                                       productStock.promotion_price,
+                                    )}{" "}
                                     {CURRENCY_CHARACTER}
                                  </h3>
-                              )}
-                           </div>
-                        )}
-
-                        {variation && (
-                           <div className="flex flex-wrap items-end my-3 gap-3">
-                              {infoProduct.promotion_price > 0 ? (
-                                 <Fragment>
-                                    <h3 className="lg:text-2xl md:text-xl text-lg font-medium text-[#6a7779] line-through">
-                                       {formatBigNumber(infoProduct.price)}{" "}
-                                       {CURRENCY_CHARACTER}
-                                    </h3>
-                                    <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
-                                       {formatBigNumber(
-                                          infoProduct.promotion_price,
-                                       )}{" "}
-                                       {CURRENCY_CHARACTER}
-                                    </h2>
-                                    <span className="md:text-sm text-xs font-medium text-white px-2 py-0.5 bg-primary rounded-md">
-                                       Save{" "}
-                                       {getPercentPromotionPrice(
-                                          infoProduct.price,
-                                          infoProduct.promotion_price,
-                                       )}
-                                       %
-                                    </span>
-                                 </Fragment>
-                              ) : (
-                                 <h2 className="lg:text-3xl md:text-2xl text-lg font-medium">
-                                    {formatBigNumber(infoProduct.price)}{" "}
+                                 <h3 className="md:text-lg text-lg font-medium text-[#6a7779] line-through">
+                                    {formatBigNumber(productStock.price)}{" "}
                                     {CURRENCY_CHARACTER}
-                                 </h2>
-                              )}
-                           </div>
-                        )}
+                                 </h3>
+
+                                 <sup className="text-xs font-medium text-white px-2 py-1 bg-primary rounded-md">
+                                    Giảm{" "}
+                                    {getPercentPromotionPrice(
+                                       productStock.price,
+                                       productStock.promotion_price,
+                                    )}
+                                    %
+                                 </sup>
+                              </Fragment>
+                           ) : (
+                              <h3 className="md:text-2xl text-lg font-medium text-primary">
+                                 {formatBigNumber(productStock.price)}{" "}
+                                 {CURRENCY_CHARACTER}
+                              </h3>
+                           )}
+                        </div>
+
                         <p className="md:text-base text-sm text-[#071c1f]">
                            {product.shortDescription}
                         </p>
@@ -498,7 +354,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                      <div className="pb-5 mb-5 border-b border-borderColor">
                         <div className="flex items-center text-sm mb-5">
                            <span className="md:text-base text-sm font-medium min-w-[100px]">
-                              Sold:
+                              Đã bán:
                            </span>
                            {!variation && (
                               <p>{formatBigNumber(product.sold)}</p>
@@ -509,15 +365,9 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                         </div>
                         <div className="flex items-center text-sm mb-5">
                            <span className="md:text-base text-sm font-medium min-w-[100px]">
-                              Brand:
+                              Kho:
                            </span>
-                           Brand
-                        </div>
-                        <div className="flex items-center text-sm mb-5">
-                           <span className="md:text-base text-sm font-medium min-w-[100px]">
-                              Inventory:
-                           </span>
-                           <p>{formatBigNumber(infoProduct.inventory)}</p>
+                           <p>{formatBigNumber(productStock.inventory)}</p>
                         </div>
                      </div>
 
@@ -564,7 +414,7 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
 
                      {product && (
                         <div>
-                           {infoProduct.inventory > 0 ? (
+                           {productStock.inventory > 0 ? (
                               <div>
                                  <div className="flex items-center w-full my-5 gap-5">
                                     <span className="md:text-base text-sm font-medium min-w-[100px]">
@@ -573,12 +423,12 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                                     <div className="flex items-center gap-5">
                                        <ProductQuantity
                                           total={totalProduct}
-                                          max={infoProduct.inventory}
+                                          max={productStock.inventory}
                                           setTotalProduct={setTotalProduct}
                                        />
                                        <p className="sm:block hidden text-sm text-nowrap">
                                           {formatBigNumber(
-                                             infoProduct.inventory,
+                                             productStock.inventory,
                                           )}{" "}
                                           sản phẩm có sẵn
                                        </p>
@@ -659,7 +509,14 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
                            </div>
                         </div>
                      ),
-                  )}
+                  )} */}
+                  <MainInfo
+                     product={product}
+                     productChild={productChild}
+                     productStock={productStock}
+                     selectOption={selectOption}
+                     onChangeOption={onChangeOption}
+                  />
                </div>
                {/* content right */}
             </div>
@@ -668,8 +525,8 @@ const ProductPage: NextPageWithLayout<Props> = (props: Props) => {
          <section className="container__cus py-10">
             <ListProducts
                title="Có thể bạn thích"
-               isLoading={loadingOtherProducts}
-               items={otherProducts}
+               isLoading={otherProductLoading}
+               items={otherProduct}
             />
          </section>
 
@@ -729,11 +586,11 @@ ProductPage.getLayout = function getLayout(page: ReactElement) {
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
    const product_param: string[] = (params?.product_param as string).split(".");
-   const productId: string = product_param[0];
+   const productId: string = product_param[1];
 
    try {
       const res = await getProductBySlugStatic(productId);
-      const product: IProductData = res.payload;
+      const product: IProduct = res.payload;
 
       return {
          props: { product },
@@ -752,7 +609,7 @@ export async function getStaticPaths() {
    const res = await getProductsStatic();
    const products = await res.payload;
 
-   const paths = products.map((product: IProductData) => ({
+   const paths = products.map((product: IProduct) => ({
       params: { product_param: `${product._id}.${product.slug}` },
    }));
 

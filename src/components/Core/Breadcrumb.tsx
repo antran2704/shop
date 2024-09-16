@@ -12,6 +12,7 @@ const Breadcrumb = (props: IBreadcrumb) => {
                <li
                   className={clsx(
                      "text-sm hover:text-primary",
+                     [index === items.length - 1 && "text-primary"],
                      item.className,
                   )}>
                   {item.path && <Link href={item.path}>{item.title}</Link>}

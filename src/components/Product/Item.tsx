@@ -22,7 +22,7 @@ const ProductItem = (props: Props) => {
             hoverScale ? "hover:scale-105" : ""
          } lg:hover:shadow-lg border rounded-md overflow-hidden transition-all ease-linear duration-100`}>
          <Link
-            href={`/products/${data._id}.${data.slug}`}
+            href={`/products/${data.slug}.${data._id}`}
             className="block w-full h-full">
             <div className="relative pb-[100%] ">
                <ImageCus
