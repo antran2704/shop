@@ -1,9 +1,7 @@
-import qs from "qs";
-
-import { IDataCategory, IQueryParam } from "~/interfaces";
-import { AxiosGet } from "~/configs/axiosConfig";
 import { ISearch } from "~/interfaces/paramater";
 import { parseQueryString } from "~/helpers/url";
+import axios from "axios";
+import { BASE_URL } from "~/common/api";
 
 const CATEGORY_KEY = {
    CATEGORIES_PAGE: "categories_page",
@@ -13,29 +11,22 @@ const CATEGORY_KEY = {
 };
 
 const getCategories = async (page: number = 1) => {
-   return await AxiosGet(`/categories?page=${page}`);
+   return await axios
+      .get(BASE_URL + `/categories?page=${page}`)
+      .then((res) => res.data);
 };
 
 const getCategory = async (categoryId: string) => {
-   return await AxiosGet(`/categories/id/${categoryId}`);
+   return await axios
+      .get(BASE_URL + `/categories/id/${categoryId}`)
+      .then((res) => res.data);
 };
 
 const getParentCategories = async (paramater: ISearch) => {
    const parseParamater = parseQueryString(paramater);
-   return await AxiosGet("/categories/parent" + parseParamater);
+   return await axios
+      .get(BASE_URL + "/categories/parent" + parseParamater)
+      .then((res) => res.data);
 };
 
-const getAllCategories = async (
-   select?: IQueryParam<Partial<IDataCategory>>,
-) => {
-   const parseQuery = qs.stringify(select);
-   return await AxiosGet(`/categories/all?${parseQuery}`);
-};
-
-export {
-   getCategories,
-   getAllCategories,
-   getParentCategories,
-   getCategory,
-   CATEGORY_KEY,
-};
+export { getCategories, getParentCategories, getCategory, CATEGORY_KEY };

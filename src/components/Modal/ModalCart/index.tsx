@@ -28,7 +28,7 @@ const ModalCart = (props: Props) => {
    const router = useRouter();
    const { mutate } = useSWRConfig();
    const { infor } = useAppSelector((state) => state.user);
-   const { cart } = useCart(!!infor._id, infor._id as string);
+   const { cart } = useCart(!!infor._id);
    const { cart_products, loadingCartItems } = useCartItems(
       !!infor._id,
       infor._id as string,

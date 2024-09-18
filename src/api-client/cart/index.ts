@@ -1,4 +1,5 @@
-import { AxiosGet, AxiosPost } from "~/configs/axiosConfig";
+import { BASE_URL } from "~/common/api";
+import httpConfig from "~/configs/axiosConfig";
 import { Cart, SendCartItem, SendDeleteCartItem } from "~/interfaces";
 
 const CART_KEY = {
@@ -6,32 +7,44 @@ const CART_KEY = {
    CART_ITEMS: "cart_items",
 };
 
-const getCart = async (user_id: string) => {
-   return await AxiosGet(`/carts/${user_id}`);
+const getCart = async () => {
+   return await httpConfig.get(BASE_URL + "/cart").then((res) => res.data);
 };
 
 const getCartItems = async (user_id: string) => {
-   return await AxiosGet(`/carts/items/${user_id}`);
+   return await httpConfig
+      .get(BASE_URL + `/cart/${user_id}/items`)
+      .then((res) => res.data);
 };
 
 const updateCart = async (user_id: string, data: SendCartItem) => {
-   return await AxiosPost(`/carts/update/${user_id}`, data);
+   return await httpConfig
+      .post(BASE_URL + `/cart/${user_id}/update`, data)
+      .then((res) => res.data);
 };
 
-const increaseCart = async (user_id: string, data: SendCartItem) => {
-   return await AxiosPost(`/carts/increase/${user_id}`, data);
+const increaseCart = async (cartId: string, data: SendCartItem) => {
+   return await httpConfig
+      .post(BASE_URL + `/cart/${cartId}/increase`, data)
+      .then((res) => res.data);
 };
 
-const checkInventoryItems = async (user_id: string, data: Cart) => {
-   return await AxiosPost(`/carts/check_inventory/${user_id}`, data);
+const checkInventoryItems = async (cartId: string, data: Cart) => {
+   return await httpConfig
+      .post(BASE_URL + `/cart/${cartId}/check`, data)
+      .then((res) => res.data);
 };
 
 const deleteItemCart = async (user_id: string, data: SendDeleteCartItem) => {
-   return await AxiosPost(`/carts/item/${user_id}`, data);
+   return await httpConfig
+      .post(BASE_URL + `/cart/item/${user_id}`, data)
+      .then((res) => res.data);
 };
 
-const deleteAllItemsCart = async (user_id: string) => {
-   return await AxiosPost(`/carts/items/${user_id}`, {});
+const deleteAllItemsCart = async (cartId: string) => {
+   return await httpConfig
+      .post(BASE_URL + `/cart/${cartId}/all`)
+      .then((res) => res.data);
 };
 
 export {

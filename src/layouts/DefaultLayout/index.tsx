@@ -14,8 +14,11 @@ import {
 import Footer from "~/components/Footer";
 import Navbar from "~/components/Navbar";
 import ScrollToTop from "~/components/ScrollToTop";
-import { injectRouter } from "~/configs/axiosConfig";
+import { injectRouter, injectStore } from "~/configs/axiosConfig";
+import { setAuthLocal } from "~/helpers/auth";
 import { IUserInfor } from "~/interfaces";
+import { IAuthLocal, IResponseLogin } from "~/interfaces/auth";
+import { IResponse } from "~/interfaces/response";
 import { useAppDispatch } from "~/store/hooks";
 import { updateInforUserReducer } from "~/store/slice/user";
 
@@ -32,11 +35,20 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
    const { signOut } = useClerk();
 
    const handleLogin = async (email: string) => {
-      try {
-         await login(email);
-      } catch (error) {
-         console.log(error);
-      }
+      await login(email as string)
+         .then(({ payload }: IResponse<IResponseLogin>) => {
+            setAuthLocal("accessToken", payload.accessToken.value);
+            setAuthLocal("refreshToken", payload.refreshToken.value);
+            setAuthLocal("apiKey", payload.apiKey);
+            setAuthLocal("publicKey", payload.publicKey);
+         })
+         .catch((err) => err);
+
+      await getUser()
+         .then((res) => {
+            dispatch(updateInforUserReducer(res.payload));
+         })
+         .catch((err) => err);
    };
 
    const handleCreateUser = async () => {
@@ -52,8 +64,6 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
             await handleLogin(inforUser.email as string);
          }
       } catch (error: any) {
-         console.log(error);
-
          if (!error.response) {
             toast.error("Error in server, please try again", {
                position: toast.POSITION.TOP_RIGHT,
@@ -71,32 +81,16 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
 
    const handleCheckUserIsExit = async (userId: string) => {
       try {
-         const { status, payload } = await checkUserIsExit(userId);
+         const { status } = await checkUserIsExit(userId);
          if (status === 200) {
-            if (!payload.refreshToken && !payload.accessToken) {
-               await login(user?.primaryEmailAddress?.emailAddress as string);
-            }
-
-            const userRes = await getUser();
-
-            if (userRes.status === 200) {
-               dispatch(updateInforUserReducer(userRes.payload));
-            }
+            handleLogin(user?.primaryEmailAddress?.emailAddress as string);
          }
-      } catch (error: any) {
-         if (!error.response) {
-            toast.error("Error in server, please try again", {
-               position: toast.POSITION.TOP_RIGHT,
-            });
 
-            return;
-         }
-         const response = error.response.data;
-         if (response.status === 404) {
+         if (status === 201) {
             await handleCreateUser();
          }
-
-         console.log(error);
+      } catch (error) {
+         return error;
       }
    };
 
@@ -108,6 +102,7 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
 
    useEffect(() => {
       injectRouter(signOut, router);
+      injectStore(dispatch);
    }, []);
 
    return (

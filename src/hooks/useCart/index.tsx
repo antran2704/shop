@@ -5,9 +5,9 @@ import { Cart, ICartItem } from "~/interfaces";
 // refesh 30 minute
 const REFESH_TIME = 1000 * 60 * 30;
 
-const fetcherCart = async (user_id: string) => {
+const fetcherCart = async () => {
    try {
-      const res = await getCart(user_id);
+      const res = await getCart();
       if (res.status === 200) {
          return res;
       }
@@ -27,14 +27,10 @@ const fetcherCartItems = async (user_id: string) => {
    }
 };
 
-const useCart = (
-   isReady: boolean,
-   user_id: string,
-   options?: Partial<SWRConfiguration>,
-) => {
+const useCart = (isReady: boolean, options?: Partial<SWRConfiguration>) => {
    const { data, isLoading, mutate, error } = useSWR(
       isReady ? CART_KEY.CART_USER : null,
-      () => fetcherCart(user_id),
+      () => fetcherCart(),
       {
          refreshInterval: REFESH_TIME,
          keepPreviousData: true,

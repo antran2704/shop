@@ -2,8 +2,6 @@ import {
    FC,
    ChangeEvent,
    KeyboardEvent,
-   Dispatch,
-   SetStateAction,
    useState,
    useEffect,
    memo,
@@ -11,77 +9,81 @@ import {
 import checkValidCount from "~/helpers/number";
 
 interface Props {
+   initValue?: number;
    total: number;
    max?: number;
-   setTotalProduct: Dispatch<SetStateAction<number>>;
+   onChange?: (value: number) => void;
 }
 
 const ProductQuantity: FC<Props> = (props: Props) => {
-   const { total, max, setTotalProduct } = props;
+   const { total, max, initValue, onChange } = props;
    const [message, setMessage] = useState<string | null>(null);
+   const [count, setCount] = useState<number>(1);
 
-   const onDecrease = (): void => {
-      const value = total - 1;
-
+   const onDecrease = (value: number): void => {
       if (value <= 0) {
-         setTotalProduct(1);
-         return;
+         setCount(1);
+      } else {
+         setCount(value);
       }
 
-      setTotalProduct(value);
+      if (onChange) onChange(value <= 0 ? 1 : value);
    };
 
-   const onIncrease = (): void => {
-      const value = total + 1;
-
+   const onIncrease = (value: number): void => {
       if (max && value > max) {
-         setTotalProduct(max);
-         return;
+         setCount(max);
+      } else {
+         setCount(value);
       }
 
-      setTotalProduct(value);
+      if (onChange) onChange(max && value > max ? max : value);
    };
 
    const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
       const keyCode = e.key;
 
       if (keyCode === "ArrowUp") {
-         onIncrease();
+         onIncrease(count + 1);
       }
 
       if (keyCode === "ArrowDown") {
-         onDecrease();
+         onDecrease(count - 1);
       }
    };
 
    const handleChangeCount = (e: ChangeEvent<HTMLInputElement>) => {
-      const value = Number(e.target.value);
+      let value = Number(e.target.value);
       const isValidCount = checkValidCount(value);
 
       if (!isValidCount || value === 0) {
-         setTotalProduct(1);
-         return;
+         value = 1;
       }
 
       if (max && value > max) {
-         setTotalProduct(max);
-         return;
+         value = max;
       }
 
-      setTotalProduct(Number(value));
+      setCount(Number(value));
    };
 
    useEffect(() => {
       if (message) {
          setMessage(null);
       }
-   }, [total]);
+   }, [count]);
+
+   useEffect(() => {
+      if (initValue) {
+         setCount(initValue);
+      }
+   }, []);
 
    return (
       <div className="w-full">
          <div className="flex items-center w-full">
             <button
-               onClick={onDecrease}
+               onClick={() => onDecrease(count - 1)}
                className="flex items-center justify-center text-2xl w-10 h-10 border border-borderColor">
                -
             </button>
@@ -89,11 +91,14 @@ const ProductQuantity: FC<Props> = (props: Props) => {
                type="text"
                onKeyDown={onKeyDown}
                onChange={handleChangeCount}
-               value={total}
+               onBlur={() => {
+                  if (onChange) onChange(count);
+               }}
+               value={count}
                className="flex items-center justify-center text-sm text-center w-12 h-10 border border-borderColor"
             />
             <button
-               onClick={onIncrease}
+               onClick={() => onIncrease(count + 1)}
                className="flex items-center justify-center text-2xl w-10 h-10 border border-borderColor">
                +
             </button>

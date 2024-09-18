@@ -9,7 +9,7 @@ import { IoMdCloseCircleOutline } from "react-icons/io";
 
 import { initDataNavbar } from "~/data";
 
-import { IProductHome, INavItem } from "~/interfaces";
+import { INavItem, IListProduct } from "~/interfaces";
 
 import { searchProductsMenu } from "~/api-client/search";
 
@@ -29,7 +29,7 @@ import useClientY from "~/hooks/useClientY";
 
 const Navbar: FC = () => {
    const { infor } = useAppSelector((state) => state.user);
-   const { cart } = useCart(!!infor._id, infor._id as string);
+   const { cart } = useCart(!!infor._id);
 
    const { signOut } = useClerk();
    const { isSignedIn, user } = useUser();
@@ -45,7 +45,7 @@ const Navbar: FC = () => {
    const [currentNav, setCurrentNav] = useState([initDataNavbar]);
    const [typeShow, setTypeShow] = useState<"next" | "prev" | null>(null);
 
-   const [listSearch, setListSearch] = useState<IProductHome[]>([]);
+   const [listSearch, setListSearch] = useState<IListProduct[]>([]);
    const [searchText, setSearch] = useState<string | null>(null);
    const debouce = useDebounce(searchText, 1000);
 

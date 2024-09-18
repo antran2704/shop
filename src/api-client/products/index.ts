@@ -1,8 +1,8 @@
-import { AxiosGet } from "~/configs/axiosConfig";
 import axios from "axios";
 import { ISearch } from "~/interfaces/paramater";
 import { parseQueryString } from "~/helpers/url";
 import { IProductSearch } from "~/interfaces";
+import { BASE_URL } from "~/common/api";
 
 const PRODUCT_KEY = {
    PRODUCTS_PAGE: "products_page",
@@ -30,17 +30,23 @@ const getProducts = async (paramater: IProductSearch) => {
       },
    });
 
-   return await AxiosGet("/products" + parseParamater);
+   return await axios
+      .get(BASE_URL + "/products" + parseParamater)
+      .then((res) => res.data);
 };
 
 const getHotProducts = async (page: number = 1) => {
-   return await AxiosGet(`/products/hot?page=${page}`);
+   return await axios
+      .get(BASE_URL + `/products/hot?page=${page}`)
+      .then((res) => res.data);
 };
 
 const getOtherProducts = async (productIds: string[], paramater: ISearch) => {
    const parseParamater = parseQueryString({ ...paramater, productIds });
 
-   return await AxiosGet(`/products/other` + parseParamater);
+   return await axios
+      .get(BASE_URL + `/products/other` + parseParamater)
+      .then((res) => res.data);
 };
 
 const getProductsInCategory = async (
@@ -49,11 +55,15 @@ const getProductsInCategory = async (
 ) => {
    const parseParamater = parseQueryString(paramater);
 
-   return await AxiosGet(`/products/category/${category_id}` + parseParamater);
+   return await axios
+      .get(BASE_URL + `/products/category/${category_id}` + parseParamater)
+      .then((res) => res.data);
 };
 
 const getProduct = async (product_id: string) => {
-   return await AxiosGet(`/products/id/${product_id}`);
+   return await axios
+      .get(BASE_URL + `/products/id/${product_id}`)
+      .then((res) => res.data);
 };
 
 const getProductBySlugStatic = async (product_id: string) => {
@@ -63,19 +73,15 @@ const getProductBySlugStatic = async (product_id: string) => {
 };
 
 const getProductBySlug = async (product_id: string, slug: string) => {
-   return await AxiosGet(`/products/${product_id}/${slug}`);
-};
-
-const getProductsWithFilter = async (filter: any, page: number = 1) => {
-   return await AxiosGet(
-      `/products/search?search=${filter?.search || ""}&category=${
-         filter?.category || ""
-      }&page=${page}`,
-   );
+   return await axios
+      .get(BASE_URL + `/products/${product_id}/${slug}`)
+      .then((res) => res.data);
 };
 
 const getStockProduct = async (product_id: string) => {
-   return await AxiosGet(`/products/stock/${product_id}`);
+   return await axios
+      .get(BASE_URL + `/products/stock/${product_id}`)
+      .then((res) => res.data);
 };
 
 export {
@@ -84,7 +90,6 @@ export {
    getProduct,
    getOtherProducts,
    getProductBySlug,
-   getProductsWithFilter,
    getProductBySlugStatic,
    getProductsStatic,
    getHotProducts,

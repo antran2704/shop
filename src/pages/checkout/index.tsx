@@ -52,10 +52,7 @@ const CheckOut: NextPageWithLayout = () => {
    const router = useRouter();
 
    const { infor } = useAppSelector((state) => state.user);
-   const { cart, loadingCart, mutate } = useCart(
-      !!infor._id,
-      infor._id as string,
-   );
+   const { cart, loadingCart, mutate } = useCart(!!infor._id);
 
    const { cart_products } = useCartItems(!!infor._id, infor._id as string, {
       refreshWhenHidden: true,

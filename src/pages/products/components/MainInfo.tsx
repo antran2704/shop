@@ -13,6 +13,7 @@ import {
    formatBigNumber,
    getPercentPromotionPrice,
 } from "~/helpers/number/fomatterCurrency";
+import { useCart } from "~/hooks/useCart";
 import {
    IOptionProduct,
    IProduct,
@@ -39,6 +40,7 @@ const MainInfo = (props: Props) => {
    const router = useRouter();
 
    const { infor } = useAppSelector((state) => state.user);
+   const { cart } = useCart(!!infor._id);
    const { mutate } = useSWRConfig();
 
    const { user } = useUser();
@@ -93,7 +95,7 @@ const MainInfo = (props: Props) => {
       }
 
       try {
-         const { status } = await increaseCart(infor._id as string, data);
+         const { status } = await increaseCart(cart._id as string, data);
 
          if (status === 201) {
             mutate(CART_KEY.CART_USER);
@@ -117,7 +119,7 @@ const MainInfo = (props: Props) => {
             );
          }
       }
-   }, [selectOption, user, infor, totalProduct, productChild]);
+   }, [selectOption, user, cart, infor, totalProduct, productChild]);
 
    const hanldeAddCart = useCallback(async () => {
       if (!user || !infor._id) {
@@ -147,9 +149,8 @@ const MainInfo = (props: Props) => {
             quantity: totalProduct,
          };
       }
-
       try {
-         const { status } = await increaseCart(infor._id as string, data);
+         const { status } = await increaseCart(cart._id as string, data);
 
          if (status === 201) {
             mutate(CART_KEY.CART_USER);
@@ -175,7 +176,7 @@ const MainInfo = (props: Props) => {
             );
          }
       }
-   }, [selectOption, user, infor, totalProduct, productChild]);
+   }, [selectOption, user, infor, cart, totalProduct, productChild]);
 
    return (
       <Fragment>
@@ -280,7 +281,7 @@ const MainInfo = (props: Props) => {
                            <ProductQuantity
                               total={totalProduct}
                               max={productStock.inventory}
-                              setTotalProduct={setTotalProduct}
+                              onChange={(value) => setTotalProduct(value)}
                            />
                            <p className="sm:block hidden text-sm text-nowrap">
                               {formatBigNumber(productStock.inventory)} sản phẩm
@@ -290,17 +291,17 @@ const MainInfo = (props: Props) => {
                      </div>
                      <div className="flex items-center sm:flex-nowrap flex-wrap gap-3">
                         <PrimaryButton
-                           title="Add to cart"
+                           title="Thêm vào giỏ hàng"
                            Icon={
                               <AiOutlineShoppingCart className="lg:text-2xl text-xl" />
                            }
                            onClick={hanldeAddCart}
-                           className="lg:w-fit w-full min-w-[140px] h-12 md:text-base text-sm hover:text-white text-dark px-4 hover:bg-primary bg-white rounded border hover:border-primary border-dark "
+                           className="lg:w-fit w-full min-w-[140px] h-12 text-sm hover:text-white text-dark px-4 hover:bg-primary bg-white rounded border hover:border-primary border-dark "
                            type="BUTTON"
                         />
                         <PrimaryButton
-                           title="Buy it now"
-                           className="lg:w-fit w-full min-w-[140px] h-12 md:text-base text-sm text-white bg-primary rounded px-4 gap-2"
+                           title="Mua ngay"
+                           className="lg:w-fit w-full min-w-[140px] h-12 text-sm text-white bg-primary rounded px-4 gap-2"
                            type="BUTTON"
                            onClick={hanldeBuyNow}
                         />

@@ -19,21 +19,11 @@ export default async function handler(
          },
       });
 
-      res.status(404).json({ status: 404, message: "new user" });
+      res.status(201).json({ status: 201, message: "NEW_USER" });
    } else {
-      const { refreshToken, accessToken, publicKey, apiKey } = getCookies({
-         req,
-         res,
-      });
-
       res.status(200).json({
          status: 200,
-         payload: {
-            refreshToken,
-            accessToken,
-            publicKey,
-            apiKey,
-         },
+         payload: "ok",
       });
    }
 }

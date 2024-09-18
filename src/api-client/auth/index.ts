@@ -1,29 +1,39 @@
 import axios from "axios";
-import { AxiosGet, AxiosPost } from "~/configs/axiosConfig";
+import { BASE_URL } from "~/common/api";
+import httpConfig from "~/configs/axiosConfig";
 import { IUserInfor } from "~/interfaces";
 
 const login = async (email: string) => {
-   return await AxiosPost("/users/login", { email });
+   return await axios
+      .post(BASE_URL + "/user/login", { email })
+      .then((res) => res.data);
 };
 
 const getUser = async () => {
-   return await AxiosGet("/users");
+   return await httpConfig.get(BASE_URL + "/user").then((res) => res.data);
 };
 
 const createUser = async (payload: Partial<IUserInfor>) => {
-   return await AxiosPost("/users", payload);
+   return await axios.post(BASE_URL + "/user", payload).then((res) => res.data);
 };
 
-const getRefreshToken = async () => {
-   return await AxiosGet("/users/refreshToken");
+const getRefreshToken = async (refreshToken: string) => {
+   return await httpConfig
+      .post(BASE_URL + "/refreshToken", {
+         refreshToken,
+      })
+      .then((res) => res.data)
+      .then((res) => res.data);
 };
 
 const checkUserIsExit = async (userId: string) => {
-   return await AxiosPost("/private", { userId });
+   return await axios
+      .post(BASE_URL + "/private", { userId })
+      .then((res) => res.data);
 };
 
 const logout = async () => {
-   return await AxiosPost("/users/logout", {});
+   return await axios.post(BASE_URL + "/user/logout").then((res) => res.data);
 };
 
 export { checkUserIsExit, createUser, login, getRefreshToken, getUser, logout };

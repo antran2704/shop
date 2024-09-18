@@ -1,7 +1,7 @@
 import axios from "axios";
 import qs from "qs";
+import httpConfig from "~/configs/axiosConfig";
 
-import { AxiosGet } from "~/configs/axiosConfig";
 import { IFilterBlog } from "~/interfaces/blog";
 
 const BLOG_KEY = {
@@ -11,7 +11,7 @@ const BLOG_KEY = {
 };
 
 const getBlogs = async (page: number = 1) => {
-   return await AxiosGet(`/blogs?page=${page}`);
+   return await httpConfig.get(`/blogs?page=${page}`).then((res) => res.data);
 };
 
 const getBlogsStatic = async (page: number = 1) => {
@@ -21,7 +21,7 @@ const getBlogsStatic = async (page: number = 1) => {
 };
 
 const getBlog = async (slug: string) => {
-   return await AxiosGet(`/blogs/${slug}`);
+   return await httpConfig.get(`/blogs/${slug}`).then((res) => res.data);
 };
 
 const getBlogStatic = async (slug: string) => {
@@ -34,11 +34,15 @@ const searchBlog = async (filter: IFilterBlog) => {
    const parseQuery = qs.stringify(filter, {
       filter: (prefix, value) => value || undefined,
    });
-   return await AxiosGet(`/blogs/search${parseQuery && "?" + parseQuery}`);
+   return await httpConfig
+      .get(`/blogs/search${parseQuery && "?" + parseQuery}`)
+      .then((res) => res.data);
 };
 
 const otherBlogs = async (blogId: string) => {
-   return await AxiosGet(`/blogs/other/${blogId}`);
+   return await httpConfig
+      .get(`/blogs/other/${blogId}`)
+      .then((res) => res.data);
 };
 
 export {

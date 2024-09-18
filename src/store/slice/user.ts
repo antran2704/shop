@@ -22,10 +22,13 @@ const userSlice = createSlice({
       updateInforUserReducer: (state, action) => {
          state.infor = action.payload;
       },
+      logoutReducer: (state) => {
+         state.infor = initialState.infor;
+      },
    },
 });
 
 export const getUser = (state: RootState) => state.user;
 
-export const { updateInforUserReducer } = userSlice.actions;
+export const { updateInforUserReducer, logoutReducer } = userSlice.actions;
 export default userSlice.reducer;

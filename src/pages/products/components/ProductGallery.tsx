@@ -84,7 +84,7 @@ const ProductGallery = (props: Props) => {
                         title={product.title}
                         alt={product.title}
                         src={image}
-                        className={`w-full lg:h-[100px] sm:h-[160px] h-[120px] ${
+                        className={`w-full xl:h-[120px] lg:h-[100px] sm:h-[160px] h-[120px] ${
                            currentImg && currentImg.includes(image)
                               ? "border-primary"
                               : "border-white"

@@ -1,31 +1,16 @@
 import useSWR, { SWRConfiguration } from "swr";
 import {
    CATEGORY_KEY,
-   getAllCategories,
    getCategories,
    getCategory,
    getParentCategories,
 } from "~/api-client";
 import { initPagination } from "~/data";
-import { IDataCategory, IQueryParam } from "~/interfaces";
+import { ICategory } from "~/interfaces";
 import { ISearch } from "~/interfaces/paramater";
 
 // refesh 1 hour
 const REFESH_TIME = 1000 * 60 * 60;
-
-const selects: IQueryParam<Partial<IDataCategory>> = {};
-
-const fetcherCategoriesAll = async () => {
-   try {
-      const res = await getAllCategories(selects);
-
-      if (res.status === 200) {
-         return res;
-      }
-   } catch (error) {
-      console.log(error);
-   }
-};
 
 const fetcherParentCategories = async (paramater: ISearch) => {
    try {
@@ -86,26 +71,6 @@ const useCategories = (
    };
 };
 
-const useCategoriesAll = (options?: Partial<SWRConfiguration>) => {
-   const { data, isLoading, mutate } = useSWR(
-      [CATEGORY_KEY.CATEGORIES_ALL],
-      () => fetcherCategoriesAll(),
-      {
-         ...options,
-         revalidateOnFocus: false,
-         dedupingInterval: REFESH_TIME,
-         keepPreviousData: true,
-         fallbackData: { payload: [], pagination: initPagination },
-      },
-   );
-   return {
-      categories: data.payload,
-      pagination: data.pagination,
-      loadingCategories: isLoading,
-      mutate,
-   };
-};
-
 const useParentCategories = (
    paramater: ISearch,
    options?: Partial<SWRConfiguration>,
@@ -145,10 +110,10 @@ const useCategory = (
       },
    );
    return {
-      category: data.payload || (null as IDataCategory | null),
+      category: data.payload || (null as ICategory | null),
       loadingCategory: isLoading,
       mutate,
    };
 };
 
-export { useCategoriesAll, useCategories, useParentCategories, useCategory };
+export { useCategories, useParentCategories, useCategory };
