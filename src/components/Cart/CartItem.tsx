@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import { useSWRConfig } from "swr";
 import ModalConfirm from "../Modal/ModalConfirm";
 import CartItemLoading from "./CartItemLoading";
+import { useCart } from "~/hooks/useCart";
 
 interface Props {
    data: ICartItem;
@@ -22,71 +23,43 @@ interface Props {
 const CartItem: FC<Props> = (props: Props) => {
    const { data, onDelete } = props;
    const { infor } = useAppSelector((state) => state.user);
+   const { cart } = useCart(!!infor._id);
+
    const { mutate } = useSWRConfig();
 
    const [totalProduct, setTotalProduct] = useState<number>(0);
    const total = useDebounce(totalProduct.toString(), 1000);
 
-   // const [cartItem, setCartItem] = useState<ICartItem | null>(null);
    const [showModalConfirm, setShowModalConfirm] = useState<boolean>(false);
 
-   // const handeDeleteItem = async (data: ICartItem) => {
-   //     if (!infor._id || !data) return;
-
-   //     const dataSend: SendDeleteCartItem = {
-   //         product_id: data.product._id as string,
-   //         variation_id: data.variation?._id as string | null
-   //     };
-   //     try {
-   //         const { status } = await deleteItemCart(infor._id, dataSend);
-
-   //         if (status === 201) {
-   //             mutate(CART_KEY.CART_USER);
-   //             mutate(CART_KEY.CART_ITEMS);
-   //         }
-   //     } catch (error) {
-   //         console.log(error);
-   //     }
-   // };
-
-   const updateCartItem = async () => {
-      if (!infor._id) return;
+   const updateCartItem = async (quantity: number) => {
+      if (!cart) return;
       const dataSend: SendCartItem = {
          product_id: data.product._id as string,
          variation_id: data.variation?._id as string | null,
-         quantity: totalProduct,
+         quantity,
       };
 
-      try {
-         const { status } = await updateCart(infor._id, dataSend);
-
-         if (status === 201) {
-            // setCartItem({ ...cartItem, quantity: dataSend.quantity });
+      await updateCart(cart._id, dataSend)
+         .then(() => {
             mutate(CART_KEY.CART_USER);
             mutate(CART_KEY.CART_ITEMS);
             toast.success("Thay đổi số lượng thành công", {
                position: toast.POSITION.BOTTOM_RIGHT,
             });
-         }
-      } catch (error) {
-         console.log(error);
-      }
+         })
+         .catch((err) => err);
    };
 
    useEffect(() => {
       if (totalProduct > 0 && totalProduct !== data.quantity) {
-         updateCartItem();
+         updateCartItem(totalProduct);
       }
    }, [total]);
 
    useEffect(() => {
       setTotalProduct(data.quantity);
-      // setCartItem(data);
    }, [data]);
-
-   // if (!cartItem) {
-   //     return <CartItemLoading />;
-   // }
 
    return (
       <li
@@ -134,7 +107,7 @@ const CartItem: FC<Props> = (props: Props) => {
                   <Link
                      href={`/collections/product/${data.product._id}.${data.product.slug}`}
                      className="md:text-base text-sm hover:text-primary md:text-start text-center line-clamp-2">
-                     {data.variation.options?.join(" / ")}
+                     {data?.options}
                   </Link>
                )}
 
@@ -158,7 +131,6 @@ const CartItem: FC<Props> = (props: Props) => {
             {data.inventory > 0 ? (
                <ProductQuantity
                   initValue={data.quantity}
-                  total={totalProduct}
                   max={data.inventory}
                   onChange={(value) => setTotalProduct(value)}
                />

@@ -10,13 +10,12 @@ import checkValidCount from "~/helpers/number";
 
 interface Props {
    initValue?: number;
-   total: number;
    max?: number;
    onChange?: (value: number) => void;
 }
 
 const ProductQuantity: FC<Props> = (props: Props) => {
-   const { total, max, initValue, onChange } = props;
+   const { max, initValue, onChange } = props;
    const [message, setMessage] = useState<string | null>(null);
    const [count, setCount] = useState<number>(1);
 
