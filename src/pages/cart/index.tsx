@@ -1,11 +1,7 @@
 import { ReactElement, useEffect, useState } from "react";
 import Header from "~/components/Header";
 
-import {
-   ICartItem,
-   NextPageWithLayout,
-   SendDeleteCartItem,
-} from "~/interfaces";
+import { ICartItem, NextPageWithLayout } from "~/interfaces";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import { useCart, useCartItems } from "~/hooks/useCart";
 import { useAppSelector } from "~/store/hooks";
@@ -25,6 +21,7 @@ import ListProducts from "~/components/Product/List";
 import { useProducts } from "~/hooks/useProducts";
 import { useRouter } from "next/router";
 import PrimaryButton from "~/components/Button/PrimaryButton";
+import { ORDER_PARAMATER_ENUM } from "~/enums/paramater";
 
 const Layout = DefaultLayout;
 
@@ -38,14 +35,18 @@ const Cart: NextPageWithLayout = () => {
    });
 
    const { cart_products, loadingCartItems } = useCartItems(
-      !!infor._id,
-      infor._id as string,
+      !!cart,
+      cart?._id as string,
       {
          refreshWhenHidden: true,
       },
    );
 
-   const { products, loadingProducts } = useProducts();
+   const { products, loadingProducts } = useProducts({
+      page: 1,
+      take: 16,
+      order: ORDER_PARAMATER_ENUM.DESC,
+   });
 
    const { mutate } = useSWRConfig();
 
@@ -54,10 +55,7 @@ const Cart: NextPageWithLayout = () => {
 
    const onCheckout = async () => {
       try {
-         const res = await checkInventoryItems(
-            cart.cart_userId as string,
-            cart,
-         );
+         const res = await checkInventoryItems(cart._id as string);
          if (res.status === 200) {
             router.push("/checkout");
          }
@@ -81,35 +79,37 @@ const Cart: NextPageWithLayout = () => {
       }
    };
 
-   const handleDeleteItem = async (data: ICartItem) => {
-      if (!infor._id || !data) return;
-
-      const dataSend: SendDeleteCartItem = {
-         product_id: data.product._id as string,
-         variation_id: data.variation?._id as string | null,
-      };
-      try {
-         const { status } = await deleteItemCart(infor._id, dataSend);
-
-         if (status === 201) {
-            // const newItems = items.filter(
-            //     (item: ICartItem) =>
-            //         item.product !== data.product &&
-            //         item.variation !== data.variation
-            // );
-
-            // setItems([...newItems]);
+   const handleDeleteItem = async (cartId: string, itemId: string) => {
+      if (!cartId || !itemId) return;
+      await deleteItemCart(cartId, itemId)
+         .then(() => {
             mutate(CART_KEY.CART_USER);
             mutate(CART_KEY.CART_ITEMS);
-         }
-      } catch (error) {
-         console.log(error);
-      }
+         })
+         .catch((err) => err);
+
+      // try {
+      //    const { status } = await deleteItemCart(infor._id, dataSend);
+
+      //    if (status === 201) {
+      //       // const newItems = items.filter(
+      //       //     (item: ICartItem) =>
+      //       //         item.product !== data.product &&
+      //       //         item.variation !== data.variation
+      //       // );
+
+      //       // setItems([...newItems]);
+      //       mutate(CART_KEY.CART_USER);
+      //       mutate(CART_KEY.CART_ITEMS);
+      //    }
+      // } catch (error) {
+      //    console.log(error);
+      // }
    };
 
    const handleCheckInventoryItems = async () => {
       try {
-         await checkInventoryItems(cart.cart_userId as string, cart);
+         await checkInventoryItems(cart._id as string);
       } catch (error: any) {
          if (!error.response) {
             toast.error("Lỗi hệ thống, vui lòng thử lại sau", {
@@ -156,10 +156,10 @@ const Cart: NextPageWithLayout = () => {
       <div>
          <Header
             title={"Cart"}
-            breadcrumbs={[
-               { label: "Home", url_path: "/" },
-               { label: "Cart", url_path: "/" },
-            ]}
+            // breadcrumbs={[
+            //    { label: "Home", url_path: "/" },
+            //    { label: "Cart", url_path: "/" },
+            // ]}
          />
 
          <section className="container__cus">
@@ -168,7 +168,7 @@ const Cart: NextPageWithLayout = () => {
                   <ul className="flex flex-col items-start my-10 gap-5">
                      {cart_products.map((item: ICartItem, index: number) => (
                         <CartItem
-                           onDelete={handleDeleteItem}
+                           onDelete={() => handleDeleteItem(cart._id, item._id)}
                            data={item}
                            key={index}
                         />

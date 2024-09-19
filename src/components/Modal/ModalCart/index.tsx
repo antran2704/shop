@@ -8,7 +8,7 @@ import { useAppSelector } from "~/store/hooks";
 import LayoutClose from "~/components/Layout/LayoutClose";
 
 import styles from "./ModalCart.module.scss";
-import { ICartItem, SendDeleteCartItem } from "~/interfaces";
+import { ICartItem } from "~/interfaces";
 import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
 import { CART_KEY, deleteItemCart } from "~/api-client/cart";
 import { useSWRConfig } from "swr";
@@ -29,33 +29,26 @@ const ModalCart = (props: Props) => {
    const { mutate } = useSWRConfig();
    const { infor } = useAppSelector((state) => state.user);
    const { cart } = useCart(!!infor._id);
+
    const { cart_products, loadingCartItems } = useCartItems(
-      !!infor._id,
-      infor._id as string,
-      { refreshWhenHidden: true },
+      !!cart,
+      cart?._id as string,
+      // { refreshWhenHidden: true },
    );
 
    const [selectItem, setSelectItem] = useState<ICartItem | null>(null);
    const [showModalConfirm, setShowModalConfirm] = useState<boolean>(false);
 
-   const handeDeleteItem = async (data: ICartItem) => {
-      if (!infor._id || !data) return;
+   const handeDeleteItem = async (cartId: string, itemId: string) => {
+      if (!cartId || !itemId) return;
 
-      const dataSend: SendDeleteCartItem = {
-         product_id: data.product._id as string,
-         variation_id: data.variation?._id as string | null,
-      };
-      try {
-         const { status } = await deleteItemCart(infor._id, dataSend);
-
-         if (status === 201) {
+      await deleteItemCart(cartId, itemId)
+         .then(() => {
             mutate(CART_KEY.CART_USER);
             mutate(CART_KEY.CART_ITEMS);
             setSelectItem(null);
-         }
-      } catch (error) {
-         console.log(error);
-      }
+         })
+         .catch((err) => err);
    };
 
    useEffect(() => {
@@ -98,8 +91,8 @@ const ModalCart = (props: Props) => {
                   ))}
             </ul>
             <div className="flex w-full items-center justify-between pb-3 gap-3">
-               <p className="text-lg font-medium">Subtotal:</p>
-               <p className="text-lg text-primary font-medium">
+               <p className="text-base font-medium">Subtotal:</p>
+               <p className="text-base text-primary font-medium">
                   {cart ? formatBigNumber(cart.cart_total) : 0} VND
                </p>
             </div>
@@ -107,26 +100,26 @@ const ModalCart = (props: Props) => {
                <PrimaryButton
                   title="View cart"
                   type="LINK"
-                  className="sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap hover:text-dark bg-primary hover:bg-white px-8 py-2 gap-2 border border-primary hover:border-dark rounded"
+                  className="sm:w-auto w-full text-lg font-medium text-primary hover:text-white whitespace-nowrap hover:bg-primary px-8 py-2 gap-2 border border-primary rounded"
                   path="/cart"
                />
 
                <PrimaryButton
                   title="Check out"
                   type="LINK"
-                  className="sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap bg-dark hover:bg-primary px-8 py-2 border border-transparent rounded"
+                  className="sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap bg-primary px-8 py-2 gap-2 border border-primary rounded opacity-90 hover:opacity-100"
                   path="/checkout"
                />
             </div>
          </div>
 
-         {show && <LayoutClose handleClose={() => setShow(!show)} />}
+         <LayoutClose show={show} handleClose={() => setShow(!show)} />
 
          {showModalConfirm && selectItem && (
             <ModalConfirm
                title="Confirm"
                onClick={() => {
-                  handeDeleteItem(selectItem as ICartItem);
+                  handeDeleteItem(cart._id, selectItem._id);
                   setShowModalConfirm(!showModalConfirm);
                }}
                onClose={() => {

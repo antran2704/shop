@@ -69,7 +69,8 @@ module.exports = {
                 "gray-700": "#303032",
                 "gray-800": "#1D1D1E",
                 "gray-900": "#131314",
-                "gray-950": "#0C0C0C"
+                "gray-950": "#0C0C0C",
+                "gray-1000": "#F4F4F4"
             }
         }
     },

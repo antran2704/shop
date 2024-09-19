@@ -7,13 +7,12 @@ import {
    getProductsInCategory,
 } from "~/api-client";
 import { initPagination } from "~/data";
-import { IPagination } from "~/interfaces";
-import { ISearch } from "~/interfaces/paramater";
+import { IPagination, IProductSearch } from "~/interfaces";
 
 // refesh 1 hour
 const REFESH_TIME = 1000 * 60 * 60;
 
-const fetcherProducts = async (paramater: ISearch) => {
+const fetcherProducts = async (paramater: IProductSearch) => {
    try {
       const res = await getProducts(paramater);
 
@@ -27,7 +26,7 @@ const fetcherProducts = async (paramater: ISearch) => {
 
 const fetcherOtherProducts = async (
    productIds: string[],
-   paramater: ISearch,
+   paramater: IProductSearch,
 ) => {
    const res = await getOtherProducts(productIds, paramater);
 
@@ -50,7 +49,7 @@ const fetcherHotProducts = async (page: number = 1) => {
 
 const fetcherProductsInCategory = async (
    category_id: string,
-   paramater: ISearch,
+   paramater: IProductSearch,
 ) => {
    try {
       const res = await getProductsInCategory(category_id, paramater);
@@ -63,7 +62,7 @@ const fetcherProductsInCategory = async (
 };
 
 const useProducts = (
-   paramater: ISearch,
+   paramater: IProductSearch,
    options?: Partial<SWRConfiguration>,
 ) => {
    const { data, isLoading, mutate, error } = useSWR(
@@ -115,7 +114,7 @@ const useHotProducts = (
 const useOtherProducts = (
    isReady: boolean,
    productIds: string[],
-   paramater: ISearch,
+   paramater: IProductSearch,
    options?: Partial<SWRConfiguration>,
 ) => {
    const { data, isLoading, mutate, error } = useSWR(
@@ -142,7 +141,7 @@ const useOtherProducts = (
 const useProductsInCategory = (
    isReady: boolean,
    category_id: string,
-   paramater: ISearch,
+   paramater: IProductSearch,
    options?: Partial<SWRConfiguration>,
 ) => {
    const {

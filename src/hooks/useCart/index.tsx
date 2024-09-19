@@ -1,36 +1,15 @@
 import useSWR, { SWRConfiguration } from "swr";
 import { CART_KEY, getCart, getCartItems } from "~/api-client/cart";
+import { initPagination } from "~/data";
 import { Cart, ICartItem } from "~/interfaces";
 
 // refesh 30 minute
 const REFESH_TIME = 1000 * 60 * 30;
 
-const fetcherCart = async () => {
-   try {
-      const res = await getCart();
-      if (res.status === 200) {
-         return res;
-      }
-   } catch (error) {
-      console.log(error);
-   }
-};
-
-const fetcherCartItems = async (user_id: string) => {
-   try {
-      const res = await getCartItems(user_id);
-      if (res.status === 200) {
-         return res;
-      }
-   } catch (error) {
-      console.log(error);
-   }
-};
-
 const useCart = (isReady: boolean, options?: Partial<SWRConfiguration>) => {
    const { data, isLoading, mutate, error } = useSWR(
       isReady ? CART_KEY.CART_USER : null,
-      () => fetcherCart(),
+      async () => await getCart().catch((err) => err),
       {
          refreshInterval: REFESH_TIME,
          keepPreviousData: true,
@@ -49,16 +28,16 @@ const useCart = (isReady: boolean, options?: Partial<SWRConfiguration>) => {
 
 const useCartItems = (
    isReady: boolean,
-   user_id: string,
+   cartId: string,
    options?: Partial<SWRConfiguration>,
 ) => {
    const { data, isLoading, mutate, error } = useSWR(
       isReady ? CART_KEY.CART_ITEMS : null,
-      () => fetcherCartItems(user_id),
+      async () => await getCartItems(cartId).catch((err) => err),
       {
          refreshInterval: REFESH_TIME,
          keepPreviousData: true,
-         fallbackData: { payload: [] },
+         fallbackData: { payload: [], pagination: initPagination },
          ...options,
       },
    );
@@ -66,6 +45,7 @@ const useCartItems = (
    return {
       cart_products: data.payload as ICartItem[],
       loadingCartItems: isLoading,
+      paginationCartItems: data.pagination,
       error,
       mutate,
    };

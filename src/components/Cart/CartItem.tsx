@@ -3,10 +3,10 @@ import { FC, useState, useEffect } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 
 import ProductQuantity from "~/components/ProductQuantity";
-import { ICartItem, SendCartItem, SendDeleteCartItem } from "~/interfaces";
+import { ICartItem, SendCartItem } from "~/interfaces";
 import ImageCus from "~/components/Image";
 import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
-import { CART_KEY, deleteItemCart, updateCart } from "~/api-client/cart";
+import { CART_KEY, updateCart } from "~/api-client/cart";
 import { useAppSelector } from "~/store/hooks";
 import useDebounce from "~/hooks/useDebounce";
 import { toast } from "react-toastify";
@@ -157,9 +157,10 @@ const CartItem: FC<Props> = (props: Props) => {
          <div>
             {data.inventory > 0 ? (
                <ProductQuantity
+                  initValue={data.quantity}
                   total={totalProduct}
                   max={data.inventory}
-                  setTotalProduct={setTotalProduct}
+                  onChange={(value) => setTotalProduct(value)}
                />
             ) : (
                <p className="w-32 min-w-32 text-sm text-primary font-medium text-center">

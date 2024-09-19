@@ -1,12 +1,19 @@
-import { IProductData, IVariantProduct } from "../product";
+interface ICartProduct {
+   _id: string;
+   title: string;
+   slug: string;
+   thumbnail: string;
+}
 
 interface ICartItem {
-   product: Partial<IProductData>;
-   variation: Partial<IVariantProduct> | null;
+   _id: string;
+   product: ICartProduct;
+   options: string | null;
    quantity: number;
+   variation: Omit<ICartProduct, "thumbnail" | "slug"> | null;
+   inventory: number;
    price: number;
    promotion_price: number;
-   inventory: number;
 }
 
 interface SendCartItem {
@@ -15,15 +22,12 @@ interface SendCartItem {
    quantity: number;
 }
 
-type SendDeleteCartItem = Omit<SendCartItem, "quantity">;
-
 interface Cart {
    _id: string;
    cart_userId: string;
    cart_status: "active" | "pending" | "failed" | "compeleted";
-   // cart_products: ICartItem[];
    cart_count: number;
    cart_total: number;
 }
 
-export type { Cart, ICartItem, SendCartItem, SendDeleteCartItem };
+export type { Cart, ICartItem, SendCartItem };
