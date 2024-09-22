@@ -1,5 +1,4 @@
 import { clerkClient } from "@clerk/nextjs";
-import { getCookies } from "cookies-next";
 import { NextApiRequest, NextApiResponse } from "next";
 import { v4 as uuidv4 } from "uuid";
 

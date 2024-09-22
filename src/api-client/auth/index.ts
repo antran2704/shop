@@ -3,9 +3,9 @@ import { BASE_URL } from "~/common/api";
 import httpConfig from "~/configs/axiosConfig";
 import { IUserInfor } from "~/interfaces";
 
-const login = async (email: string) => {
+const login = async (clerkToken: string) => {
    return await axios
-      .post(BASE_URL + "/user/login", { email })
+      .post(BASE_URL + "/user/login", { token: clerkToken })
       .then((res) => res.data);
 };
 
@@ -19,7 +19,7 @@ const createUser = async (payload: Partial<IUserInfor>) => {
 
 const getRefreshToken = async (refreshToken: string) => {
    return await httpConfig
-      .post(BASE_URL + "/refreshToken", {
+      .post(BASE_URL + "/user/refreshToken", {
          refreshToken,
       })
       .then((res) => res.data)
@@ -28,7 +28,7 @@ const getRefreshToken = async (refreshToken: string) => {
 
 const checkUserIsExit = async (userId: string) => {
    return await axios
-      .post(BASE_URL + "/private", { userId })
+      .post(BASE_URL + "/user/check-user", { userId })
       .then((res) => res.data);
 };
 

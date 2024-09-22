@@ -1,6 +1,6 @@
 import { BASE_URL } from "~/common/api";
 import httpConfig from "~/configs/axiosConfig";
-import { Cart, SendCartItem } from "~/interfaces";
+import { SendCartItem } from "~/interfaces";
 
 const CART_KEY = {
    CART_USER: "cart_user",

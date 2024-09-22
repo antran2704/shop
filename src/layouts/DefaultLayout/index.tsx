@@ -1,4 +1,4 @@
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useClerk, useUser, useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/router";
 import React, { FC, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
@@ -15,9 +15,10 @@ import Footer from "~/components/Footer";
 import Navbar from "~/components/Navbar";
 import ScrollToTop from "~/components/ScrollToTop";
 import { injectRouter, injectStore } from "~/configs/axiosConfig";
-import { setAuthLocal } from "~/helpers/auth";
+import { getAuthLocal, setAuthLocal } from "~/helpers/auth";
+import hanldeErrorAxios from "~/helpers/handleErrorAxios";
 import { IUserInfor } from "~/interfaces";
-import { IAuthLocal, IResponseLogin } from "~/interfaces/auth";
+import { IResponseLogin } from "~/interfaces/auth";
 import { IResponse } from "~/interfaces/response";
 import { useAppDispatch } from "~/store/hooks";
 import { updateInforUserReducer } from "~/store/slice/user";
@@ -31,11 +32,24 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
 
    const dispatch = useAppDispatch();
 
-   const { user, isLoaded } = useUser();
+   const { user } = useUser();
+   const { getToken } = useAuth();
    const { signOut } = useClerk();
 
-   const handleLogin = async (email: string) => {
-      await login(email as string)
+   const handleGetUser = async () => {
+      await getUser()
+         .then((res) => {
+            dispatch(updateInforUserReducer(res.payload));
+         })
+         .catch((err) => err);
+   };
+
+   const handleLogin = async () => {
+      const clerkToken: string | null = await getToken();
+
+      if (!clerkToken) return;
+
+      await login(clerkToken)
          .then(({ payload }: IResponse<IResponseLogin>) => {
             setAuthLocal("accessToken", payload.accessToken.value);
             setAuthLocal("refreshToken", payload.refreshToken.value);
@@ -44,11 +58,7 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
          })
          .catch((err) => err);
 
-      await getUser()
-         .then((res) => {
-            dispatch(updateInforUserReducer(res.payload));
-         })
-         .catch((err) => err);
+      handleGetUser();
    };
 
    const handleCreateUser = async () => {
@@ -58,47 +68,46 @@ const DefaultLayout: FC<Props> = ({ children }: Props) => {
          avartar: user?.imageUrl,
       };
 
-      try {
-         const { status } = await createUser(inforUser);
-         if (status === 201) {
-            await handleLogin(inforUser.email as string);
-         }
-      } catch (error: any) {
-         if (!error.response) {
-            toast.error("Error in server, please try again", {
-               position: toast.POSITION.TOP_RIGHT,
-            });
+      await createUser(inforUser)
+         .then(() => {
+            handleLogin();
+         })
+         .catch((err) => {
+            const { message } = hanldeErrorAxios(err);
 
-            return;
-         }
-         const response = error.response.data;
-         if (response.status === 400 && response.message === "Email is used") {
-            await logout();
-            signOut();
-         }
-      }
+            if (message === "USER_ALREADY_EXITED") {
+               logout();
+               signOut();
+            }
+
+            return err;
+         });
    };
 
    const handleCheckUserIsExit = async (userId: string) => {
-      try {
-         const { status } = await checkUserIsExit(userId);
-         if (status === 200) {
-            handleLogin(user?.primaryEmailAddress?.emailAddress as string);
-         }
-
-         if (status === 201) {
-            await handleCreateUser();
-         }
-      } catch (error) {
-         return error;
-      }
+      checkUserIsExit(userId)
+         .then(({ message }) => {
+            if (message === "NEW_USER") {
+               handleCreateUser();
+            } else {
+               handleLogin();
+            }
+         })
+         .catch((err) => err);
    };
 
    useEffect(() => {
-      if (isLoaded && user) {
+      const accessToken = getAuthLocal("accessToken") as string;
+      const refreshToken = getAuthLocal("refreshToken") as string;
+      const publicToken = getAuthLocal("publicKey") as string;
+      if (user && !accessToken && !refreshToken && !publicToken) {
          handleCheckUserIsExit(user.id);
       }
-   }, [user, isLoaded]);
+
+      if (user && accessToken && refreshToken && publicToken) {
+         handleGetUser();
+      }
+   }, [user]);
 
    useEffect(() => {
       injectRouter(signOut, router);
