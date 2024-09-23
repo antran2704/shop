@@ -5,11 +5,4 @@ interface IUserInfor {
    avartar: string | null;
 }
 
-interface IInforCheckout {
-   email: string;
-   phoneNumber: string;
-   name: string;
-   address: string;
-}
-
-export type { IUserInfor, IInforCheckout };
+export type { IUserInfor };

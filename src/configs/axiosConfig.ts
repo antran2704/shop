@@ -49,7 +49,7 @@ const httpConfig = axios.create({
 
 let isRefresh = false;
 const resfreshTokenUrl: string =
-   (process.env.NEXT_PUBLIC_ENDPOINT_API as string) + "/refreshToken";
+   (process.env.NEXT_PUBLIC_ENDPOINT_API as string) + "/user/refreshToken";
 const MAX_RETRY: number = 3;
 
 let router: NextRouter;
@@ -160,8 +160,7 @@ httpConfig.interceptors.request.use(
          }
 
          const accessTokenExp: number = decoded?.exp as number;
-         const currentTime: number =
-            Math.floor(new Date().getTime() / 1000) + 3 * 60;
+         const currentTime: number = Math.floor(new Date().getTime() / 1000);
 
          // check accessToken still live or was expried
          if (currentTime >= accessTokenExp && !isRefresh) {

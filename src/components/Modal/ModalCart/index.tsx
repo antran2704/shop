@@ -33,7 +33,6 @@ const ModalCart = (props: Props) => {
    const { cart_products, loadingCartItems } = useCartItems(
       !!cart,
       cart?._id as string,
-      // { refreshWhenHidden: true },
    );
 
    const [selectItem, setSelectItem] = useState<ICartItem | null>(null);

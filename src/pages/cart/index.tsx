@@ -37,9 +37,6 @@ const Cart: NextPageWithLayout = () => {
    const { cart_products, loadingCartItems } = useCartItems(
       !!cart,
       cart?._id as string,
-      {
-         refreshWhenHidden: true,
-      },
    );
 
    const { products, loadingProducts } = useProducts({
@@ -155,11 +152,10 @@ const Cart: NextPageWithLayout = () => {
    return (
       <div>
          <Header
-            title={"Cart"}
-            // breadcrumbs={[
-            //    { label: "Home", url_path: "/" },
-            //    { label: "Cart", url_path: "/" },
-            // ]}
+            title="Giỏ hàng"
+            breadcrumbs={{
+               items: [{ title: "Giỏ hàng" }],
+            }}
          />
 
          <section className="container__cus">
@@ -177,23 +173,23 @@ const Cart: NextPageWithLayout = () => {
                   <div className="flex lg:flex-nowrap flex-wrap items-start justify-between gap-5">
                      <div className="lg:w-4/12 w-full">
                         <PrimaryButton
-                           title="Clear cart"
+                           title="Xóa toàn bộ"
                            type="BUTTON"
                            onClick={() =>
                               setShowModalConfirm(!showModalConfirm)
                            }
-                           className="sm:w-auto w-full text-lg font-medium text-white whitespace-nowrap hover:text-dark bg-primary hover:bg-white px-8 py-2 gap-2 border border-primary hover:border-dark rounded"
+                           className="sm:w-auto w-full text-lg font-medium hover:text-white whitespace-nowrap text-primary hover:bg-primary bg-white px-8 py-2 gap-2 border border-primary rounded"
                         />
                      </div>
                      <div className="lg:w-6/12 w-full sm:mt-0 mt-8">
                         <h3 className="text-xl font-medium mb-5">
-                           Cart Totals
+                           Tổng quan đơn hàng
                         </h3>
                         <table className="table-auto flex items-center bg-white">
                            <thead className="w-6/12 md:text-lg text-base">
                               <tr className="block w-full">
                                  <th className="block w-full text-start p-4 border border-borderColor">
-                                    Total
+                                    Tổng
                                  </th>
                               </tr>
                            </thead>
@@ -209,10 +205,10 @@ const Cart: NextPageWithLayout = () => {
                            </tbody>
                         </table>
                         <PrimaryButton
-                           title="Proceed to Checkout"
+                           title="Thanh toán ngay"
                            type="BUTTON"
                            onClick={onCheckout}
-                           className="w-full text-lg font-medium text-white whitespace-nowrap hover:text-dark bg-primary hover:bg-white px-8 py-3 mt-4 gap-2 border border-primary hover:border-dark rounded transition-all ease-linear duration-100"
+                           className="w-full text-lg font-medium text-white whitespace-nowrap bg-primary px-8 py-3 mt-4 gap-2 border border-primary hover:border-dark rounded opacity-80 hover:opacity-100 transition-all ease-linear duration-100"
                         />
                      </div>
                   </div>
@@ -231,9 +227,9 @@ const Cart: NextPageWithLayout = () => {
 
             {cart && cart_products.length <= 0 && (
                <div className="py-10">
-                  <h2 className="text-3xl font-medium">Shopping Cart</h2>
+                  <h2 className="text-3xl font-medium">Mua sắm</h2>
                   <h3 className="text-xl font-medium mt-2">
-                     Your cart is currently empty.
+                     Giỏ hàng của bạn đang trống
                   </h3>
                </div>
             )}

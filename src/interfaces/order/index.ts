@@ -1,50 +1,115 @@
 import {
-   EOrderStatus,
-   EPaymentMethod,
-   EPaymentStatus,
+   ENUM_ORDER_STATUS,
+   ENUM_PAYMENT_METHOD,
+   ENUM_PAYMENT_STATUS,
+   ENUM_PROCESS_ORDER,
    ESelectOrderStatus,
 } from "~/enums";
 import { ICartItem } from "../cart";
-import { IInforCheckout } from "../user";
-import { ICoupon } from "../coupon";
 
-interface ItemOrder extends ICartItem {
-   price: number;
-   promotion_price: number;
+// interface ItemOrder extends ICartItem {
+//    price: number;
+//    promotion_price: number;
+// }
+
+// interface ItemOrderCreate {
+//    product: string;
+//    variation: string | null;
+//    price: number;
+//    promotion_price: number;
+//    quantity: number;
+//    inventory: number;
+// }
+
+interface IOrderAddress {
+   shipping_name: string;
+   shipping_address: string;
+   shipping_phone: string;
+   shipping_email: string;
 }
 
-interface ItemOrderCreate {
-   product: string;
-   variation: string | null;
+interface IOrderCancel {
+   canCancel: boolean;
+   content: string;
+}
+
+interface Discount {
+   _id: string;
+   discount_type: string;
+   discount_name: string;
+   discount_code: string;
+   discount_value: number;
+   discount_min_value: number;
+}
+
+interface IOrderProduct {
+   product_id: string;
+   model_id: string;
+   image: string;
+   model_name: string;
    price: number;
    promotion_price: number;
    quantity: number;
-   inventory: number;
 }
 
-interface Order {
+interface IOrderProcess {
+   label: ENUM_PROCESS_ORDER;
+   value: string;
+}
+
+interface IOrderShipping {
+   shipping_name: string;
+   shipping_fee: number;
+}
+
+interface IOrder {
    order_id: string;
+   address: IOrderAddress;
    user_id: string;
-   user_infor: IInforCheckout;
-   items: ItemOrder[];
-   shipping_cost: number;
+   items: IOrderProduct[];
+   shipping: IOrderShipping;
+   processing_info: IOrderProcess[];
+   order_status: ENUM_ORDER_STATUS;
    sub_total: number;
+   total_before_discount: number;
    total: number;
-   discount: ICoupon | null;
-   status: EOrderStatus;
-   payment_method: EPaymentMethod;
-   payment_status: EPaymentStatus;
-   cancleContent: string | null;
-   note: string | null;
+   discount: Discount;
+   currency: string;
+   payment_method: ENUM_PAYMENT_METHOD;
+   payment_status: ENUM_PAYMENT_STATUS;
+   cancel: IOrderCancel;
+   note: string;
 }
 
-type IOrderCreate = Omit<Order, "order_id" | "cancleContent" | "note"> & {
-   items: ItemOrderCreate[];
+interface ICreateOrder {
+   address: IOrderAddress;
+   user_id: string;
+   items: IOrderProduct[];
+   shipping: IOrderShipping;
+   processing_info: IOrderProcess[];
+   order_status: ENUM_ORDER_STATUS;
+   sub_total: number;
+   total_before_discount: number;
+   total: number;
+   discount: Discount | null;
+   currency: string;
+   payment_method: ENUM_PAYMENT_METHOD;
+   payment_status: ENUM_PAYMENT_STATUS;
+   cancel: IOrderCancel;
+   note: string;
+}
+
+// interface TypeShowOrder {
+//    title: string;
+//    type: ESelectOrderStatus;
+// }
+
+export type {
+   IOrder,
+   ICreateOrder,
+   IOrderProduct,
+   IOrderAddress,
+   IOrderCancel,
+   IOrderProcess,
+   IOrderShipping,
 };
-
-interface TypeShowOrder {
-   title: string;
-   type: ESelectOrderStatus;
-}
-
-export type { Order, ItemOrder, IOrderCreate, ItemOrderCreate, TypeShowOrder };

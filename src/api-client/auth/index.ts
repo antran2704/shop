@@ -22,7 +22,6 @@ const getRefreshToken = async (refreshToken: string) => {
       .post(BASE_URL + "/user/refreshToken", {
          refreshToken,
       })
-      .then((res) => res.data)
       .then((res) => res.data);
 };
 

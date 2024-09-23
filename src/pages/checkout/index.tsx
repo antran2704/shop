@@ -14,7 +14,6 @@ import ImageCus from "~/components/Image";
 import {
    ICartItem,
    ICoupon,
-   IInforCheckout,
    IMethodPayment,
    IQueryParam,
    NextPageWithLayout,
@@ -32,18 +31,29 @@ import { createPayment, getDiscount } from "~/api-client";
 import { toast } from "react-toastify";
 import { AiFillCloseCircle } from "react-icons/ai";
 import { InputText, InputEmail, InputNumber } from "~/components/InputField";
-import { IOrderCreate, ItemOrderCreate, Order } from "~/interfaces/order";
-import { EOrderStatus, EPaymentMethod, EPaymentStatus } from "~/enums";
+import {
+   ICreateOrder,
+   IOrderProduct,
+   IOrder,
+   IOrderAddress,
+} from "~/interfaces/order";
+import {
+   ENUM_ORDER_STATUS,
+   ENUM_PAYMENT_METHOD,
+   ENUM_PAYMENT_STATUS,
+   ENUM_PROCESS_ORDER,
+   EPaymentStatus,
+} from "~/enums";
 import { createOrder, updatePaymentStatusOrder } from "~/api-client/order";
-import { CART_KEY, checkInventoryItems, getCartItems } from "~/api-client/cart";
+import { CART_KEY, checkInventoryItems } from "~/api-client/cart";
 import paymentMethods from "~/data/paymentMethods";
 import { SpinLoading } from "~/components/Loading";
 
-const initInforCustomer: IInforCheckout = {
-   email: "",
-   phoneNumber: "",
-   name: "",
-   address: "",
+const initInforCustomer: IOrderAddress = {
+   shipping_name: "",
+   shipping_address: "",
+   shipping_phone: "",
+   shipping_email: "",
 };
 
 const Layout = DefaultLayout;
@@ -53,15 +63,12 @@ const CheckOut: NextPageWithLayout = () => {
 
    const { infor } = useAppSelector((state) => state.user);
    const { cart, loadingCart, mutate } = useCart(!!infor._id);
-
-   const { cart_products } = useCartItems(!!cart, cart._id as string, {
-      refreshWhenHidden: true,
-   });
+   const { cart_products } = useCartItems(!!cart, cart?._id as string);
 
    const [inforCustomer, setInforCustomer] =
-      useState<IInforCheckout>(initInforCustomer);
+      useState<IOrderAddress>(initInforCustomer);
 
-   const [invalidFields, setInvalidFields] = useState<(keyof IInforCheckout)[]>(
+   const [invalidFields, setInvalidFields] = useState<(keyof IOrderAddress)[]>(
       [],
    );
 
@@ -76,9 +83,8 @@ const CheckOut: NextPageWithLayout = () => {
    const [coupon, setCoupon] = useState<ICoupon | null>(null);
    const [couponCode, setCouponCode] = useState<string | null>(null);
 
-   const [paymentMethod, setPaymentMethod] = useState<EPaymentMethod | null>(
-      null,
-   );
+   const [paymentMethod, setPaymentMethod] =
+      useState<ENUM_PAYMENT_METHOD | null>(null);
 
    const [isSaveInfor, setSaveInfor] = useState<boolean>(false);
 
@@ -97,16 +103,13 @@ const CheckOut: NextPageWithLayout = () => {
    };
 
    const handleCheckInventoryItems = async () => {
-      try {
-         await checkInventoryItems(cart.cart_userId as string, cart);
-      } catch (error) {
+      await checkInventoryItems(cart._id as string).catch(() => {
          router.push("/cart");
-         console.log(error);
-      }
+      });
    };
 
    const handleChangeInforCus = (name: string, value: string): void => {
-      if (invalidFields.includes(name as keyof IInforCheckout)) {
+      if (invalidFields.includes(name as keyof IOrderAddress)) {
          const newFields = invalidFields.filter(
             (field: string) => field !== name,
          );
@@ -117,7 +120,7 @@ const CheckOut: NextPageWithLayout = () => {
    };
 
    const handleChangePhoneNumber = (name: string, value: number): void => {
-      if (invalidFields.includes(name as keyof IInforCheckout)) {
+      if (invalidFields.includes(name as keyof IOrderAddress)) {
          const newFields = invalidFields.filter(
             (field: string) => field !== name,
          );
@@ -127,21 +130,24 @@ const CheckOut: NextPageWithLayout = () => {
       setInforCustomer({ ...inforCustomer, [name]: value.toString() });
    };
 
-   const handlePaymentMethod = async (order: Order, method: EPaymentMethod) => {
+   const handlePaymentMethod = async (
+      order: IOrder,
+      method: ENUM_PAYMENT_METHOD,
+   ) => {
       try {
          switch (method) {
-            case EPaymentMethod.COD:
+            case ENUM_PAYMENT_METHOD.COD:
                await updatePaymentStatusOrder(order.order_id, {
                   payment_status: EPaymentStatus.SUCCESS,
                });
                await router.push(`/checkout/${order.order_id}`);
                break;
 
-            case EPaymentMethod.BANKING:
+            case ENUM_PAYMENT_METHOD.BANKING:
                await router.push(`/checkout/${order.order_id}`);
                break;
 
-            case EPaymentMethod.VNPAY:
+            case ENUM_PAYMENT_METHOD.VNPAY:
                await createPayment(order).then((urlPayment) => {
                   router.push(urlPayment.payload);
                });
@@ -192,11 +198,13 @@ const CheckOut: NextPageWithLayout = () => {
          localStorage.setItem("inforCus", JSON.stringify(inforCustomer));
       }
 
-      const items = cart_products.map((item: ICartItem) => {
+      const items: IOrderProduct[] = cart_products.map((item: ICartItem) => {
          if (item.variation) {
             return {
-               product: item.product._id,
-               variation: item.variation._id,
+               product_id: item.product._id,
+               model_id: item.variation._id,
+               image: item.product.thumbnail,
+               model_name: item.variation.title,
                price: item.price,
                promotion_price: item.promotion_price,
                quantity: item.quantity,
@@ -204,25 +212,44 @@ const CheckOut: NextPageWithLayout = () => {
          }
 
          return {
-            product: item.product._id,
-            variation: null,
+            product_id: item.product._id,
+            model_id: item.product._id,
+            image: item.product.thumbnail,
+            model_name: item.product.title,
             price: item.price,
             promotion_price: item.promotion_price,
             quantity: item.quantity,
          };
       });
 
-      const dataOrder: IOrderCreate = {
-         items: items as ItemOrderCreate[],
-         shipping_cost: shippingCost,
+      const dataOrder: ICreateOrder = {
+         items,
          sub_total: subTotal,
          total,
          user_id: infor._id,
-         user_infor: inforCustomer,
-         discount: coupon,
-         status: EOrderStatus.PENDING,
-         payment_status: EPaymentStatus.PENDING,
-         payment_method: paymentMethod as EPaymentMethod,
+         address: inforCustomer,
+         // discount: coupon,
+         discount: null,
+         order_status: ENUM_ORDER_STATUS.PENDING,
+         payment_status: ENUM_PAYMENT_STATUS.PENDING,
+         payment_method: paymentMethod as ENUM_PAYMENT_METHOD,
+         cancel: {
+            canCancel: true,
+            content: "",
+         },
+         currency: "",
+         note: "",
+         processing_info: [
+            {
+               label: ENUM_PROCESS_ORDER.ORDER_TIME,
+               value: new Date().toISOString(),
+            },
+         ],
+         shipping: {
+            shipping_fee: 0,
+            shipping_name: "Antran express",
+         },
+         total_before_discount: 0,
       };
 
       try {
@@ -309,7 +336,7 @@ const CheckOut: NextPageWithLayout = () => {
    }, [subTotal, shippingCost, coupon]);
 
    useEffect(() => {
-      const inforCus: IInforCheckout | null =
+      const inforCus: IOrderAddress | null =
          JSON.parse(localStorage.getItem("inforCus") as string) || null;
 
       if (inforCus) {
@@ -320,8 +347,8 @@ const CheckOut: NextPageWithLayout = () => {
       if (!inforCus && infor._id) {
          setInforCustomer({
             ...inforCustomer,
-            email: infor.email,
-            name: infor.name,
+            shipping_email: infor.email,
+            shipping_name: infor.name,
          });
       }
    }, [infor]);
@@ -346,11 +373,12 @@ const CheckOut: NextPageWithLayout = () => {
       <div>
          <Header
             title="Check out"
-            breadcrumbs={[
-               { label: "Home", url_path: "/" },
-               { label: "Cart", url_path: "/cart" },
-               { label: "Check out", url_path: "/checkout" },
-            ]}
+            breadcrumbs={{
+               items: [
+                  { title: "Giỏ hàng", path: "/cart" },
+                  { title: "Check out", path: "/checkout" },
+               ],
+            }}
          />
 
          <div className="container__cus">
@@ -365,10 +393,12 @@ const CheckOut: NextPageWithLayout = () => {
                      <div className="flex lg:flex-nowrap flex-wrap w-full items-center justify-between gap-3">
                         <InputEmail
                            name="email"
-                           value={inforCustomer.email}
+                           value={inforCustomer.shipping_email}
                            placeholder="Email..."
                            error={
-                              invalidFields.includes("email") ? true : false
+                              invalidFields.includes("shipping_email")
+                                 ? true
+                                 : false
                            }
                            className="h-10 px-4 border border-[#e5e5e5] rounded-md"
                            width="lg:w-8/12 w-full"
@@ -378,11 +408,11 @@ const CheckOut: NextPageWithLayout = () => {
                         <InputNumber
                            name="phoneNumber"
                            error={
-                              invalidFields.includes("phoneNumber")
+                              invalidFields.includes("shipping_phone")
                                  ? true
                                  : false
                            }
-                           value={inforCustomer.phoneNumber}
+                           value={inforCustomer.shipping_phone}
                            placeholder="Phone number..."
                            className="h-10 px-4 border border-[#e5e5e5] rounded-md"
                            width="lg:w-4/12 w-full"
@@ -393,8 +423,12 @@ const CheckOut: NextPageWithLayout = () => {
                      <div className="flex lg:flex-nowrap flex-wrap w-full items-center justify-between gap-3">
                         <InputText
                            name="name"
-                           error={invalidFields.includes("name") ? true : false}
-                           value={inforCustomer.name}
+                           error={
+                              invalidFields.includes("shipping_name")
+                                 ? true
+                                 : false
+                           }
+                           value={inforCustomer.shipping_name}
                            placeholder="Full name..."
                            className="h-10 px-4 border border-[#e5e5e5] rounded-md"
                            required={true}
@@ -405,9 +439,11 @@ const CheckOut: NextPageWithLayout = () => {
                         <InputText
                            name="address"
                            error={
-                              invalidFields.includes("address") ? true : false
+                              invalidFields.includes("shipping_address")
+                                 ? true
+                                 : false
                            }
-                           value={inforCustomer.address}
+                           value={inforCustomer.shipping_address}
                            placeholder="Address..."
                            className="h-10 px-4 border border-[#e5e5e5] rounded-md"
                            required={true}
