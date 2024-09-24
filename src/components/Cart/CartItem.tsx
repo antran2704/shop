@@ -12,7 +12,6 @@ import useDebounce from "~/hooks/useDebounce";
 import { toast } from "react-toastify";
 import { useSWRConfig } from "swr";
 import ModalConfirm from "../Modal/ModalConfirm";
-import CartItemLoading from "./CartItemLoading";
 import { useCart } from "~/hooks/useCart";
 
 interface Props {

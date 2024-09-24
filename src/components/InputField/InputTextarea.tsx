@@ -4,7 +4,6 @@ import { ITextarea } from "~/interfaces";
 
 const InputTextareaField: FC<ITextarea> = (props: ITextarea) => {
    const {
-      id,
       title,
       className,
       name,
@@ -19,23 +18,8 @@ const InputTextareaField: FC<ITextarea> = (props: ITextarea) => {
       enableEnter = false,
       error,
       onEnter,
-      getValue,
+      onChange,
    } = props;
-
-   const handleChangeValue = (e: FormEvent<HTMLTextAreaElement>) => {
-      if (readonly) return;
-
-      const name = e.currentTarget.name;
-      const value = e.currentTarget.value;
-
-      if (getValue && id) {
-         getValue(name, value, id);
-      }
-
-      if (getValue) {
-         getValue(name, value);
-      }
-   };
 
    const onKeyUp = (e: KeyboardEvent<HTMLTextAreaElement>) => {
       if (readonly) return;
@@ -71,7 +55,7 @@ const InputTextareaField: FC<ITextarea> = (props: ITextarea) => {
             }`}
             name={name}
             value={value}
-            onInput={handleChangeValue}
+            onChange={onChange}
             onKeyUp={(e) => {
                if (enableEnter) {
                   onKeyUp(e);

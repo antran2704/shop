@@ -1,10 +1,9 @@
-import { FC, FormEvent, KeyboardEvent, memo } from "react";
+import { forwardRef, KeyboardEvent, LegacyRef } from "react";
 import { TippyInfor } from "../Tippy";
 import { IInputText } from "~/interfaces";
 
-const InputEmail: FC<IInputText> = (props: IInputText) => {
+const InputEmail = (props: IInputText, ref: LegacyRef<HTMLInputElement>) => {
    const {
-      id,
       title,
       width,
       className,
@@ -16,24 +15,10 @@ const InputEmail: FC<IInputText> = (props: IInputText) => {
       required = false,
       enableEnter = false,
       error,
+      errorMsg,
       onEnter,
-      getValue,
+      onChange,
    } = props;
-
-   const handleChangeValue = (e: FormEvent<HTMLInputElement>) => {
-      if (readonly) return;
-
-      const name = e.currentTarget.name;
-      const value = e.currentTarget.value;
-
-      if (getValue && id) {
-         getValue(name, value, id);
-      }
-
-      if (getValue) {
-         getValue(name, value);
-      }
-   };
 
    const onKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
       if (readonly) return;
@@ -69,7 +54,8 @@ const InputEmail: FC<IInputText> = (props: IInputText) => {
                   onKeyUp(e);
                }
             }}
-            onChange={handleChangeValue}
+            ref={ref}
+            onChange={onChange}
             type="email"
             className={`w-full ${className ? className : ""} ${
                error && "border-error"
@@ -79,8 +65,10 @@ const InputEmail: FC<IInputText> = (props: IInputText) => {
                   : ""
             }`}
          />
+
+         {error && <p className="text-sm text-red-500">{errorMsg}</p>}
       </div>
    );
 };
 
-export default memo(InputEmail);
+export default forwardRef(InputEmail);

@@ -1,13 +1,15 @@
 import Link from "next/link";
 import {
    useState,
-   FormEvent,
    useEffect,
    Fragment,
    ReactElement,
    useMemo,
    useCallback,
 } from "react";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { object, string } from "yup";
+import { useForm } from "react-hook-form";
 
 import Header from "~/components/Header";
 import ImageCus from "~/components/Image";
@@ -30,7 +32,7 @@ import { useRouter } from "next/router";
 import { createPayment, getDiscount } from "~/api-client";
 import { toast } from "react-toastify";
 import { AiFillCloseCircle } from "react-icons/ai";
-import { InputText, InputEmail, InputNumber } from "~/components/InputField";
+import { InputText } from "~/components/InputField";
 import {
    ICreateOrder,
    IOrderProduct,
@@ -42,12 +44,15 @@ import {
    ENUM_PAYMENT_METHOD,
    ENUM_PAYMENT_STATUS,
    ENUM_PROCESS_ORDER,
-   EPaymentStatus,
 } from "~/enums";
 import { createOrder, updatePaymentStatusOrder } from "~/api-client/order";
 import { CART_KEY, checkInventoryItems } from "~/api-client/cart";
-import paymentMethods from "~/data/paymentMethods";
+
 import { SpinLoading } from "~/components/Loading";
+
+import { InfoFormOrder } from "./components";
+import paymentMethods from "~/data/paymentMethods";
+import hanldeErrorAxios from "~/helpers/handleErrorAxios";
 
 const initInforCustomer: IOrderAddress = {
    shipping_name: "",
@@ -55,6 +60,16 @@ const initInforCustomer: IOrderAddress = {
    shipping_phone: "",
    shipping_email: "",
 };
+
+const schema = object().shape({
+   shipping_name: string().trim().required("Vui lòng nhập"),
+   shipping_address: string().trim().required("Vui lòng nhập"),
+   shipping_phone: string().trim().required("Vui lòng nhập"),
+   shipping_email: string()
+      .trim()
+      .email("Không đúng định dạng email")
+      .required("Vui lòng nhập"),
+});
 
 const Layout = DefaultLayout;
 
@@ -65,12 +80,10 @@ const CheckOut: NextPageWithLayout = () => {
    const { cart, loadingCart, mutate } = useCart(!!infor._id);
    const { cart_products } = useCartItems(!!cart, cart?._id as string);
 
-   const [inforCustomer, setInforCustomer] =
-      useState<IOrderAddress>(initInforCustomer);
-
-   const [invalidFields, setInvalidFields] = useState<(keyof IOrderAddress)[]>(
-      [],
-   );
+   const infoForm = useForm<IOrderAddress>({
+      defaultValues: initInforCustomer,
+      resolver: yupResolver(schema) as any,
+   });
 
    const [selectPayment, setSelectPayment] = useState<IMethodPayment | null>(
       null,
@@ -88,94 +101,49 @@ const CheckOut: NextPageWithLayout = () => {
 
    const [isSaveInfor, setSaveInfor] = useState<boolean>(false);
 
-   const handleCheckFields: <T>(
-      fields: IQueryParam<T>,
-   ) => (keyof typeof fields)[] = (fields) => {
-      const invalids: (keyof typeof fields)[] = [];
-
-      for (const [key, value] of Object.entries(fields)) {
-         if (!value) {
-            invalids.push(key as keyof typeof fields);
-         }
-      }
-
-      return invalids;
-   };
-
    const handleCheckInventoryItems = async () => {
       await checkInventoryItems(cart._id as string).catch(() => {
          router.push("/cart");
       });
    };
 
-   const handleChangeInforCus = (name: string, value: string): void => {
-      if (invalidFields.includes(name as keyof IOrderAddress)) {
-         const newFields = invalidFields.filter(
-            (field: string) => field !== name,
-         );
-         setInvalidFields(newFields);
-      }
-
-      setInforCustomer({ ...inforCustomer, [name]: value });
-   };
-
-   const handleChangePhoneNumber = (name: string, value: number): void => {
-      if (invalidFields.includes(name as keyof IOrderAddress)) {
-         const newFields = invalidFields.filter(
-            (field: string) => field !== name,
-         );
-         setInvalidFields(newFields);
-      }
-
-      setInforCustomer({ ...inforCustomer, [name]: value.toString() });
-   };
-
    const handlePaymentMethod = async (
       order: IOrder,
       method: ENUM_PAYMENT_METHOD,
    ) => {
-      try {
-         switch (method) {
-            case ENUM_PAYMENT_METHOD.COD:
-               await updatePaymentStatusOrder(order.order_id, {
-                  payment_status: EPaymentStatus.SUCCESS,
-               });
-               await router.push(`/checkout/${order.order_id}`);
-               break;
+      switch (method) {
+         case ENUM_PAYMENT_METHOD.COD:
+            await updatePaymentStatusOrder(
+               order.order_id,
+               ENUM_PAYMENT_STATUS.SUCCESS,
+            ).catch((err) => err);
+            await router.push(`/checkout/${order.order_id}`);
+            break;
 
-            case ENUM_PAYMENT_METHOD.BANKING:
-               await router.push(`/checkout/${order.order_id}`);
-               break;
+         case ENUM_PAYMENT_METHOD.BANKING:
+            await router.push(`/checkout/${order.order_id}`);
+            break;
 
-            case ENUM_PAYMENT_METHOD.VNPAY:
-               await createPayment(order).then((urlPayment) => {
+         case ENUM_PAYMENT_METHOD.VNPAY:
+            await createPayment(order)
+               .then((urlPayment) => {
                   router.push(urlPayment.payload);
-               });
-               break;
+               })
+               .catch((err) => err);
+            break;
 
-            default:
-               toast.error("Phương thức thanh toán không hợp lệ", {
-                  position: toast.POSITION.TOP_RIGHT,
-               });
-         }
-
-         mutate(CART_KEY.CART_USER);
-         mutate(CART_KEY.CART_ITEMS);
-      } catch (error) {
-         console.log(error);
+         default:
+            toast.error("Phương thức thanh toán không hợp lệ", {
+               position: toast.POSITION.TOP_RIGHT,
+            });
       }
+
+      mutate(CART_KEY.CART_USER);
+      mutate(CART_KEY.CART_ITEMS);
    };
 
-   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-
+   const onSubmit = async (values: IOrderAddress) => {
       if (!infor._id) return;
-
-      const fields = handleCheckFields(inforCustomer);
-
-      if (fields.length > 0) {
-         return setInvalidFields(fields);
-      }
 
       if (!paymentMethod) {
          toast.error("Vui lòng lựa chọn phương thức thanh toán", {
@@ -195,7 +163,7 @@ const CheckOut: NextPageWithLayout = () => {
       }
 
       if (isSaveInfor) {
-         localStorage.setItem("inforCus", JSON.stringify(inforCustomer));
+         localStorage.setItem("inforCus", JSON.stringify(values));
       }
 
       const items: IOrderProduct[] = cart_products.map((item: ICartItem) => {
@@ -213,7 +181,7 @@ const CheckOut: NextPageWithLayout = () => {
 
          return {
             product_id: item.product._id,
-            model_id: item.product._id,
+            model_id: null,
             image: item.product.thumbnail,
             model_name: item.product.title,
             price: item.price,
@@ -227,7 +195,7 @@ const CheckOut: NextPageWithLayout = () => {
          sub_total: subTotal,
          total,
          user_id: infor._id,
-         address: inforCustomer,
+         address: values,
          // discount: coupon,
          discount: null,
          order_status: ENUM_ORDER_STATUS.PENDING,
@@ -235,7 +203,7 @@ const CheckOut: NextPageWithLayout = () => {
          payment_method: paymentMethod as ENUM_PAYMENT_METHOD,
          cancel: {
             canCancel: true,
-            content: "",
+            content: null,
          },
          currency: "",
          note: "",
@@ -262,49 +230,36 @@ const CheckOut: NextPageWithLayout = () => {
             toast.error("Lỗi hệ thống, vui lòng thử lại sau", {
                position: toast.POSITION.TOP_RIGHT,
             });
-         }
 
-         const response = error.response;
+            const { message, status } = hanldeErrorAxios(error);
 
-         if (response.status === 400) {
-            if (response.data.message === "No item") {
+            if (status === 400 && message === "No item") {
                mutate(CART_KEY.CART_USER);
                mutate(CART_KEY.CART_ITEMS);
                router.push("/cart");
             }
          }
-
-         console.log(error);
       }
    };
 
    const handleUseCoupon = useCallback(async () => {
       if (!couponCode || !infor._id) return;
 
-      try {
-         const { status, payload } = await getDiscount(
-            couponCode,
-            infor._id,
-            subTotal,
-         );
-
-         if (status === 200) {
-            console.log(payload);
+      await getDiscount(couponCode, infor._id, subTotal)
+         .then((payload) => {
             setCoupon(payload);
-         }
-      } catch (error: any) {
-         console.log(error);
+         })
+         .catch((error) => {
+            if (!error.response) {
+               toast.error("Lỗi hệ thống, vui lòng thử lại sau", {
+                  position: toast.POSITION.TOP_RIGHT,
+               });
+            }
 
-         if (!error.response) {
-            toast.error("Lỗi hệ thống, vui lòng thử lại sau", {
+            toast.error("Mã khuyến mãi không hợp lệ", {
                position: toast.POSITION.TOP_RIGHT,
             });
-         }
-
-         toast.error("Mã khuyến mãi không hợp lệ", {
-            position: toast.POSITION.TOP_RIGHT,
          });
-      }
 
       setCouponCode(null);
    }, [couponCode]);
@@ -335,23 +290,23 @@ const CheckOut: NextPageWithLayout = () => {
       return result;
    }, [subTotal, shippingCost, coupon]);
 
-   useEffect(() => {
-      const inforCus: IOrderAddress | null =
-         JSON.parse(localStorage.getItem("inforCus") as string) || null;
+   // useEffect(() => {
+   //    const inforCus: IOrderAddress | null =
+   //       JSON.parse(localStorage.getItem("inforCus") as string) || null;
 
-      if (inforCus) {
-         setInforCustomer(inforCus);
-         setSaveInfor(true);
-      }
+   //    if (inforCus) {
+   //       setInforCustomer(inforCus);
+   //       setSaveInfor(true);
+   //    }
 
-      if (!inforCus && infor._id) {
-         setInforCustomer({
-            ...inforCustomer,
-            shipping_email: infor.email,
-            shipping_name: infor.name,
-         });
-      }
-   }, [infor]);
+   //    if (!inforCus && infor._id) {
+   //       setInforCustomer({
+   //          ...inforCustomer,
+   //          shipping_email: infor.email,
+   //          shipping_name: infor.name,
+   //       });
+   //    }
+   // }, [infor]);
 
    useEffect(() => {
       if (cart && cart.cart_count <= 0) {
@@ -387,7 +342,7 @@ const CheckOut: NextPageWithLayout = () => {
                   <h3 className="lg:text-2xl md:text-xl text-lg font-medium mb-3">
                      Thông tin
                   </h3>
-                  <form
+                  {/* <form
                      onSubmit={(e) => handleSubmit(e)}
                      className="flex flex-col gap-3">
                      <div className="flex lg:flex-nowrap flex-wrap w-full items-center justify-between gap-3">
@@ -461,7 +416,7 @@ const CheckOut: NextPageWithLayout = () => {
                         <label
                            className="cursor-pointer"
                            htmlFor="checkSaveInfor">
-                           Save this information for next time
+                           Lưu thông tin cho lần thanh toán tiếp theo
                         </label>
                      </div>
 
@@ -529,21 +484,100 @@ const CheckOut: NextPageWithLayout = () => {
                            )}
                         </ul>
                      </div>
+                  </form> */}
+                  <InfoFormOrder form={infoForm} />
 
-                     <div className="flex lg:flex-nowrap flex-wrap items-center w-full mt-4 sm:gap-5 gap-2">
-                        <PrimaryButton
-                           title="Return your cart"
-                           type="LINK"
-                           className="sm:w-auto w-full text-bsae font-medium text-white whitespace-nowrap bg-dark px-4 py-2 opacity-80 hover:opacity-100 transition-all ease-linear border border-transparent rounded"
-                           path="/cart"
-                        />
-                        <PrimaryButton
-                           title="Continute payment"
-                           type="BUTTON"
-                           className="sm:w-auto w-full text-base font-medium text-white whitespace-nowrap bg-primary px-4 py-2 opacity-90 hover:opacity-100 gap-2 border border-primary rounded"
-                        />
-                     </div>
-                  </form>
+                  <div className="flex items-center w-full mt-3 cursor-pointer gap-2">
+                     <input
+                        onChange={(e) => setSaveInfor(e.target.checked)}
+                        checked={isSaveInfor}
+                        className="w-5 h-5"
+                        type="checkbox"
+                        id="checkSaveInfor"
+                     />
+                     <label className="cursor-pointer" htmlFor="checkSaveInfor">
+                        Lưu thông tin cho lần thanh toán tiếp theo
+                     </label>
+                  </div>
+
+                  <div>
+                     <h4 className="md:text-lg text-base font-medium pt-5 pb-2">
+                        Phương thức thanh toán
+                     </h4>
+                     <ul className="border-2 rounded-md">
+                        {paymentMethods.map(
+                           (method: IMethodPayment, index: number) => (
+                              <li key={method.id}>
+                                 <label
+                                    htmlFor={`method-${method.id}`}
+                                    onClick={() => {
+                                       setSelectPayment(method);
+                                       setPaymentMethod(method.type);
+                                    }}
+                                    className={`flex items-center gap-2 px-4 py-3 ${
+                                       index !== paymentMethods.length - 1
+                                          ? "border-b"
+                                          : ""
+                                    } cursor-pointer`}>
+                                    <input
+                                       className="min-w-5 min-h-5 w-5 h-5"
+                                       type="radio"
+                                       name="payment_method"
+                                       id={`method-${method.id}`}
+                                    />
+                                    <div className="flex items-center gap-2">
+                                       {method.icon && (
+                                          <ImageCus
+                                             src={method.icon}
+                                             title="payment"
+                                             alt="payment"
+                                             className="w-10 h-10 min-w-10 min-h-10"
+                                          />
+                                       )}
+                                       <p className="block md:text-base text-sm w-full cursor-pointer">
+                                          {method.title}
+                                       </p>
+                                    </div>
+                                 </label>
+                                 {selectPayment?.id === 3 &&
+                                    method.id === 3 && (
+                                       <ul className="px-5 py-2 border-t">
+                                          <li className="lg:text-base text-sm">
+                                             Ngân hàng: ACB
+                                          </li>
+                                          <li className="lg:text-base text-sm">
+                                             STK: 6823577
+                                          </li>
+                                          <li className="lg:text-base text-sm">
+                                             Chủ tài khoản: PHAM TRAN GIA AN
+                                          </li>
+                                          <li className="lg:text-base text-sm">
+                                             Sau khi chuyển khoản thành công,
+                                             chụp màn hình, gửi vào messenger
+                                             hoặc zalo cho Antran Shop để kiểm
+                                             tra thông tin chuyển khoản.
+                                          </li>
+                                       </ul>
+                                    )}
+                              </li>
+                           ),
+                        )}
+                     </ul>
+                  </div>
+                  <div className="flex lg:flex-nowrap flex-wrap items-center w-full mt-4 sm:gap-5 gap-2">
+                     <PrimaryButton
+                        title="Giỏ hàng"
+                        type="LINK"
+                        className="sm:w-auto w-full text-bsae font-medium text-white whitespace-nowrap bg-gray-500 px-4 py-2 opacity-80 hover:opacity-100 transition-all ease-linear border border-transparent rounded"
+                        path="/cart"
+                     />
+                     <PrimaryButton
+                        title="Mua hàng"
+                        type="BUTTON"
+                        onClick={infoForm.handleSubmit(onSubmit)}
+                        className="sm:w-auto w-full text-base font-medium text-white whitespace-nowrap bg-primary px-4 py-2 opacity-90 hover:opacity-100 gap-2 border border-primary rounded"
+                     />
+                  </div>
                </div>
                <div className="lg:w-5/12 w-full">
                   {cart && !loadingCart && (
@@ -556,7 +590,7 @@ const CheckOut: NextPageWithLayout = () => {
                                     className="flex items-center justify-between w-full pb-5 border-b border-borderColor gap-4">
                                     <div className="flex items-center gap-5">
                                        <Link
-                                          href={`/collections/product/${item.product._id}.${item.product.slug}`}
+                                          href={`/product/${item.product.slug}.${item.product._id}`}
                                           className="relative">
                                           <span className="flex items-center justify-center absolute -top-2 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
                                              {item.quantity}
@@ -645,7 +679,7 @@ const CheckOut: NextPageWithLayout = () => {
                         </ul>
 
                         <div className="flex items-center py-5 border-b gap-5">
-                           <InputText
+                           {/* <InputText
                               name="couponCode"
                               placeholder="Coupon code..."
                               className="h-10 px-4 border border-[#e5e5e5] rounded-md"
@@ -655,7 +689,7 @@ const CheckOut: NextPageWithLayout = () => {
                               getValue={(name: string, value: string) =>
                                  setCouponCode(value.toUpperCase())
                               }
-                           />
+                           /> */}
                            <PrimaryButton
                               title="Coupon"
                               type="BUTTON"

@@ -1,10 +1,13 @@
-import { ChangeEvent, FC, KeyboardEvent, memo } from "react";
+import { ChangeEvent, forwardRef, KeyboardEvent, LegacyRef } from "react";
 import { TippyInfor } from "../Tippy";
 import { IInputNumber } from "~/interfaces";
 import { revertPriceToString } from "~/helpers/number/fomatterCurrency";
 import handleCheckValidNumber from "~/helpers/number";
 
-const InputNumberField: FC<IInputNumber> = (props: IInputNumber) => {
+const InputNumberField = (
+   props: IInputNumber,
+   ref: LegacyRef<HTMLInputElement>,
+) => {
    const {
       title,
       className,
@@ -17,26 +20,21 @@ const InputNumberField: FC<IInputNumber> = (props: IInputNumber) => {
       required = false,
       enableEnter = false,
       error,
+      errorMsg,
       onEnter,
-      getValue,
+      onChange,
    } = props;
 
    const handleChangeValue = (e: ChangeEvent<HTMLInputElement>) => {
       if (readonly) return;
 
-      const name = e.target.name;
       const value = Number(revertPriceToString(e.target.value));
 
       const valid = handleCheckValidNumber(value);
 
-      if (name && getValue) {
-         if (valid) {
-            getValue(name, value);
-         }
-         if (value <= 0) {
-            getValue(name, 0);
-         }
-      }
+      if (valid && onChange) onChange(value);
+
+      if (value <= 0 && onChange) onChange(0);
    };
 
    const onKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -68,6 +66,7 @@ const InputNumberField: FC<IInputNumber> = (props: IInputNumber) => {
             value={value}
             placeholder={placeholder}
             readOnly={readonly}
+            ref={ref}
             onKeyUp={(e) => {
                if (enableEnter) {
                   onKeyUp(e);
@@ -76,15 +75,16 @@ const InputNumberField: FC<IInputNumber> = (props: IInputNumber) => {
             onInput={handleChangeValue}
             type="text"
             className={`w-full ${className ? className : ""} ${
-               error && "border-error"
+               error && "border-red-500"
             } ${
                readonly
                   ? "pointer-events-none cursor-not-allowed opacity-80"
                   : ""
             }`}
          />
+         {error && <p className="text-sm text-red-500">{errorMsg}</p>}
       </div>
    );
 };
 
-export default memo(InputNumberField);
+export default forwardRef(InputNumberField);

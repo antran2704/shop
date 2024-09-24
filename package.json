@@ -34,6 +34,7 @@
    },
    "dependencies": {
       "@clerk/nextjs": "^4.29.5",
+      "@hookform/resolvers": "^3.9.0",
       "@reduxjs/toolkit": "^1.9.3",
       "@tippyjs/react": "^4.2.6",
       "@types/node": "18.15.3",
@@ -52,6 +53,7 @@
       "rc-pagination": "^3.3.1",
       "react": "18.2.0",
       "react-dom": "18.2.0",
+      "react-hook-form": "^7.53.0",
       "react-icons": "^4.8.0",
       "react-quill": "^2.0.0",
       "react-redux": "^8.0.5",
@@ -60,7 +62,8 @@
       "swiper": "^9.1.1",
       "swr": "^2.2.4",
       "typescript": "4.9.5",
-      "uuid": "^9.0.1"
+      "uuid": "^9.0.1",
+      "yup": "^1.4.0"
    },
    "devDependencies": {
       "@commitlint/cli": "^19.5.0",

@@ -3,9 +3,7 @@ import {
    ENUM_PAYMENT_METHOD,
    ENUM_PAYMENT_STATUS,
    ENUM_PROCESS_ORDER,
-   ESelectOrderStatus,
 } from "~/enums";
-import { ICartItem } from "../cart";
 
 // interface ItemOrder extends ICartItem {
 //    price: number;
@@ -30,7 +28,7 @@ interface IOrderAddress {
 
 interface IOrderCancel {
    canCancel: boolean;
-   content: string;
+   content: string | null;
 }
 
 interface Discount {
@@ -44,7 +42,7 @@ interface Discount {
 
 interface IOrderProduct {
    product_id: string;
-   model_id: string;
+   model_id: string | null;
    image: string;
    model_name: string;
    price: number;
@@ -98,11 +96,6 @@ interface ICreateOrder {
    cancel: IOrderCancel;
    note: string;
 }
-
-// interface TypeShowOrder {
-//    title: string;
-//    type: ESelectOrderStatus;
-// }
 
 export type {
    IOrder,

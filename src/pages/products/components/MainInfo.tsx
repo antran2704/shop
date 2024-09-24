@@ -279,7 +279,7 @@ const MainInfo = (props: Props) => {
                         </span>
                         <div className="flex items-center gap-5">
                            <ProductQuantity
-                              total={totalProduct}
+                              initValue={totalProduct}
                               max={productStock.inventory}
                               onChange={(value) => setTotalProduct(value)}
                            />

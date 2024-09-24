@@ -1,53 +1,30 @@
-import { FC, FormEvent, KeyboardEvent, memo } from "react";
+import { forwardRef, KeyboardEvent, LegacyRef } from "react";
 import { TippyInfor } from "../Tippy";
 import { IInputText } from "~/interfaces";
 import { AiOutlineClose } from "react-icons/ai";
 
-const InputText: FC<IInputText> = (props: IInputText) => {
+const InputText = (props: IInputText, ref: LegacyRef<HTMLInputElement>) => {
    const {
-      id,
       title,
       width,
       className,
-      name,
       placeholder,
       value,
       infor = null,
       readonly = false,
-      required = false,
       enableEnter = false,
       enableClearAll = false,
       error,
+      errorMsg,
       onEnter,
       onClear,
-      getValue,
+      onChange,
    } = props;
 
    const onClearAll = () => {
       if (readonly) return;
 
-      if (getValue && id) {
-         getValue(name, "", id);
-      }
-
-      if (getValue) {
-         getValue(name, "");
-      }
-   };
-
-   const handleChangeValue = (e: FormEvent<HTMLInputElement>) => {
-      if (readonly) return;
-
-      const name = e.currentTarget.name;
-      const value = e.currentTarget.value;
-
-      if (getValue && id) {
-         getValue(name, value, id);
-      }
-
-      if (getValue) {
-         getValue(name, value);
-      }
+      if (onClear) onClear();
    };
 
    const onKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -62,9 +39,7 @@ const InputText: FC<IInputText> = (props: IInputText) => {
       <div className={`${width ? width : "w-full"}`}>
          {title && (
             <div className="flex items-center mb-1 gap-2">
-               <span
-                  id={name}
-                  className="block text-base text-[#1E1E1E] font-medium">
+               <span className="block text-base text-[#1E1E1E] font-medium">
                   {title}
                </span>
 
@@ -74,26 +49,26 @@ const InputText: FC<IInputText> = (props: IInputText) => {
 
          <div className="relative">
             <input
-               required={required}
-               name={name}
                value={value}
                placeholder={placeholder}
-               readOnly={readonly}
+               ref={ref}
+               onChange={onChange}
                onKeyUp={(e) => {
                   if (enableEnter) {
                      onKeyUp(e);
                   }
                }}
-               onChange={handleChangeValue}
                type="text"
                className={`w-full ${className ? className : ""} ${
-                  error && "border-red-600"
+                  error && "border-red-500"
                } ${
                   readonly
                      ? "pointer-events-none cursor-not-allowed opacity-80"
                      : ""
                }`}
             />
+
+            {error && <p className="text-sm text-red-500">{errorMsg}</p>}
 
             {enableClearAll && (
                <AiOutlineClose
@@ -106,4 +81,4 @@ const InputText: FC<IInputText> = (props: IInputText) => {
    );
 };
 
-export default memo(InputText);
+export default forwardRef(InputText);

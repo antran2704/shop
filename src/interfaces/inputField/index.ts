@@ -1,5 +1,6 @@
+import { FormEvent } from "react";
+
 interface IInput {
-   id?: string | null;
    title?: string;
    width?: string;
    className?: string;
@@ -8,6 +9,7 @@ interface IInput {
    placeholder?: string;
    value?: string;
    error?: boolean;
+   errorMsg?: string;
    readonly?: boolean;
    enableEnter?: boolean;
    enableClearAll?: boolean;
@@ -18,17 +20,17 @@ interface IInput {
 }
 
 interface IInputText extends IInput {
-   getValue?: (name: string, value: string, id?: string) => void;
+   onChange?: (e: FormEvent<HTMLInputElement>) => void;
 }
 
 interface IInputNumber extends IInput {
-   getValue?: (name: string, value: number, id?: string) => void;
+   onChange?: (value: number) => void;
 }
 
 interface ITextarea extends IInput {
    cols?: number;
    rows?: number;
-   getValue?: (name: string, value: string, id?: string) => void;
+   onChange?: (e: FormEvent<HTMLTextAreaElement>) => void;
 }
 
 export type { IInputText, IInputNumber, ITextarea };

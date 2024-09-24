@@ -30,9 +30,7 @@ const Cart: NextPageWithLayout = () => {
 
    const { infor } = useAppSelector((state) => state.user);
 
-   const { cart } = useCart(!!infor._id, {
-      refreshWhenHidden: false,
-   });
+   const { cart } = useCart(!!infor._id);
 
    const { cart_products, loadingCartItems } = useCartItems(
       !!cart,
