@@ -8,12 +8,12 @@ const paymentMethods: IMethodPayment[] = [
       icon: "/payments/cod.svg",
       type: ENUM_PAYMENT_METHOD.COD,
    },
-   {
-      id: 2,
-      title: "Thanh toán Online VNPay",
-      icon: "/payments/vnpay_icon.svg",
-      type: ENUM_PAYMENT_METHOD.VNPAY,
-   },
+   // {
+   //    id: 2,
+   //    title: "Thanh toán Online VNPay",
+   //    icon: "/payments/vnpay_icon.svg",
+   //    type: ENUM_PAYMENT_METHOD.VNPAY,
+   // },
    {
       id: 3,
       title: "Chuyển khoản qua ngân hàng",

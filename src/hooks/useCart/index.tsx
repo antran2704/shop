@@ -15,6 +15,8 @@ const useCart = (isReady: boolean, options?: Partial<SWRConfiguration>) => {
          keepPreviousData: true,
          fallbackData: { payload: null },
          ...options,
+         refreshWhenHidden: false,
+         revalidateOnFocus: false,
       },
    );
 

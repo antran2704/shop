@@ -18,7 +18,7 @@ const ModalConfirm = (props: Props) => {
          className="fade_up fixed bg-gray-500/80 top-0 left-0 right-0 bottom-0 z-[9999]">
          <div
             onClick={(e) => e.stopPropagation()}
-            className="scroll absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 md:w-1/2 w-full max-h-[600px] bg-white p-5 rounded-lg overflow-y-auto z-40">
+            className="scroll absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 lg:w-1/3 md:w-1/2 w-full max-h-[600px] bg-white p-5 rounded-lg overflow-y-auto z-40">
             <div
                onClick={onClose}
                className="w-fit text-3xl ml-auto px-5 cursor-pointer">
@@ -33,13 +33,13 @@ const ModalConfirm = (props: Props) => {
             <div className="flex sm:flex-nowrap flex-wrap justify-between items-center w-full mt-5 gap-2">
                <button
                   onClick={onClose}
-                  className="flex items-center justify-center sm:w-auto w-full text-base font-medium whitespace-nowrap hover:text-white text-dark hover:bg-primary bg-white rounded border hover:border-primary border-dark px-6 py-2 gap-2 transition-all ease-linear duration-100">
-                  Cancle
+                  className="flex items-center justify-center sm:w-auto min-w-[120px] w-full text-base font-medium whitespace-nowrap bg-gray-1000 text-gray-500 rounded border  border-dark px-6 py-2 gap-2 transition-all ease-linear duration-100">
+                  Hủy
                </button>
                <button
                   onClick={onClick}
-                  className="flex items-center justify-center sm:w-auto w-full text-base font-medium text-white whitespace-nowrap bg-primary px-6 py-2 opacity-90 hover:opacity-100 transition-all ease-linear border border-transparent duration-100 rounded-lg gap-2">
-                  Confirm
+                  className="flex items-center justify-center sm:w-auto min-w-[120px] w-full text-base font-medium text-white whitespace-nowrap bg-primary px-6 py-2 opacity-90 hover:opacity-100 transition-all ease-linear border border-transparent duration-100 rounded-lg gap-2">
+                  Xác nhận
                </button>
             </div>
          </div>

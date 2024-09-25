@@ -8,6 +8,7 @@ export enum ENUM_PAYMENT_STATUS {
 }
 
 export enum ENUM_ORDER_STATUS {
+   ALL = "ALL",
    PENDING = "PENDING",
    PROCESS = "PROCESS",
    SHIPPING = "SHIPPING",
@@ -35,13 +36,6 @@ export enum ENUM_PAYMENT_METHOD {
 export enum ENUM_ORDER_CANCEL_OPTION {
    OUT_OF_STOCK = "OUT_OF_STOCK",
    OTHER = "OTHER",
-}
-
-export enum EOrderStatus {
-   PENDING = "pending",
-   CANCLE = "cancle",
-   PROCESSING = "processing",
-   DELIVERED = "delivered",
 }
 
 export enum ESelectOrderStatus {

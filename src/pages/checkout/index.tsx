@@ -103,7 +103,7 @@ const CheckOut: NextPageWithLayout = () => {
 
    const handleCheckInventoryItems = async () => {
       await checkInventoryItems(cart._id as string).catch(() => {
-         router.push("/cart");
+         // router.push("/cart");
       });
    };
 
@@ -127,7 +127,7 @@ const CheckOut: NextPageWithLayout = () => {
          case ENUM_PAYMENT_METHOD.VNPAY:
             await createPayment(order)
                .then((urlPayment) => {
-                  router.push(urlPayment.payload);
+                  router.push(urlPayment.payload.url);
                })
                .catch((err) => err);
             break;
@@ -290,28 +290,20 @@ const CheckOut: NextPageWithLayout = () => {
       return result;
    }, [subTotal, shippingCost, coupon]);
 
-   // useEffect(() => {
-   //    const inforCus: IOrderAddress | null =
-   //       JSON.parse(localStorage.getItem("inforCus") as string) || null;
+   useEffect(() => {
+      const infoCustome: IOrderAddress | null =
+         JSON.parse(localStorage.getItem("inforCus") as string) || null;
 
-   //    if (inforCus) {
-   //       setInforCustomer(inforCus);
-   //       setSaveInfor(true);
-   //    }
+      if (!infoCustome) return;
 
-   //    if (!inforCus && infor._id) {
-   //       setInforCustomer({
-   //          ...inforCustomer,
-   //          shipping_email: infor.email,
-   //          shipping_name: infor.name,
-   //       });
-   //    }
-   // }, [infor]);
+      infoForm.reset(infoCustome);
+      setSaveInfor(true);
+   }, [infor]);
 
    useEffect(() => {
-      if (cart && cart.cart_count <= 0) {
-         router.push("/cart");
-      }
+      // if (cart && cart.cart_count <= 0) {
+      //    router.push("/cart");
+      // }
 
       if (cart) {
          setSubTotal(cart.cart_total);
@@ -342,149 +334,7 @@ const CheckOut: NextPageWithLayout = () => {
                   <h3 className="lg:text-2xl md:text-xl text-lg font-medium mb-3">
                      Thông tin
                   </h3>
-                  {/* <form
-                     onSubmit={(e) => handleSubmit(e)}
-                     className="flex flex-col gap-3">
-                     <div className="flex lg:flex-nowrap flex-wrap w-full items-center justify-between gap-3">
-                        <InputEmail
-                           name="email"
-                           value={inforCustomer.shipping_email}
-                           placeholder="Email..."
-                           error={
-                              invalidFields.includes("shipping_email")
-                                 ? true
-                                 : false
-                           }
-                           className="h-10 px-4 border border-[#e5e5e5] rounded-md"
-                           width="lg:w-8/12 w-full"
-                           required={true}
-                           getValue={handleChangeInforCus}
-                        />
-                        <InputNumber
-                           name="phoneNumber"
-                           error={
-                              invalidFields.includes("shipping_phone")
-                                 ? true
-                                 : false
-                           }
-                           value={inforCustomer.shipping_phone}
-                           placeholder="Phone number..."
-                           className="h-10 px-4 border border-[#e5e5e5] rounded-md"
-                           width="lg:w-4/12 w-full"
-                           required={true}
-                           getValue={handleChangePhoneNumber}
-                        />
-                     </div>
-                     <div className="flex lg:flex-nowrap flex-wrap w-full items-center justify-between gap-3">
-                        <InputText
-                           name="name"
-                           error={
-                              invalidFields.includes("shipping_name")
-                                 ? true
-                                 : false
-                           }
-                           value={inforCustomer.shipping_name}
-                           placeholder="Full name..."
-                           className="h-10 px-4 border border-[#e5e5e5] rounded-md"
-                           required={true}
-                           getValue={handleChangeInforCus}
-                        />
-                     </div>
-                     <div className="flex lg:flex-nowrap flex-wrap w-full items-center justify-between gap-3">
-                        <InputText
-                           name="address"
-                           error={
-                              invalidFields.includes("shipping_address")
-                                 ? true
-                                 : false
-                           }
-                           value={inforCustomer.shipping_address}
-                           placeholder="Address..."
-                           className="h-10 px-4 border border-[#e5e5e5] rounded-md"
-                           required={true}
-                           getValue={handleChangeInforCus}
-                        />
-                     </div>
-                     <div className="flex items-center w-full mt-3 cursor-pointer gap-2">
-                        <input
-                           onChange={(e) => setSaveInfor(e.target.checked)}
-                           checked={isSaveInfor}
-                           className="w-5 h-5"
-                           type="checkbox"
-                           id="checkSaveInfor"
-                        />
-                        <label
-                           className="cursor-pointer"
-                           htmlFor="checkSaveInfor">
-                           Lưu thông tin cho lần thanh toán tiếp theo
-                        </label>
-                     </div>
 
-                     <div>
-                        <h4 className="md:text-lg text-base font-medium pt-5 pb-2">
-                           Phương thức thanh toán
-                        </h4>
-                        <ul className="border-2 rounded-md">
-                           {paymentMethods.map(
-                              (method: IMethodPayment, index: number) => (
-                                 <li key={method.id}>
-                                    <label
-                                       htmlFor={`method-${method.id}`}
-                                       onClick={() => {
-                                          setSelectPayment(method);
-                                          setPaymentMethod(method.type);
-                                       }}
-                                       className={`flex items-center gap-2 px-4 py-3 ${
-                                          index !== paymentMethods.length - 1
-                                             ? "border-b"
-                                             : ""
-                                       } cursor-pointer`}>
-                                       <input
-                                          className="min-w-5 min-h-5 w-5 h-5"
-                                          type="radio"
-                                          name="payment_method"
-                                          id={`method-${method.id}`}
-                                       />
-                                       <div className="flex items-center gap-2">
-                                          {method.icon && (
-                                             <ImageCus
-                                                src={method.icon}
-                                                title="payment"
-                                                alt="payment"
-                                                className="w-10 h-10 min-w-10 min-h-10"
-                                             />
-                                          )}
-                                          <p className="block md:text-base text-sm w-full cursor-pointer">
-                                             {method.title}
-                                          </p>
-                                       </div>
-                                    </label>
-                                    {selectPayment?.id === 3 &&
-                                       method.id === 3 && (
-                                          <ul className="px-5 py-2 border-t">
-                                             <li className="lg:text-base text-sm">
-                                                Ngân hàng: ACB
-                                             </li>
-                                             <li className="lg:text-base text-sm">
-                                                STK: 6823577
-                                             </li>
-                                             <li className="lg:text-base text-sm">
-                                                Chủ tài khoản: PHAM TRAN GIA AN
-                                             </li>
-                                             <li className="lg:text-base text-sm">
-                                                Sau khi chuyển khoản thành công,
-                                                chụp màn hình, gửi vào messenger
-                                                hoặc zalo cho Antran Shop để
-                                                kiểm tra thông tin chuyển khoản.
-                                             </li>
-                                          </ul>
-                                       )}
-                                 </li>
-                              ),
-                           )}
-                        </ul>
-                     </div>
-                  </form> */}
                   <InfoFormOrder form={infoForm} />
 
                   <div className="flex items-center w-full mt-3 cursor-pointer gap-2">
@@ -678,8 +528,8 @@ const CheckOut: NextPageWithLayout = () => {
                            )}
                         </ul>
 
-                        <div className="flex items-center py-5 border-b gap-5">
-                           {/* <InputText
+                        {/* <div className="flex items-center py-5 border-b gap-5">
+                           <InputText
                               name="couponCode"
                               placeholder="Coupon code..."
                               className="h-10 px-4 border border-[#e5e5e5] rounded-md"
@@ -689,14 +539,14 @@ const CheckOut: NextPageWithLayout = () => {
                               getValue={(name: string, value: string) =>
                                  setCouponCode(value.toUpperCase())
                               }
-                           /> */}
+                           />
                            <PrimaryButton
                               title="Coupon"
                               type="BUTTON"
                               onClick={handleUseCoupon}
                               className="sm:w-auto w-full text-base font-medium text-white whitespace-nowrap bg-primary px-4 py-2 opacity-90 hover:opacity-100 gap-2 border border-primary rounded"
                            />
-                        </div>
+                        </div> */}
 
                         <div className="py-5 border-b gap-10">
                            <div className="flex items-center justify-between py-1">

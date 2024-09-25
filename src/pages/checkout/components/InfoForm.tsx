@@ -35,15 +35,16 @@ const InfoForm = (props: Props) => {
             <Controller
                name="shipping_phone"
                control={control}
-               render={({ field }) => (
+               render={({ field: { value, ...rest } }) => (
                   <InputNumber
                      error={!!errors.shipping_phone}
                      placeholder="Số điện thoại..."
                      className="h-10 px-4 border border-[#e5e5e5] rounded-md"
                      width="lg:w-4/12 w-full"
+                     value={!!value ? value : ""}
                      required={true}
                      errorMsg={errors.shipping_phone?.message}
-                     {...field}
+                     {...rest}
                   />
                )}
             />

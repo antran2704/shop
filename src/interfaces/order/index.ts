@@ -4,6 +4,7 @@ import {
    ENUM_PAYMENT_STATUS,
    ENUM_PROCESS_ORDER,
 } from "~/enums";
+import { ISearch } from "../paramater";
 
 // interface ItemOrder extends ICartItem {
 //    price: number;
@@ -18,6 +19,11 @@ import {
 //    quantity: number;
 //    inventory: number;
 // }
+
+interface ITypeSelecOrder {
+   title: string;
+   type: ENUM_ORDER_STATUS;
+}
 
 interface IOrderAddress {
    shipping_name: string;
@@ -97,6 +103,10 @@ interface ICreateOrder {
    note: string;
 }
 
+interface IOrderSearch extends ISearch {
+   orderStatus?: ENUM_ORDER_STATUS;
+}
+
 export type {
    IOrder,
    ICreateOrder,
@@ -105,4 +115,6 @@ export type {
    IOrderCancel,
    IOrderProcess,
    IOrderShipping,
+   ITypeSelecOrder,
+   IOrderSearch,
 };

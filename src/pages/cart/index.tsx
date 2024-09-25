@@ -127,23 +127,17 @@ const Cart: NextPageWithLayout = () => {
 
    const handleClearCart = async () => {
       if (!infor._id) return;
-
-      try {
-         const { status } = await deleteAllItemsCart(infor._id);
-
-         if (status === 201) {
+      await deleteAllItemsCart(cart._id)
+         .then(() => {
             mutate(CART_KEY.CART_USER);
             mutate(CART_KEY.CART_ITEMS);
-         }
-      } catch (error) {
-         console.log(error);
-      }
+         })
+         .catch((err) => err);
    };
 
    useEffect(() => {
       if (cart_products.length > 0) {
          handleCheckInventoryItems();
-         // setItems(cart_products);
       }
    }, [loadingCartItems]);
 
@@ -235,7 +229,7 @@ const Cart: NextPageWithLayout = () => {
 
          {showModalConfirm && (
             <ModalConfirm
-               title="Confirm"
+               title="Xác nhận"
                onClick={() => {
                   handleClearCart();
                   setShowModalConfirm(!showModalConfirm);
@@ -244,7 +238,7 @@ const Cart: NextPageWithLayout = () => {
                   setShowModalConfirm(!showModalConfirm);
                }}
                show={showModalConfirm}>
-               <p className="text-lg text-center">
+               <p className="text-base text-center w-2/3 mx-auto">
                   Bạn có muốn xóa sản phẩm toàn bộ sản phẩm khỏi giỏ hàng
                </p>
             </ModalConfirm>

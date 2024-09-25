@@ -6,18 +6,23 @@ import { getOrder } from "~/api-client/order";
 import { InputText } from "~/components/InputField";
 import paymentMethods from "~/data/paymentMethods";
 import { IMethodPayment, NextPageWithLayout } from "~/interfaces";
-import { ItemOrder, Order } from "~/interfaces/order";
+import { IOrder, IOrderProduct } from "~/interfaces/order";
 import Link from "next/link";
 import {
    formatBigNumber,
    getValueCoupon,
 } from "~/helpers/number/fomatterCurrency";
-import { EOrderStatus, EPaymentStatus } from "~/enums";
+import {
+   ENUM_ORDER_STATUS,
+   ENUM_PAYMENT_STATUS,
+   EPaymentStatus,
+} from "~/enums";
 import PrimaryButton from "~/components/Button/PrimaryButton";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import { SpinLoading } from "~/components/Loading";
 import ListProducts from "~/components/Product/List";
 import { useProducts } from "~/hooks/useProducts";
+import { ORDER_PARAMATER_ENUM } from "~/enums/paramater";
 
 const Layout = DefaultLayout;
 
@@ -27,9 +32,13 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
    const router = useRouter();
    const { order_id } = router.query;
 
-   const { products, loadingProducts } = useProducts();
+   const { products, loadingProducts } = useProducts({
+      page: 1,
+      take: 16,
+      order: ORDER_PARAMATER_ENUM.DESC,
+   });
 
-   const [order, setOrder] = useState<Order | null>(null);
+   const [order, setOrder] = useState<IOrder | null>(null);
    const [paymentMethod, setPaymentMethod] = useState<IMethodPayment | null>(
       null,
    );
@@ -81,26 +90,29 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
          <div className="container__cus">
             {!loading && (
                <div>
-                  {order?.status !== EOrderStatus.CANCLE && (
+                  {order?.order_status !== ENUM_ORDER_STATUS.CANCEL && (
                      <div className="flex items-start mt-10 gap-5">
-                        {order?.payment_status === EPaymentStatus.SUCCESS && (
+                        {order?.payment_status ===
+                           ENUM_PAYMENT_STATUS.SUCCESS && (
                            <CiCircleCheck className="w-12 h-12 text-green-400" />
                         )}
-                        {order?.payment_status === EPaymentStatus.CANCLE && (
+                        {order?.payment_status === ENUM_PAYMENT_STATUS.FAIL && (
                            <CiCircleRemove className="w-12 h-12 text-red-400" />
                         )}
-                        {order?.payment_status === EPaymentStatus.PENDING && (
+                        {order?.payment_status ===
+                           ENUM_PAYMENT_STATUS.PENDING && (
                            <CiCircleInfo className="w-12 h-12 text-blue-400" />
                         )}
                         <div>
                            <h2 className="text-lg font-medium">
                               {order?.payment_status ===
-                                 EPaymentStatus.SUCCESS &&
+                                 ENUM_PAYMENT_STATUS.SUCCESS &&
                                  "Đặt hàng thành công"}
                               {order?.payment_status ===
-                                 EPaymentStatus.CANCLE && "Đặt hàng thất bại"}
+                                 ENUM_PAYMENT_STATUS.FAIL &&
+                                 "Đặt hàng thất bại"}
                               {order?.payment_status ===
-                                 EPaymentStatus.PENDING &&
+                                 ENUM_PAYMENT_STATUS.PENDING &&
                                  "Chờ đối soát giao dịch"}
                            </h2>
                            <p className="text-base">Mã đơn hàng: #{order_id}</p>
@@ -108,22 +120,22 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
                      </div>
                   )}
 
-                  {order?.status === EOrderStatus.CANCLE && (
+                  {order?.order_status === ENUM_ORDER_STATUS.CANCEL && (
                      <div className="flex items-start mt-10 gap-5">
                         <CiCircleRemove className="w-12 h-12 text-red-400" />
                         <div>
                            <h2 className="text-lg font-medium">
                               Đơn hàng đã bị hủy
                            </h2>
-                           <h3>Lý do: {order.cancleContent}</h3>
+                           <h3>Lý do: {order.cancel.content}</h3>
                            <p className="text-base">Mã đơn hàng: #{order_id}</p>
                         </div>
                      </div>
                   )}
 
                   {order &&
-                     order?.status !== EOrderStatus.CANCLE &&
-                     order.payment_status !== EPaymentStatus.CANCLE && (
+                     order?.order_status !== ENUM_ORDER_STATUS.CANCEL &&
+                     order.payment_status !== ENUM_PAYMENT_STATUS.FAIL && (
                         <div className="relative flex items-start w-fit my-5 mx-auto gap-20">
                            <div className="relative flex flex-col items-center z-10">
                               <div
@@ -233,7 +245,7 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
                                  <div className="grid md:grid-cols-2 grid-cols-1 gap-3">
                                     <InputText
                                        name="email"
-                                       value={order.user_infor.email}
+                                       value={order.address.shipping_email}
                                        title="Email"
                                        readonly={true}
                                        placeholder="Email..."
@@ -245,7 +257,7 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
                                        title="Phone Number"
                                        name="phoneNumber"
                                        readonly={true}
-                                       value={order.user_infor.phoneNumber}
+                                       value={order.address.shipping_phone}
                                        placeholder="Phone number..."
                                        className="h-8 bg-transparent"
                                        width="w-full"
@@ -255,7 +267,7 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
                                        title="Full Name"
                                        name="name"
                                        readonly={true}
-                                       value={order.user_infor.name}
+                                       value={order.address.shipping_name}
                                        placeholder="Full name..."
                                        className="h-8 bg-transparent"
                                        required={true}
@@ -264,7 +276,7 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
                                        title="Address"
                                        name="address"
                                        readonly={true}
-                                       value={order.user_infor.address}
+                                       value={order.address.shipping_address}
                                        placeholder="Address..."
                                        className="h-8 bg-transparent"
                                        required={true}
@@ -320,36 +332,29 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
                            <Fragment>
                               <ul className="scroll flex flex-col lg:max-h-[600px] max-h-[400px] pt-5 overflow-auto gap-6">
                                  {order.items.map(
-                                    (item: ItemOrder, index: number) => (
+                                    (item: IOrderProduct, index: number) => (
                                        <li
                                           key={index}
                                           className="flex items-center justify-between w-full pb-5 border-b border-borderColor gap-4">
                                           <div className="flex items-center gap-5">
                                              <Link
-                                                href={`/collections/product/${item.product._id}.${item.product.slug}`}
+                                                href={`/products/${item.model_name}.${item.product_id}`}
                                                 className="relative">
                                                 <span className="flex items-center justify-center absolute -top-2 -right-2 md:w-5 md:h-5 w-4 h-4 text-xs text-white bg-primary rounded-full z-10">
                                                    {item.quantity}
                                                 </span>
                                                 <ImageCus
-                                                   src={
-                                                      ((process.env
-                                                         .NEXT_PUBLIC_IMAGE_ENDPOINT as string) +
-                                                         item.product
-                                                            .thumbnail) as string
-                                                   }
+                                                   src={item.image}
                                                    className="w-[60px] h-[60px] border border-borderColor rounded-lg"
                                                    alt="img"
                                                    title="img"
                                                 />
                                              </Link>
                                              <Link
-                                                href={`/collections/product/${item.product._id}.${item.product.slug}`}
+                                                href={`/products/${item.model_name}.${item.product_id}`}
                                                 className="w-8/12">
                                                 <h3 className="sm:text-base text-sm font-medium my-0">
-                                                   {item.variation
-                                                      ? item.variation.title
-                                                      : item.product.title}
+                                                   {item.model_name}
                                                 </h3>
                                              </Link>
                                           </div>
@@ -404,7 +409,9 @@ const CheckoutOrderIdPage: NextPageWithLayout = () => {
                                  <div className="flex items-center justify-between py-1">
                                     <p className="text-sm">Phí vận chuyển:</p>
                                     <p className="text-base">
-                                       {formatBigNumber(order.shipping_cost)}{" "}
+                                       {formatBigNumber(
+                                          order.shipping.shipping_fee,
+                                       )}{" "}
                                        VND
                                     </p>
                                  </div>

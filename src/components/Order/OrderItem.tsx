@@ -6,34 +6,19 @@ import {
    formatBigNumber,
 } from "~/helpers/number/fomatterCurrency";
 import PrimaryButton from "../Button/PrimaryButton";
-import { ItemOrder, Order } from "~/interfaces/order";
+import { IOrder, IOrderProduct } from "~/interfaces/order";
 import { toast } from "react-toastify";
 import { useAppSelector } from "~/store/hooks";
 import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/router";
 import { CART_KEY, increaseCart } from "~/api-client/cart";
 import { SendCartItem } from "~/interfaces";
-import { useCallback } from "react";
 import { useSWRConfig } from "swr";
-import { EOrderStatus } from "~/enums";
+import { ENUM_ORDER_STATUS } from "~/enums";
 
 interface Props {
-   order: Order;
+   order: IOrder;
 }
-
-const contentStatus = {
-   pending: "Đang chờ xác nhận",
-   processing: "Đang chuẩn bị hàng",
-   delivered: "Giao thành công",
-   cancle: "Đã hủy",
-};
-
-const statusStyle = {
-   pending: "bg-pending",
-   processing: "bg-blue-500",
-   delivered: "bg-success",
-   cancle: "bg-cancle",
-};
 
 const OrderItem = (props: Props) => {
    const { order } = props;
@@ -52,8 +37,8 @@ const OrderItem = (props: Props) => {
       try {
          for (const item of order.items) {
             let data = {
-               product_id: item.product._id,
-               variation_id: item.variation?._id,
+               product_id: item.product_id,
+               variation_id: item.model_id,
                quantity: item.quantity,
             } as SendCartItem;
 
@@ -102,16 +87,45 @@ const OrderItem = (props: Props) => {
             <p className="md:text-lg text-sm">
                Mã đơn hàng: <strong>#{order.order_id}</strong>
             </p>
-            <p
-               className={`md:text-sm text-xs text-center text-white py-2 px-5 rounded-md ${
-                  statusStyle[order.status]
-               }`}>
-               {contentStatus[order.status]}
-            </p>
+
+            {order.order_status === ENUM_ORDER_STATUS.PENDING && (
+               <p
+                  className={`md:text-sm text-xs text-center text-white py-2 px-5 rounded-md bg-yellow-500`}>
+                  Đang chờ xác nhận
+               </p>
+            )}
+
+            {order.order_status === ENUM_ORDER_STATUS.PROCESS && (
+               <p
+                  className={`md:text-sm text-xs text-center text-white py-2 px-5 rounded-md bg-blue-500`}>
+                  Đang chuẩn bị hàng
+               </p>
+            )}
+
+            {order.order_status === ENUM_ORDER_STATUS.SHIPPING && (
+               <p
+                  className={`md:text-sm text-xs text-center text-white py-2 px-5 rounded-md bg-blue-500`}>
+                  Đang vận chuyển
+               </p>
+            )}
+
+            {order.order_status === ENUM_ORDER_STATUS.SUCCESS && (
+               <p
+                  className={`md:text-sm text-xs text-center text-white py-2 px-5 rounded-md bg-green-500`}>
+                  Giao thành công
+               </p>
+            )}
+
+            {order.order_status === ENUM_ORDER_STATUS.CANCEL && (
+               <p
+                  className={`md:text-sm text-xs text-center text-white py-2 px-5 rounded-md bg-red-500`}>
+                  Đã hủy
+               </p>
+            )}
          </div>
 
          <ul className="flex flex-col rounded-md gap-5">
-            {order.items.map((item: ItemOrder, index: number) => (
+            {order.items.map((item: IOrderProduct, index: number) => (
                <li key={index} className="w-full gap-5">
                   <Link
                      href={`/checkout/${order.order_id}`}
@@ -121,11 +135,7 @@ const OrderItem = (props: Props) => {
                         className={`flex md:flex-row flex-col items-center gap-5`}>
                         <div className="md:w-[100px] md:h-[100px] md:min-w-[100px] md:min-h-[100px] w-[120px] h-[120px] min-w-[120px] min-h-[120px]">
                            <ImageCus
-                              src={
-                                 ((process.env
-                                    .NEXT_PUBLIC_IMAGE_ENDPOINT as string) +
-                                    item.product.thumbnail) as string
-                              }
+                              src={item.image}
                               title={"order"}
                               alt={"order"}
                               className="w-full h-full object-fill object-center rounded-md"
@@ -134,15 +144,8 @@ const OrderItem = (props: Props) => {
 
                         <div className="lg:max-w-[800px] md:max-w-[400px] max-w-[300px]">
                            <h3 className="md:text-base text-sm hover:text-primary md:text-start text-center font-medium capitalize line-clamp-2">
-                              {item.variation
-                                 ? item.variation.title
-                                 : item.product.title}
+                              {item.model_name}
                            </h3>
-                           {item.variation && (
-                              <p className="w-full text-sm md:text-start text-center">
-                                 {item.variation.options?.join(" / ")}
-                              </p>
-                           )}
                            <p className="w-full text-sm md:text-start text-center py-2">
                               X {item.quantity}
                            </p>
@@ -169,8 +172,8 @@ const OrderItem = (props: Props) => {
                {CURRENCY_CHARACTER}
             </p>
 
-            {(order.status === EOrderStatus.DELIVERED ||
-               order.status === EOrderStatus.CANCLE) && (
+            {(order.order_status === ENUM_ORDER_STATUS.SUCCESS ||
+               order.order_status === ENUM_ORDER_STATUS.CANCEL) && (
                <PrimaryButton
                   title="Mua lại"
                   type="BUTTON"

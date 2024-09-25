@@ -1,5 +1,5 @@
 import { ReactElement, useCallback, useEffect, useState } from "react";
-import { NextPageWithLayout } from "~/interfaces";
+import { IPagination, NextPageWithLayout } from "~/interfaces";
 import DefaultLayout from "~/layouts/DefaultLayout";
 import ImageCus from "~/components/Image";
 import { useUser, UserProfile, useClerk } from "@clerk/nextjs";
@@ -7,113 +7,137 @@ import { useRouter } from "next/router";
 import LayoutClose from "~/components/Layout/LayoutClose";
 import { AiOutlineClose } from "react-icons/ai";
 import { logout } from "~/api-client";
-import { Order, TypeShowOrder } from "~/interfaces/order";
-import { ESelectOrderStatus } from "~/enums";
+import { IOrder, IOrderSearch, ITypeSelecOrder } from "~/interfaces/order";
+import { ENUM_ORDER_STATUS, ESelectOrderStatus } from "~/enums";
 import { useAppSelector } from "~/store/hooks";
-import { useOrders } from "~/hooks/useOrder";
 import OrderItem from "~/components/Order/OrderItem";
 import Pagination from "rc-pagination";
 import { SpinLoading } from "~/components/Loading";
 import { InputText } from "~/components/InputField";
 import ListProducts from "~/components/Product/List";
 import { useProducts } from "~/hooks/useProducts";
+import { getOrders } from "~/api-client/order";
+import { IResponseWithPagination } from "~/interfaces/response";
+import { initPagination } from "~/data";
+import { ORDER_PARAMATER_ENUM } from "~/enums/paramater";
+import useDebounce from "~/hooks/useDebounce";
 
 const Layout = DefaultLayout;
 
-const typeList: TypeShowOrder[] = [
+const typeList: ITypeSelecOrder[] = [
    {
       title: "Tất cả",
-      type: ESelectOrderStatus.ALL,
+      type: ENUM_ORDER_STATUS.ALL,
    },
    {
       title: "Đang chờ xác nhận",
-      type: ESelectOrderStatus.PENDING,
+      type: ENUM_ORDER_STATUS.PENDING,
    },
    {
       title: "Đang chuẩn bị hàng",
-      type: ESelectOrderStatus.PROCESSING,
+      type: ENUM_ORDER_STATUS.PROCESS,
    },
    {
       title: "Giao thành công",
-      type: ESelectOrderStatus.DELIVERED,
+      type: ENUM_ORDER_STATUS.SUCCESS,
    },
    {
       title: "Đã hủy",
-      type: ESelectOrderStatus.CANCLE,
+      type: ENUM_ORDER_STATUS.CANCEL,
    },
 ];
 
 const AccountPage: NextPageWithLayout = () => {
    const router = useRouter();
-   const { page } = router.query;
-   const [currentPage, setCurrentPage] = useState<number>(
-      page ? Number(page) : 1,
-   );
+   const {
+      page: pageQuery,
+      take: takeQuery,
+      order: orderQuery,
+      search: searchQuery,
+      orderStatus: orderStatusQuery,
+   } = router.query;
 
    const { signOut } = useClerk();
    const { isSignedIn, user } = useUser();
-   const { infor } = useAppSelector((state) => state.user);
 
-   const { products, loadingProducts } = useProducts();
+   const { products, loadingProducts } = useProducts({
+      page: 1,
+      take: 16,
+      order: ORDER_PARAMATER_ENUM.DESC,
+   });
 
    const [showClerk, setShowClerk] = useState<boolean>(false);
-   const [selectShowType, setSelectShowType] = useState<TypeShowOrder>(
-      typeList[0],
+   const [selectShowType, setSelectShowType] = useState<ENUM_ORDER_STATUS>(
+      ENUM_ORDER_STATUS.ALL,
    );
 
-   const [filter, setFilter] = useState<
-      Partial<Pick<Order, "order_id"> & { status: ESelectOrderStatus }>
-   >({ status: selectShowType.type });
-   const [orderId, setOrderId] = useState<string | null>(null);
+   const [orders, setOrders] = useState<IOrder[]>([]);
+   const [paramater, setParamter] = useState<IOrderSearch>({
+      page: pageQuery ? Number(pageQuery) : 1,
+      take: takeQuery ? Number(takeQuery) : 16,
+      order: orderQuery
+         ? (orderQuery as ORDER_PARAMATER_ENUM)
+         : ORDER_PARAMATER_ENUM.DESC,
+      search: (searchQuery as string) || "",
+      orderStatus: orderStatusQuery as ENUM_ORDER_STATUS,
+   });
+   const [pagination, setPagiantion] = useState<IPagination>(initPagination);
 
-   const { orders, loadingOrders, pagination } = useOrders(
-      !!infor._id,
-      infor._id as string,
-      filter,
-      currentPage,
+   const [search, setSearch] = useState<string>(
+      paramater.search ? paramater.search : "",
    );
+
+   const newSearch = useDebounce(search, 600);
+   const [loading, setLoading] = useState<boolean>(true);
 
    const onShowClerk = () => {
       setShowClerk(!showClerk);
    };
 
-   const onSearch = useCallback(
-      (name: string, value: string) => {
-         if (!value) {
-            setFilter({ status: ESelectOrderStatus.ALL });
-            setOrderId(null);
-         } else {
-            setOrderId(value);
-         }
+   const onSearch = (value: string) => {
+      setSearch(value);
+   };
 
-         if (router.query.page && router.query.page !== "1") {
-            router.replace({ query: {} });
-            setCurrentPage(1);
-         }
-      },
-      [orderId],
-   );
-
-   const handleSearch = useCallback(() => {
-      if (!orderId) return;
-
-      setFilter({ status: ESelectOrderStatus.ALL, order_id: orderId });
-   }, [orderId, filter]);
-
-   const onSelectShowType = async (item: TypeShowOrder) => {
-      setSelectShowType(item);
-      setFilter({ status: item.type });
-
-      if (router.query.page && router.query.page !== "1") {
-         router.replace({ query: {} });
-         setCurrentPage(1);
-      }
+   const onSelectShowType = async (value: ENUM_ORDER_STATUS) => {
+      const newParamater: IOrderSearch = {
+         ...paramater,
+         page: 1,
+         search: "",
+         orderStatus: value,
+      };
+      setSelectShowType(value);
+      setParamter(newParamater);
+      router.replace({ query: { ...newParamater } });
    };
 
    const onLogout = async () => {
       await logout();
       signOut();
    };
+
+   const handleGetOrders = async (paramater: IOrderSearch) => {
+      setLoading(true);
+
+      await getOrders(paramater)
+         .then(({ pagination, payload }: IResponseWithPagination<IOrder[]>) => {
+            setOrders(payload);
+            setPagiantion(pagination);
+         })
+         .catch((err) => err);
+
+      setLoading(false);
+   };
+
+   useEffect(() => {
+      if (newSearch !== paramater.search) {
+         setParamter({ ...paramater, search: newSearch.trim(), page: 1 });
+         router.replace({ query: { ...paramater, search: newSearch.trim() } });
+      }
+   }, [newSearch]);
+
+   useEffect(() => {
+      handleGetOrders(paramater);
+   }, [paramater]);
 
    useEffect(() => {
       if (!user || !isSignedIn) {
@@ -153,12 +177,12 @@ const AccountPage: NextPageWithLayout = () => {
          <div className="container__cus">
             <div className="w-fit mx-auto">
                <ul className="scrollHidden flex items-center text-base mt-5 bg-white mx-auto rounded-md overflow-x-auto">
-                  {typeList.map((item: TypeShowOrder, index: number) => (
+                  {typeList.map((item: ITypeSelecOrder, index: number) => (
                      <li
                         key={index}
-                        onClick={() => onSelectShowType(item)}
+                        onClick={() => onSelectShowType(item.type)}
                         className={`min-w-fit md:px-10 px-5 py-4 border-b-2 hover:text-primary ${
-                           selectShowType.type === item.type
+                           selectShowType === item.type
                               ? "text-primary border-b-primary"
                               : "border-b-transparent"
                         } cursor-pointer`}>
@@ -166,54 +190,50 @@ const AccountPage: NextPageWithLayout = () => {
                      </li>
                   ))}
                </ul>
-               {selectShowType.type === ESelectOrderStatus.ALL && (
-                  <div className="mt-2">
-                     <InputText
-                        name="order_id"
-                        placeholder="Tìm kiếm với ID đơn hàng..."
-                        className="pl-5 pr-10 py-2 outline-none border rounded-md"
-                        enableEnter={true}
-                        enableClearAll={orderId ? true : false}
-                        getValue={onSearch}
-                        value={orderId || ""}
-                        onEnter={handleSearch}
-                     />
-                  </div>
-               )}
+               <div className="mt-2">
+                  <InputText
+                     name="order_id"
+                     placeholder="Tìm kiếm với ID đơn hàng..."
+                     className="pl-5 pr-10 py-2 outline-none border rounded-md"
+                     enableEnter={true}
+                     onChange={(e) => onSearch(e.currentTarget.value)}
+                     value={search}
+                  />
+               </div>
             </div>
          </div>
 
          <div className="container__cus">
-            {!loadingOrders && orders && (
+            {!loading && orders && (
                <div className="flex flex-col mt-5 gap-8">
-                  {orders.map((order: Order) => (
+                  {orders.map((order: IOrder) => (
                      <OrderItem key={order.order_id} order={order} />
                   ))}
                </div>
             )}
 
-            {!loadingOrders && pagination.totalItems > pagination.pageSize && (
+            {!loading && pagination.total > pagination.take && (
                <Pagination
-                  current={currentPage}
+                  current={paramater.page}
                   className="pagination"
                   onChange={(page) => {
                      router.replace({
                         query: { ...router.query, page },
                      });
-                     setCurrentPage(page);
+                     setParamter({ ...paramater, page });
                   }}
-                  total={pagination.totalItems}
-                  pageSize={pagination.pageSize}
+                  total={pagination.total}
+                  pageSize={pagination.take}
                />
             )}
 
-            {(loadingOrders || !orders) && (
+            {(loading || !orders) && (
                <div className="relative w-full h-[120px] flex items-center justify-center bg-white mt-4">
                   <SpinLoading className="h-8 w-8" />
                </div>
             )}
 
-            {!loadingOrders && orders && orders.length === 0 && (
+            {!loading && orders && orders.length === 0 && (
                <div className="w-full min-h-[120px] flex flex-col items-center justify-center bg-white mt-4 p-5">
                   <div className="w-28 h-28">
                      <img

@@ -3,11 +3,19 @@ import httpConfig from "~/configs/axiosConfig";
 
 import { ENUM_ORDER_STATUS, ENUM_PAYMENT_STATUS } from "~/enums";
 import { parseQueryString } from "~/helpers/url";
-import { ICreateOrder } from "~/interfaces/order";
+import { ICreateOrder, IOrderSearch } from "~/interfaces/order";
 import { ISearch } from "~/interfaces/paramater";
 
 const ORDER_KEY = {
    ORDERS_USER: "orders_user",
+};
+
+const getOrders = async (paramater: IOrderSearch) => {
+   const parseParamater = parseQueryString(paramater);
+
+   return await httpConfig
+      .get(BASE_URL + `/orders` + parseParamater)
+      .then((res) => res.data);
 };
 
 const getOrder = async (order_id: string) => {
@@ -58,6 +66,7 @@ const updateStatusOrder = async (
 };
 
 export {
+   getOrders,
    getOrder,
    createOrder,
    updateOrder,
