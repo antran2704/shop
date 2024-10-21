@@ -28,7 +28,8 @@ import DefaultLayout from "~/layouts/DefaultLayout";
 import Seo from "~/components/Seo";
 import { IBreadcrumbItem } from "~/interfaces/breadcrumb";
 import { IResponse, IResponseWithPagination } from "~/interfaces/response";
-import { MainInfo, ProductGallery } from "./components";
+import MainInfo from "./components/MainInfo";
+import ProductGallery from "./components/ProductGallery";
 import { ORDER_PARAMATER_ENUM } from "~/enums/paramater";
 import ListProducts from "~/components/Product/List";
 

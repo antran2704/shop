@@ -1,14 +1,13 @@
 import { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 
-import { IProductData, IProductHome } from "~/interfaces";
-
 import ProductLoading from "~/components/Product/Loading";
 import ProductItem from "~/components/Product/Item";
+import { IListProduct } from "~/interfaces";
 
 interface Props {
    title?: string;
-   items: IProductHome[];
+   items: IListProduct[];
    isLoading: boolean;
 }
 
@@ -40,7 +39,7 @@ const ListProducts = (props: Props) => {
                   },
                }}>
                {!isLoading &&
-                  items.map((product: IProductHome) => (
+                  items.map((product: IListProduct) => (
                      <SwiperSlide key={product._id}>
                         <ProductItem data={product} key={product._id} />
                      </SwiperSlide>

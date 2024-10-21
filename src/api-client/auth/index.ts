@@ -32,7 +32,9 @@ const checkUserIsExit = async (userId: string) => {
 };
 
 const logout = async () => {
-   return await axios.post(BASE_URL + "/user/logout").then((res) => res.data);
+   return await httpConfig
+      .patch(BASE_URL + "/user/logout")
+      .then((res) => res.data);
 };
 
 export { checkUserIsExit, createUser, login, getRefreshToken, getUser, logout };

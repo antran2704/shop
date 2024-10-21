@@ -39,9 +39,7 @@ const ModalCartItem = (props: Props) => {
                   {data.variation ? data.variation.title : data.product.title}
                </p>
                {data.variation && (
-                  <div className="flex items-center gap-2">
-                     {data.variation.options?.join("/")}
-                  </div>
+                  <div className="flex items-center gap-2">{data.options}</div>
                )}
                <p className="sm:text-base text-sm mt-2">
                   {(data.promotion_price as number) > 0

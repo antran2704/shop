@@ -7,15 +7,15 @@ import {
    useEffect,
 } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
-import { IProductHome } from "~/interfaces";
 import { IoMdClose } from "react-icons/io";
 import { useRouter } from "next/router";
 import { SpinLoading } from "../Loading";
+import { IListProduct } from "~/interfaces";
 
 interface Props {
    placeholder?: string;
    searchText: string | null;
-   listItem: IProductHome[];
+   listItem: IListProduct[];
    loading?: boolean;
    noResult: boolean;
    showSearchMobile: boolean;
@@ -44,7 +44,7 @@ const Search = (props: Props) => {
 
    const [showSearch, setShowSearch] = useState<boolean>(false);
 
-   const onClick = (item: IProductHome) => {
+   const onClick = (item: IListProduct) => {
       setShowSearch(false);
 
       if (showSearchMobile) {
@@ -117,7 +117,7 @@ const Search = (props: Props) => {
 
                {!loading && !noResult && listItem.length > 0 && (
                   <ul className="w-full">
-                     {listItem.map((item: IProductHome) => (
+                     {listItem.map((item: IListProduct) => (
                         <li
                            onClick={() => onClick(item)}
                            key={item._id}

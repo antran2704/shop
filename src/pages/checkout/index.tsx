@@ -50,7 +50,7 @@ import { CART_KEY, checkInventoryItems } from "~/api-client/cart";
 
 import { SpinLoading } from "~/components/Loading";
 
-import { InfoFormOrder } from "./components";
+import InfoFormOrder from "./components/InfoForm";
 import paymentMethods from "~/data/paymentMethods";
 import hanldeErrorAxios from "~/helpers/handleErrorAxios";
 

@@ -1,16 +1,11 @@
 import { Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useParentCategories } from "~/hooks/useCategories";
-import { IDataCategory, IQueryParam } from "~/interfaces";
+import { ICategory, IQueryParam } from "~/interfaces";
 
 import CategoryItem from "~/components/Category/Item";
 import CategoryLoading from "~/components/Category/Loading";
-
-const selectField: IQueryParam<Partial<IDataCategory>> = {
-   title: "1",
-   slug: "1",
-   thumbnail: "1",
-};
+import { ORDER_PARAMATER_ENUM } from "~/enums/paramater";
 
 interface Props {
    title?: string;
@@ -19,7 +14,11 @@ interface Props {
 const ListParentCategories = (props: Props) => {
    const { title } = props;
 
-   const { categories, loadingCategories } = useParentCategories(selectField);
+   const { categories, loadingCategories } = useParentCategories({
+      page: 1,
+      take: 16,
+      order: ORDER_PARAMATER_ENUM.DESC,
+   });
 
    return (
       <div className="bg-white p-5">
@@ -47,7 +46,7 @@ const ListParentCategories = (props: Props) => {
                   },
                }}>
                {!loadingCategories &&
-                  categories.map((category: IDataCategory) => (
+                  categories.map((category: ICategory) => (
                      <SwiperSlide key={category._id}>
                         <CategoryItem data={category} />
                      </SwiperSlide>

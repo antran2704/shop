@@ -83,13 +83,13 @@ const BlogLayout = (props: Props) => {
             </div>
          </div>
 
-         {pagination.totalItems > 0 && (
+         {pagination.total > 0 && (
             <Pagination
-               current={pagination.currentPage}
+               current={pagination.page}
                className="pagination"
                onChange={onPagination}
-               total={pagination.totalItems}
-               pageSize={pagination.pageSize}
+               total={pagination.total}
+               pageSize={pagination.take}
             />
          )}
       </section>

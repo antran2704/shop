@@ -1,11 +1,11 @@
 import Link from "next/link";
 
-import { IDataCategory } from "~/interfaces";
+import { ICategory } from "~/interfaces/category";
 import ImageCus from "../Image";
 import { memo } from "react";
 
 interface Props {
-   data: IDataCategory;
+   data: ICategory;
 }
 
 const CategoryItem = (props: Props) => {

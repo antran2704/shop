@@ -17,10 +17,9 @@ const Contact: NextPageWithLayout = () => {
 
          <Header
             title={"Contact"}
-            breadcrumbs={[
-               { label: "Home", url_path: "/" },
-               { label: "Contact", url_path: "/contact" },
-            ]}
+            breadcrumbs={{
+               items: [{ title: "Contact", path: "/contact" }],
+            }}
          />
          <section className="my-16">
             <div className="container__cus flex lg:flex-nowrap flex-wrap items-start justify-between gap-5">

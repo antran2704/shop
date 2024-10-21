@@ -26,6 +26,7 @@ import { useCart } from "~/hooks/useCart";
 import ModalCart from "../Modal/ModalCart";
 import { logout } from "~/api-client";
 import useClientY from "~/hooks/useClientY";
+import { toast } from "react-toastify";
 
 const Navbar: FC = () => {
    const { infor } = useAppSelector((state) => state.user);
@@ -47,7 +48,7 @@ const Navbar: FC = () => {
 
    const [listSearch, setListSearch] = useState<IListProduct[]>([]);
    const [searchText, setSearch] = useState<string | null>(null);
-   const debouce = useDebounce(searchText, 1000);
+   const debouce = useDebounce(searchText as string, 1000);
 
    const onClearSearchText = useCallback(() => {
       setSearch(null);
@@ -65,9 +66,15 @@ const Navbar: FC = () => {
    );
 
    const onLogout = async () => {
-      logout();
-      await router.push("/");
-      signOut();
+      try {
+         logout();
+         await router.push("/");
+         signOut();
+      } catch (error) {
+         toast.error("Có lỗi vui lòng thử lại", {
+            position: toast.POSITION.BOTTOM_RIGHT,
+         });
+      }
    };
 
    const handleShowModal = (): void => {

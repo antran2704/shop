@@ -13,13 +13,13 @@ const PaginationCus = (props: Props) => {
 
    return (
       <Pagination
-         current={pagination.currentPage}
+         current={pagination.page}
          className="pagination"
          onChange={(page) =>
             router.replace({ query: { ...router.query, page } })
          }
-         total={pagination.totalItems}
-         pageSize={pagination.pageSize}
+         total={pagination.total}
+         pageSize={pagination.take}
       />
    );
 };

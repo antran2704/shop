@@ -21,6 +21,7 @@ import { IResponseWithPagination } from "~/interfaces/response";
 import { initPagination } from "~/data";
 import { ORDER_PARAMATER_ENUM } from "~/enums/paramater";
 import useDebounce from "~/hooks/useDebounce";
+import { toast } from "react-toastify";
 
 const Layout = DefaultLayout;
 
@@ -111,8 +112,14 @@ const AccountPage: NextPageWithLayout = () => {
    };
 
    const onLogout = async () => {
-      await logout();
-      signOut();
+      try {
+         await logout();
+         signOut();
+      } catch (error) {
+         toast.error("Có lỗi vui lòng thử lại", {
+            position: toast.POSITION.BOTTOM_RIGHT,
+         });
+      }
    };
 
    const handleGetOrders = async (paramater: IOrderSearch) => {

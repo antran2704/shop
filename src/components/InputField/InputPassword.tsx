@@ -6,7 +6,6 @@ import { IInputText } from "~/interfaces";
 
 const InputField: FC<IInputText> = (props: IInputText) => {
    const {
-      id,
       title,
       className,
       width,
@@ -19,27 +18,10 @@ const InputField: FC<IInputText> = (props: IInputText) => {
       error,
       required = false,
       onEnter,
-      getValue,
+      onChange,
    } = props;
 
    const [show, setShow] = useState<boolean>(false);
-
-   const handleChangeValue = (
-      e: FormEvent<HTMLInputElement | HTMLTextAreaElement>,
-   ) => {
-      if (readonly) return;
-
-      const name = e.currentTarget.name;
-      const value = e.currentTarget.value;
-
-      if (getValue && id) {
-         getValue(name, value, id);
-      }
-
-      if (getValue) {
-         getValue(name, value);
-      }
-   };
 
    const onKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
       if (readonly) return;
@@ -83,7 +65,7 @@ const InputField: FC<IInputText> = (props: IInputText) => {
                      onKeyUp(e);
                   }
                }}
-               onInput={handleChangeValue}
+               onInput={onChange}
                type={show ? "text" : "password"}
                className={`w-full pr-8 border-0 outline-none`}
             />

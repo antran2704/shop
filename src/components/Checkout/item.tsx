@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { ICartItem, IProductInfo } from "~/interfaces";
+import { ICartItem, IProductStock } from "~/interfaces";
 
 import ImageCus from "~/components/Image";
 import { formatBigNumber } from "~/helpers/number/fomatterCurrency";
-import { AiFillCloseCircle } from "react-icons/ai";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { getProductInfo } from "~/api-client";
+import { useEffect, useState } from "react";
+import { getProduct } from "~/api-client";
 
 interface Props {
    data: ICartItem;
@@ -14,14 +13,14 @@ interface Props {
 const CheckoutItem = (props: Props) => {
    const { data } = props;
 
-   const [infoProduct, setInfoProduct] = useState<IProductInfo>({
+   const [infoProduct, setInfoProduct] = useState<IProductStock>({
       inventory: 1,
       price: 0,
       promotion_price: 0,
    });
 
    const handleGetInfo = async (productId: string) => {
-      const { status, payload } = await getProductInfo(productId);
+      const { status, payload } = await getProduct(productId);
 
       if (status === 200) {
          setInfoProduct(payload);

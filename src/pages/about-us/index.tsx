@@ -16,10 +16,9 @@ const AboutUsPage = () => {
 
          <Header
             title={"About Us"}
-            breadcrumbs={[
-               { label: "Home", url_path: "/" },
-               { label: "About us", url_path: "/about-us" },
-            ]}
+            breadcrumbs={{
+               items: [{ title: "Blog" }],
+            }}
          />
          <section className="container__cus px-5">
             <div className="flex lg:flex-nowrap flex-wrap items-center justify-between py-10 gap-10">
